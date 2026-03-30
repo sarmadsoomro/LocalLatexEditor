@@ -65,8 +65,9 @@ local-latex-editor/
 ├── tooling/
 │   ├── eslint-config/     # Shared ESLint configurations
 │   └── typescript-config/ # Shared TypeScript configurations
-├── *.md                   # Documentation
-└── package.json           # Root monorepo config
+├── docs/                  # Documentation
+├── package.json           # Root monorepo config
+└── README.md              # This file
 ```
 
 ## Development
@@ -110,23 +111,25 @@ pnpm add -w <package>
 
 ## Documentation
 
-- [Product Overview](./product-overview.md)
-- [Software Requirements Specification](./software-requirements-specification.md)
-- [System Architecture](./system-architecture.md)
-- [Project Structure](./project-structure.md)
-- [Tools and Technology](./tools-and-technology.md)
-- [API Contracts](./api-and-internal-contracts.md)
-- [Risks and Assumptions](./risks-and-assumptions.md)
+All documentation is in the `docs/` directory:
+
+- [Product Overview](./docs/product-overview.md)
+- [Software Requirements Specification](./docs/software-requirements-specification.md)
+- [System Architecture](./docs/system-architecture.md)
+- [Project Structure](./docs/project-structure.md)
+- [Tools and Technology](./docs/tools-and-technology.md)
+- [API Contracts](./docs/api-and-internal-contracts.md)
+- [Risks and Assumptions](./docs/risks-and-assumptions.md)
 
 ### Implementation Phases
 
-1. [Phase 1: Foundation and Setup](./phase-1-foundation-and-setup.md) ✅
-2. [Phase 2: Project Management](./phase-2-project-management.md)
-3. [Phase 3: Browser Editing](./phase-3-browser-editing.md)
-4. [Phase 4: Local Compilation](./phase-4-local-compilation.md)
-5. [Phase 5: PDF Preview](./phase-5-pdf-preview.md)
-6. [Phase 6: Stability and Hardening](./phase-6-stability-hardening.md)
-7. [Phase 7: Post-MVP Enhancements](./phase-7-post-mvp-enhancements.md)
+1. [Phase 1: Foundation and Setup](./docs/phase-1-foundation-and-setup.md) ✅
+2. [Phase 2: Project Management](./docs/phase-2-project-management.md)
+3. [Phase 3: Browser Editing](./docs/phase-3-browser-editing.md)
+4. [Phase 4: Local Compilation](./docs/phase-4-local-compilation.md)
+5. [Phase 5: PDF Preview](./docs/phase-5-pdf-preview.md)
+6. [Phase 6: Stability and Hardening](./docs/phase-6-stability-hardening.md)
+7. [Phase 7: Post-MVP Enhancements](./docs/phase-7-post-mvp-enhancements.md)
 
 ## License
 
