@@ -1,0 +1,28 @@
+{
+  "name": "local-latex-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A lightweight local LaTeX editor that runs entirely on your machine",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:e2e": "turbo run test:e2e",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@local-latex-editor/eslint-config": "workspace:*",
+    "@local-latex-editor/typescript-config": "workspace:*",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
