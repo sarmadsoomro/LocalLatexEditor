@@ -29,6 +29,10 @@ npm-debug.log*
 # OpenCode tooling
 .opencode/
 
+# Turborepo
+.turbo/
+*.turbo-log
+
 # Testing
 coverage/
 .nyc_output/
