@@ -9,6 +9,7 @@ import {
   getProjectFiles,
   updateProjectLastOpened,
 } from '../services/projectService.js';
+import { exportProjectAsZip } from '../services/exportService.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
 import {
   createProjectSchema,
@@ -88,6 +89,18 @@ router.get(
     try {
       const files = await getProjectFiles(req.params.id);
       res.json(createSuccessResponse({ files }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  '/:id/export',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  async (req, res, next) => {
+    try {
+      await exportProjectAsZip(req.params.id, res);
     } catch (error) {
       next(error);
     }

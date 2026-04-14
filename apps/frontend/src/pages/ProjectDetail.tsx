@@ -326,6 +326,23 @@ export function ProjectDetail() {
     }
   }, [hasUnsavedChanges, navigate]);
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = useCallback(async () => {
+    if (!currentProject) return;
+
+    setIsExporting(true);
+    try {
+      await projectApi.exportProject(currentProject.id, currentProject.name);
+      addToast("Project exported successfully", "success");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to export project";
+      addToast(message, "error");
+    } finally {
+      setIsExporting(false);
+    }
+  }, [currentProject, addToast]);
+
   const tabs = openFiles.map((file) => ({
     id: file.id,
     name: file.name,
@@ -481,6 +498,33 @@ export function ProjectDetail() {
               onCancel={handleCancel}
               onEngineChange={handleEngineChange}
             />
+
+            <button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center px-3 py-1.5 text-sm font-medium text-secondary bg-surface border border-border dark:border-gray-600 rounded-lg hover:bg-surface-hover hover:border-primary-light transition-all duration-150 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              title="Export as ZIP"
+            >
+              {isExporting ? (
+                <span className="inline-block w-4 h-4 mr-1.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg
+                  className="w-4 h-4 mr-1.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+              )}
+              Export
+            </button>
 
             <span className="sr-only" aria-live="polite">
               {status}
