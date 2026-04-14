@@ -41,3 +41,5 @@ coverage/
 *.tmp
 *.temp
 .cache/
+.project-memory.md
+.project-memory.md
