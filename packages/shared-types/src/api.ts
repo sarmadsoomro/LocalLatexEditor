@@ -1,15 +1,11 @@
-export interface CreateProjectRequest {
-  name: string;
-  template?: string;
-}
-
-export interface CreateProjectResponse {
-  project: Project;
-}
-
-export interface GetProjectResponse {
-  project: Project;
-  files: ProjectFile[];
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 }
 
 export interface UpdateFileRequest {
@@ -30,12 +26,12 @@ export interface CompileRequest {
 
 export interface CompileResponse {
   jobId: string;
-  status: 'queued' | 'compiling' | 'completed' | 'error';
+  status: 'pending' | 'compiling' | 'complete' | 'failed' | 'cancelled';
 }
 
 export interface GetCompileStatusResponse {
   jobId: string;
-  status: 'queued' | 'compiling' | 'completed' | 'error';
+  status: 'pending' | 'compiling' | 'complete' | 'failed' | 'cancelled';
   result?: CompilationResult;
   progress?: number;
 }
@@ -48,4 +44,4 @@ export interface ErrorResponse {
   };
 }
 
-import type { Project, ProjectFile, CompilationResult } from './index';
+import type { ProjectFile, CompilationResult } from './index';

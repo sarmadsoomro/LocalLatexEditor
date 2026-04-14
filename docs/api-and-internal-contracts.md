@@ -22,10 +22,10 @@ No authentication is required for local development. The backend binds to `local
 
 All requests and responses use JSON:
 
-| Header | Value |
-|--------|-------|
+| Header         | Value              |
+| -------------- | ------------------ |
 | `Content-Type` | `application/json` |
-| `Accept` | `application/json` |
+| `Accept`       | `application/json` |
 
 ### 1.4 Response Format
 
@@ -34,7 +34,7 @@ All responses follow a consistent envelope structure:
 ```json
 {
   "success": true,
-  "data": { },
+  "data": {},
   "error": null
 }
 ```
@@ -45,37 +45,39 @@ All responses follow a consistent envelope structure:
 
 ### 2.1 Project Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/projects` | List all projects |
-| POST | `/projects` | Create a new project |
-| GET | `/projects/{id}` | Get project details |
-| DELETE | `/projects/{id}` | Delete a project |
-| POST | `/projects/{id}/import` | Import files into project |
+| Method | Endpoint                | Description               |
+| ------ | ----------------------- | ------------------------- |
+| GET    | `/projects`             | List all projects         |
+| POST   | `/projects`             | Create a new project      |
+| GET    | `/projects/{id}`        | Get project details       |
+| DELETE | `/projects/{id}`        | Delete a project          |
+| POST   | `/projects/{id}/import` | Import files into project |
 
 ### 2.2 File Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/projects/{id}/files` | List all files in project |
-| GET | `/projects/{id}/files/{path}` | Get file content |
-| PUT | `/projects/{id}/files/{path}` | Save/update file content |
-| DELETE | `/projects/{id}/files/{path}` | Delete a file |
+| Method | Endpoint                      | Description                  |
+| ------ | ----------------------------- | ---------------------------- |
+| GET    | `/projects/{id}/files`        | List all files in project    |
+| POST   | `/projects/{id}/files`        | Create new file or directory |
+| POST   | `/projects/{id}/files/upload` | Upload a file                |
+| GET    | `/projects/{id}/files/{path}` | Get file content             |
+| PUT    | `/projects/{id}/files/{path}` | Save/update file content     |
+| DELETE | `/projects/{id}/files/{path}` | Delete a file                |
 
 ### 2.3 Compilation Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/projects/{id}/compile` | Start a compilation job |
-| GET | `/compile/{jobId}` | Get compilation status |
-| GET | `/compile/{jobId}/logs` | Get compilation logs |
+| Method | Endpoint                 | Description             |
+| ------ | ------------------------ | ----------------------- |
+| POST   | `/projects/{id}/compile` | Start a compilation job |
+| GET    | `/compile/{jobId}`       | Get compilation status  |
+| GET    | `/compile/{jobId}/logs`  | Get compilation logs    |
 
 ### 2.4 Preview Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/projects/{id}/pdf` | Get compiled PDF |
-| GET | `/projects/{id}/preview/{page}` | Get preview image for page |
+| Method | Endpoint                        | Description                |
+| ------ | ------------------------------- | -------------------------- |
+| GET    | `/projects/{id}/pdf`            | Get compiled PDF           |
+| GET    | `/projects/{id}/preview/{page}` | Get preview image for page |
 
 ---
 
@@ -397,13 +399,13 @@ Sequence of API calls for compiling a LaTeX project:
 
 The frontend should poll compilation status with exponential backoff:
 
-| Attempt | Delay | Total Time |
-|---------|-------|------------|
-| 1 | 500ms | 500ms |
-| 2 | 500ms | 1s |
-| 3 | 1000ms | 2s |
-| 4 | 2000ms | 4s |
-| 5+ | 2000ms | ... |
+| Attempt | Delay  | Total Time |
+| ------- | ------ | ---------- |
+| 1       | 500ms  | 500ms      |
+| 2       | 500ms  | 1s         |
+| 3       | 1000ms | 2s         |
+| 4       | 2000ms | 4s         |
+| 5+      | 2000ms | ...        |
 
 Maximum polling interval: 2 seconds  
 Maximum wait time: 5 minutes (compilation timeout)
@@ -452,16 +454,16 @@ Sequence for creating a new project:
 
 **Available Templates:**
 
-| Template ID | Description |
-|-------------|-------------|
-| `article` | Basic article class |
-| `report` | Report with chapters |
-| `book` | Book format |
-| `beamer` | Presentation slides |
-| `letter` | Formal letter |
+| Template ID       | Description           |
+| ----------------- | --------------------- |
+| `article`         | Basic article class   |
+| `report`          | Report with chapters  |
+| `book`            | Book format           |
+| `beamer`          | Presentation slides   |
+| `letter`          | Formal letter         |
 | `ieee-conference` | IEEE conference paper |
-| `acm-sigconf` | ACM conference paper |
-| `empty` | Empty project |
+| `acm-sigconf`     | ACM conference paper  |
+| `empty`           | Empty project         |
 
 ### 5.2 Create Empty Project
 
@@ -731,15 +733,15 @@ All errors follow a consistent structure:
 
 ### 8.2 HTTP Status Codes
 
-| Status | Code | Description |
-|--------|------|-------------|
-| 400 | `BAD_REQUEST` | Invalid request parameters |
-| 404 | `NOT_FOUND` | Resource not found |
-| 409 | `CONFLICT` | Resource conflict (e.g., file modified) |
-| 422 | `VALIDATION_ERROR` | Validation failed |
-| 429 | `RATE_LIMITED` | Too many requests |
-| 500 | `INTERNAL_ERROR` | Server error |
-| 503 | `SERVICE_UNAVAILABLE` | Service temporarily unavailable |
+| Status | Code                  | Description                             |
+| ------ | --------------------- | --------------------------------------- |
+| 400    | `BAD_REQUEST`         | Invalid request parameters              |
+| 404    | `NOT_FOUND`           | Resource not found                      |
+| 409    | `CONFLICT`            | Resource conflict (e.g., file modified) |
+| 422    | `VALIDATION_ERROR`    | Validation failed                       |
+| 429    | `RATE_LIMITED`        | Too many requests                       |
+| 500    | `INTERNAL_ERROR`      | Server error                            |
+| 503    | `SERVICE_UNAVAILABLE` | Service temporarily unavailable         |
 
 ### 8.3 Common Error Examples
 
@@ -850,18 +852,18 @@ ws://localhost:3000/ws
 
 ### 9.3 Event Types
 
-| Event Type | Direction | Description |
-|------------|-----------|-------------|
-| `file.changed` | Server -> Client | File content changed |
-| `file.created` | Server -> Client | New file created |
-| `file.deleted` | Server -> Client | File deleted |
-| `compile.started` | Server -> Client | Compilation started |
-| `compile.progress` | Server -> Client | Compilation progress update |
-| `compile.completed` | Server -> Client | Compilation finished |
-| `compile.failed` | Server -> Client | Compilation failed |
-| `cursor.position` | Bidirectional | Cursor position for collaboration |
-| `user.joined` | Server -> Client | Another user joined project |
-| `user.left` | Server -> Client | User left project |
+| Event Type          | Direction        | Description                       |
+| ------------------- | ---------------- | --------------------------------- |
+| `file.changed`      | Server -> Client | File content changed              |
+| `file.created`      | Server -> Client | New file created                  |
+| `file.deleted`      | Server -> Client | File deleted                      |
+| `compile.started`   | Server -> Client | Compilation started               |
+| `compile.progress`  | Server -> Client | Compilation progress update       |
+| `compile.completed` | Server -> Client | Compilation finished              |
+| `compile.failed`    | Server -> Client | Compilation failed                |
+| `cursor.position`   | Bidirectional    | Cursor position for collaboration |
+| `user.joined`       | Server -> Client | Another user joined project       |
+| `user.left`         | Server -> Client | User left project                 |
 
 ### 9.4 Event Examples
 
@@ -987,51 +989,51 @@ GET /api/v1/projects/{id}/events?since={timestamp}
 
 ### Project
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique project identifier |
-| `name` | string | Display name |
-| `template` | string | Template used for creation |
-| `createdAt` | ISO 8601 | Creation timestamp |
+| Field       | Type     | Description                 |
+| ----------- | -------- | --------------------------- |
+| `id`        | string   | Unique project identifier   |
+| `name`      | string   | Display name                |
+| `template`  | string   | Template used for creation  |
+| `createdAt` | ISO 8601 | Creation timestamp          |
 | `updatedAt` | ISO 8601 | Last modification timestamp |
-| `files` | File[] | List of files in project |
-| `settings` | object | Project-specific settings |
+| `files`     | File[]   | List of files in project    |
+| `settings`  | object   | Project-specific settings   |
 
 ### File
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `path` | string | Relative path from project root |
-| `type` | string | `file` or `directory` |
-| `size` | number | File size in bytes |
-| `modifiedAt` | ISO 8601 | Last modification timestamp |
-| `hash` | string | Content hash for conflict detection |
-| `content` | string | File content (when requested) |
-| `children` | File[] | Child files (for directories) |
+| Field        | Type     | Description                         |
+| ------------ | -------- | ----------------------------------- |
+| `path`       | string   | Relative path from project root     |
+| `type`       | string   | `file` or `directory`               |
+| `size`       | number   | File size in bytes                  |
+| `modifiedAt` | ISO 8601 | Last modification timestamp         |
+| `hash`       | string   | Content hash for conflict detection |
+| `content`    | string   | File content (when requested)       |
+| `children`   | File[]   | Child files (for directories)       |
 
 ### Compile Job
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `jobId` | string | Unique job identifier |
-| `projectId` | string | Associated project |
-| `status` | string | `queued`, `compiling`, `completed`, `failed` |
-| `mainFile` | string | Entry point file |
-| `compiler` | string | `pdflatex`, `xelatex`, `lualatex` |
-| `progress` | number | Progress percentage (0-100) |
-| `output` | object | Output file information |
-| `error` | object | Error details (if failed) |
-| `stats` | object | Timing statistics |
+| Field       | Type   | Description                                  |
+| ----------- | ------ | -------------------------------------------- |
+| `jobId`     | string | Unique job identifier                        |
+| `projectId` | string | Associated project                           |
+| `status`    | string | `queued`, `compiling`, `completed`, `failed` |
+| `mainFile`  | string | Entry point file                             |
+| `compiler`  | string | `pdflatex`, `xelatex`, `lualatex`            |
+| `progress`  | number | Progress percentage (0-100)                  |
+| `output`    | object | Output file information                      |
+| `error`     | object | Error details (if failed)                    |
+| `stats`     | object | Timing statistics                            |
 
 ---
 
 ## Appendix B: Rate Limits
 
-| Endpoint | Limit | Window |
-|----------|-------|--------|
-| All endpoints | 100 | 1 minute |
-| Compile requests | 5 | 1 minute |
-| File save | 60 | 1 minute |
+| Endpoint         | Limit | Window   |
+| ---------------- | ----- | -------- |
+| All endpoints    | 100   | 1 minute |
+| Compile requests | 5     | 1 minute |
+| File save        | 60    | 1 minute |
 
 Rate limit headers are included in all responses:
 
@@ -1043,5 +1045,5 @@ X-RateLimit-Reset: 1705321200
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: 2024-01-15*
+_Document Version: 1.0_  
+_Last Updated: 2024-01-15_

@@ -15,11 +15,13 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project,
+    tsconfigRootDir: process.cwd(),
   },
   plugins: ["@typescript-eslint", "import"],
   settings: {
     "import/resolver": {
       typescript: {
+        alwaysTryTypes: true,
         project,
       },
     },
