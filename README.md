@@ -6,7 +6,42 @@ Welcome! This is a tool that helps you write papers and documents using **LaTeX*
 
 Think of it like Google Docs, but for people who write scientific papers, math homework, or fancy reports. It runs on your computer (no internet needed!) and turns your writing into a PDF file.
 
-## 🛠️ What You Need First
+## 🚀 Quick Start (Easy Way!)
+
+We've created **setup scripts** that do all the work for you! 
+
+### 🍎 macOS / 🐧 Linux
+
+1. **Download the setup script** and save it to your computer
+2. **Open Terminal** and go to where you saved the script
+3. **Run this command:**
+   ```bash
+   ./setup-macos-linux.sh
+   ```
+4. **Follow the prompts** - the script will check what you need and help install it!
+
+That's it! The script will:
+- ✅ Check if you have the required tools (Node.js, pnpm, Git)
+- ✅ Install missing tools automatically (when possible)
+- ✅ Download the LaTeX Editor code
+- ✅ Set everything up
+- 🎉 Tell you how to start it!
+
+### 🪟 Windows
+
+1. **Download the setup script** (`setup-windows.bat`) and save it to your computer
+2. **Double-click** the file to run it
+3. **Follow the instructions** on screen
+
+The script will guide you through installing everything you need!
+
+---
+
+## 🛠️ Manual Setup (If You Prefer)
+
+Don't want to use the script? Here's how to do it yourself:
+
+### What You Need First
 
 Before you start, make sure you have:
 
@@ -15,11 +50,9 @@ Before you start, make sure you have:
 3. **pnpm** - This helps download extra parts the program needs
 4. **LaTeX** - This is the magic that turns your writing into beautiful PDFs
 
-Don't worry if you don't know what these are - we'll help you get them! 😊
+### 📥 Step 1: Download the Program
 
-## 📥 Step 1: Download the Program
-
-### 🍎 If you have a Mac:
+#### 🍎 If you have a Mac:
 
 1. Open **Terminal** (it's in Applications > Utilities)
 2. Type this and press Enter:
@@ -31,7 +64,7 @@ Don't worry if you don't know what these are - we'll help you get them! 😊
    cd local-latex-editor
    ```
 
-### 🪟 If you have Windows:
+#### 🪟 If you have Windows:
 
 1. Install **Git** first: Go to https://git-scm.com/download/win and download it
 2. Open **Command Prompt** or **PowerShell**
@@ -44,7 +77,7 @@ Don't worry if you don't know what these are - we'll help you get them! 😊
    cd local-latex-editor
    ```
 
-### 🐧 If you have Linux:
+#### 🐧 If you have Linux:
 
 1. Open your terminal
 2. Type this and press Enter:
@@ -56,11 +89,11 @@ Don't worry if you don't know what these are - we'll help you get them! 😊
    cd local-latex-editor
    ```
 
-## 🔧 Step 2: Install the Tools
+### 🔧 Step 2: Install the Tools
 
 Now we need to install some helper tools. Don't worry - this is automatic!
 
-### 1️⃣ Install Node.js
+#### 1️⃣ Install Node.js
 
 Go to https://nodejs.org and download the **LTS** version (the one with the green button that says "Recommended For Most Users")
 
@@ -70,7 +103,7 @@ node --version
 ```
 You should see a number like `v18.x.x` or higher!
 
-### 2️⃣ Install pnpm
+#### 2️⃣ Install pnpm
 
 Open Terminal/Command Prompt and type:
 ```bash
@@ -83,7 +116,7 @@ pnpm --version
 ```
 You should see a number!
 
-### 3️⃣ Install LaTeX
+#### 3️⃣ Install LaTeX
 
 This is the big one that makes your documents look pretty!
 
@@ -107,7 +140,7 @@ This is the big one that makes your documents look pretty!
 3. Enter your password when asked
 4. Wait for it to finish (this might take a while!)
 
-## 📦 Step 3: Get Everything Ready
+### 📦 Step 3: Get Everything Ready
 
 Now that you have the tools, let's get the program ready!
 
@@ -119,18 +152,42 @@ Now that you have the tools, let's get the program ready!
 3. Wait! ⌛ This downloads all the pieces the program needs. It might take a few minutes.
 4. When you see the prompt again, you're done! 🎉
 
-## 🚀 Step 4: Start the Program!
+---
 
-This is the exciting part! 🎊
+## 🚀 Start the Program!
 
-1. In the same Terminal/Command Prompt, type:
+### Using the Quick Start Script (Easiest!)
+
+After setup, you can use our quick start script:
+
+**🍎 macOS / 🐧 Linux:**
+```bash
+./start.sh
+```
+
+**🪟 Windows:**
+Double-click `start.bat` or run:
+```
+start.bat
+```
+
+### Manual Start
+
+If you prefer to start manually:
+
+1. Open Terminal/Command Prompt
+2. Make sure you're in the project folder:
+   ```bash
+   cd local-latex-editor
+   ```
+3. Type:
    ```bash
    pnpm dev
    ```
-2. Wait a few seconds...
-3. You'll see messages like "Frontend running on port 3000" and "Backend running on port 3001"
-4. Open your web browser (Chrome, Firefox, Safari, etc.)
-5. Go to this address: **http://localhost:3000**
+4. Wait a few seconds...
+5. You'll see messages like "Frontend running on port 3000" and "Backend running on port 3001"
+6. Open your web browser (Chrome, Firefox, Safari, etc.)
+7. Go to this address: **http://localhost:3000**
 
 **🎉 YOU DID IT!** You should now see the LaTeX Editor in your browser!
 
@@ -145,7 +202,19 @@ When you're done using the editor:
 
 ## 🔄 How to Start It Again Later
 
-Next time you want to use it:
+Next time you want to use it, just run the quick start script:
+
+**🍎 macOS / 🐧 Linux:**
+```bash
+./start.sh
+```
+
+**🪟 Windows:**
+```
+start.bat
+```
+
+Or manually:
 
 1. Open Terminal/Command Prompt
 2. Type:
@@ -252,6 +321,16 @@ If something doesn't work right:
 2. Check the "Help!" section above
 3. Ask for help from someone who knows computers
 4. Or tell the person who gave you this program!
+
+---
+
+## 🤝 For Contributors
+
+Want to help improve this project? Check out our [Contributing Guide](CONTRIBUTING.md) for detailed information about:
+- Development setup
+- Code conventions
+- How to submit changes
+- Project structure
 
 ---
 
