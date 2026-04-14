@@ -16,8 +16,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/YOUR_USERNAME/local-latex-editor.git"
-PROJECT_NAME="local-latex-editor"
+REPO_URL="https://github.com/sarmadsoomro/LocalLatexEditor.git"
+PROJECT_NAME="LocalLatexEditor"
 
 # =============================================================================
 # Helper Functions
@@ -258,9 +258,8 @@ show_completion() {
     echo "Then open your browser to: ${BLUE}http://localhost:3000${NC}"
     echo ""
     echo -e "${YELLOW}Next Steps:${NC}"
-    echo "  1. Update REPO_URL in this script with your actual repository URL"
-    echo "  2. Run 'pnpm dev' to start the development server"
-    echo "  3. Read CONTRIBUTING.md for development guidelines"
+    echo "  1. Run 'pnpm dev' to start the development server"
+    echo "  2. Read CONTRIBUTING.md for development guidelines"
     echo ""
 }
 

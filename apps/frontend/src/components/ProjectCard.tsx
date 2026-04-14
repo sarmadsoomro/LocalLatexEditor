@@ -4,6 +4,8 @@ interface ProjectCardProps {
   project: ProjectWithMetadata;
   onClick?: () => void;
   onDelete?: () => void;
+  onExport?: () => void;
+  isExporting?: boolean;
 }
 
 function formatFileSize(bytes: number): string {
@@ -24,7 +26,7 @@ function formatDate(dateString: string | Date): string {
   });
 }
 
-export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, onDelete, onExport, isExporting }: ProjectCardProps) {
   return (
     <article
       className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] p-6 cursor-pointer
@@ -53,32 +55,67 @@ export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
             </span>
           </p>
         </div>
-        {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="ml-4 p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 
-              transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-red-500"
-            aria-label={`Delete project ${project.name}`}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+        <div className="flex items-center space-x-1">
+          {onExport && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExport();
+              }}
+              disabled={isExporting}
+              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0D9488] hover:bg-teal-50 
+                transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#14B8A6]
+                disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Export project ${project.name} as ZIP`}
+              title="Export as ZIP"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
-        )}
+              {isExporting ? (
+                <span className="inline-block w-5 h-5 border-2 border-[#14B8A6] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 
+                transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+              aria-label={`Delete project ${project.name}`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-[#64748B]">

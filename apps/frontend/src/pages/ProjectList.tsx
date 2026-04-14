@@ -17,6 +17,7 @@ export function ProjectList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [exportingProjectId, setExportingProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -94,6 +95,19 @@ export function ProjectList() {
         err instanceof Error ? err.message : "Failed to delete project",
         "error",
       );
+    }
+  };
+
+  const handleExportProject = async (projectId: string, projectName: string) => {
+    setExportingProjectId(projectId);
+    try {
+      await projectApi.exportProject(projectId, projectName);
+      addToast("Project exported successfully", "success");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to export project";
+      addToast(message, "error");
+    } finally {
+      setExportingProjectId(null);
     }
   };
 
@@ -303,6 +317,8 @@ export function ProjectList() {
                   project={project}
                   onClick={() => navigate(`/project/${project.id}`)}
                   onDelete={() => handleDeleteProject(project.id)}
+                  onExport={() => handleExportProject(project.id, project.name)}
+                  isExporting={exportingProjectId === project.id}
                 />
                 {deleteConfirmId === project.id && (
                   <div

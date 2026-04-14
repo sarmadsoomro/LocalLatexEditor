@@ -29,12 +29,12 @@ Before you begin, ensure you have:
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-   cd local-latex-editor
+   git clone https://github.com/YOUR_FORK/LocalLatexEditor.git
+   cd LocalLatexEditor
    ```
 3. Add the upstream remote:
    ```bash
-   git remote add upstream https://github.com/ORIGINAL_OWNER/local-latex-editor.git
+   git remote add upstream https://github.com/sarmadsoomro/LocalLatexEditor.git
    ```
 
 ## Development Setup

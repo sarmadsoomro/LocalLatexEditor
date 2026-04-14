@@ -23,15 +23,15 @@ if [ ! -f "package.json" ] || [ ! -d "apps" ]; then
     echo -e "${YELLOW}Not in project directory. Looking for it...${NC}"
     
     # Try to find the project
-    if [ -d "local-latex-editor" ]; then
-        cd local-latex-editor
-        echo -e "${GREEN}Found and entered local-latex-editor/${NC}"
-    elif [ -d "../local-latex-editor" ]; then
-        cd ../local-latex-editor
-        echo -e "${GREEN}Found and entered local-latex-editor/${NC}"
+    if [ -d "LocalLatexEditor" ]; then
+        cd LocalLatexEditor
+        echo -e "${GREEN}Found and entered LocalLatexEditor/${NC}"
+    elif [ -d "../LocalLatexEditor" ]; then
+        cd ../LocalLatexEditor
+        echo -e "${GREEN}Found and entered LocalLatexEditor/${NC}"
     else
         echo -e "${YELLOW}Please run this script from the project directory${NC}"
-        echo "Or make sure local-latex-editor/ exists"
+        echo "Or make sure LocalLatexEditor/ exists"
         exit 1
     fi
 fi

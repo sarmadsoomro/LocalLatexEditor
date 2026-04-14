@@ -135,4 +135,41 @@ export const projectApi = {
       { targetPath },
     );
   },
+
+  async exportProject(projectId: string, projectName: string): Promise<void> {
+    const response = await fetch(`/api/projects/${projectId}/export`);
+
+    if (!response.ok) {
+      let errorMsg = "Failed to export project";
+      try {
+        const error = await response.json();
+        if (error.error?.message) errorMsg = error.error.message;
+      } catch {
+        // Ignore JSON parse errors
+      }
+      throw new Error(errorMsg);
+    }
+
+    // Get the blob from response
+    const blob = await response.blob();
+
+    // Generate filename with date
+    const date = new Date().toISOString().split("T")[0];
+    const safeProjectName = projectName.replace(/[^a-zA-Z0-9\-_]/g, "_");
+    const filename = `${safeProjectName}_${date}.zip`;
+
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Cleanup
+    window.URL.revokeObjectURL(url);
+  },
 };

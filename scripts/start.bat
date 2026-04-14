@@ -13,15 +13,15 @@ echo.
 if not exist "package.json" (
     echo Not in project directory. Looking for it...
     
-    if exist "local-latex-editor" (
-        cd local-latex-editor
-        echo Found and entered local-latex-editor\
-    ) else if exist "..\local-latex-editor" (
-        cd ..\local-latex-editor
-        echo Found and entered local-latex-editor\
+    if exist "LocalLatexEditor" (
+        cd LocalLatexEditor
+        echo Found and entered LocalLatexEditor\
+    ) else if exist "..\LocalLatexEditor" (
+        cd ..\LocalLatexEditor
+        echo Found and entered LocalLatexEditor\
     ) else (
         echo Please run this script from the project directory
-        echo Or make sure local-latex-editor\ exists
+        echo Or make sure LocalLatexEditor\ exists
         pause
         exit /b 1
     )

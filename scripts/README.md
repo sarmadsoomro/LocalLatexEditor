@@ -87,7 +87,7 @@ cd Downloads
 
 ### Windows says "Windows protected your PC"
 
-Windows might show a security warning for .bat files. Click "More info" then "Run anyway" - these are safe scripts we created for you!
+Windows SmartScreen may warn about unrecognised `.bat` files downloaded from the internet. Before clicking "Run anyway", verify the file came from the [official repository](https://github.com/sarmadsoomro/LocalLatexEditor) and matches the source on GitHub.
 
 ### Setup fails partway through
 

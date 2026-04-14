@@ -9,8 +9,6 @@ A **modern, browser-based LaTeX editor** that runs entirely on your local machin
 
 Think of it like **Google Docs meets LaTeX** — beautiful scientific typesetting with the privacy and speed of a local application.
 
-![Local LaTeX Editor](https://via.placeholder.com/800x400?text=LaTeX+Editor+Screenshot)
-
 ---
 
 ## 📋 Table of Contents
@@ -119,13 +117,13 @@ We've created automated setup scripts that check your system, install missing de
 **🍎 macOS / 🐧 Linux:**
 ```bash
 # Download and run the setup script
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-macos-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-macos-linux.sh | bash
 ```
 
 Or manually:
 ```bash
 # 1. Download the script
-wget https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-macos-linux.sh
+wget https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-macos-linux.sh
 
 # 2. Make it executable
 chmod +x setup-macos-linux.sh
@@ -137,7 +135,7 @@ chmod +x setup-macos-linux.sh
 **🪟 Windows:**
 ```powershell
 # Download and run the setup script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-windows.bat" -OutFile "setup-windows.bat"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-windows.bat" -OutFile "setup-windows.bat"
 .\setup-windows.bat
 ```
 
@@ -150,24 +148,42 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/local-la
 
 ---
 
-### Option 2: AI Assistant Installation (Easiest!)
+### Option 2: AI Assistant Setup
 
-If you use **OpenCode**, **VS Code Copilot**, **Claude Code**, **Cursor**, or **Gemini CLI**, just ask them to install it for you!
+If you are an AI agent (or prefer a fully scripted path), run these commands in order. Each step must succeed before continuing.
 
-**Simply say:**
-> "Install the Local LaTeX Editor project for me"
+**1. Verify prerequisites:**
+```bash
+git --version          # must be any version
+node --version         # must be v18.x.x or higher
+pnpm --version         # must be 8.x.x or higher
+pdflatex --version     # must be installed — or xelatex / lualatex
+```
 
-The AI assistant will:
-- ✅ Check your system for prerequisites
-- ✅ Install any missing tools
-- ✅ Clone the repository
-- ✅ Install all dependencies
-- ✅ Set up the development environment
+**2. Install any missing tools:**
+```bash
+# pnpm (if missing)
+npm install -g pnpm
 
-**To start it later:**
-> "Start the LaTeX Editor"
+# Node.js — download LTS from https://nodejs.org if not present
+# LaTeX — see System Requirements section for OS-specific commands
+```
 
-That's it! The AI handles everything for you! 🤖
+**3. Clone and install:**
+```bash
+git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
+cd LocalLatexEditor
+pnpm install
+```
+
+**4. Start the editor:**
+```bash
+pnpm dev
+```
+
+**5. Verify it works** — both of these should respond:
+- http://localhost:3000 (frontend)
+- http://localhost:3001 (backend API)
 
 ---
 
@@ -175,14 +191,11 @@ That's it! The AI handles everything for you! 🤖
 
 Prefer to do it yourself? Follow these steps:
 
-#### Step 1: Clone the Repository
+#### Step 1: Install Prerequisites
 
-```bash
-git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-cd local-latex-editor
-```
-
-#### Step 2: Install Prerequisites
+**Install Git:**
+- Download from [git-scm.com](https://git-scm.com/) or use your OS package manager
+- Verify: `git --version`
 
 **Install Node.js 18+:**
 - Download from [nodejs.org](https://nodejs.org/) (LTS version recommended)
@@ -196,11 +209,18 @@ npm install -g pnpm
 **Install LaTeX:**
 
 | OS | Command/Link |
-|----|--------------|
+|----|-------------|
 | macOS | `brew install --cask mactex` or [Download MacTeX](https://www.tug.org/mactex/) |
 | Windows | [Download MiKTeX](https://miktex.org/download) |
 | Ubuntu/Debian | `sudo apt-get install texlive-full` |
 | Fedora | `sudo dnf install texlive-scheme-full` |
+
+#### Step 2: Clone the Repository
+
+```bash
+git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
+cd LocalLatexEditor
+```
 
 #### Step 3: Install Project Dependencies
 
@@ -259,7 +279,7 @@ Next time you want to use it:
 
 ```bash
 # Navigate to the project (if not already there)
-cd local-latex-editor
+cd LocalLatexEditor
 
 # Start the editor
 pnpm dev
@@ -404,8 +424,8 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 ```bash
 # Fork and clone your fork
-git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-cd local-latex-editor
+git clone https://github.com/YOUR_FORK/LocalLatexEditor.git
+cd LocalLatexEditor
 
 # Install dependencies
 pnpm install
@@ -426,8 +446,7 @@ git push origin feature/my-feature
 
 - **LaTeX Tutorial**: [Overleaf's 30-minute LaTeX Guide](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes)
 - **Documentation**: See the `docs/` folder for detailed specs
-- **Examples**: Check `examples/` for sample documents
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/local-latex-editor/issues)
+- **Issues**: [GitHub Issues](https://github.com/sarmadsoomro/LocalLatexEditor/issues)
 
 ---
 

@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 :: =============================================================================
 
 :: Configuration
-set "REPO_URL=https://github.com/YOUR_USERNAME/local-latex-editor.git"
-set "PROJECT_NAME=local-latex-editor"
+set "REPO_URL=https://github.com/sarmadsoomro/LocalLatexEditor.git"
+set "PROJECT_NAME=LocalLatexEditor"
 
 :: Colors (Windows 10+)
 set "RED=[31m"
