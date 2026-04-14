@@ -277,3 +277,45 @@ export async function updateProjectLastOpened(id: string): Promise<void> {
     await saveProjectsMetadata(projects);
   }
 }
+
+export async function renameProject(id: string, newName: string): Promise<ProjectWithMetadata> {
+  // Validate name format
+  if (!newName || newName.trim().length === 0) {
+    throw new ValidationError('Project name is required');
+  }
+  
+  if (newName.length > 100) {
+    throw new ValidationError('Project name must be less than 100 characters');
+  }
+  
+  const invalidChars = /[<>:"\/\\|?*]/;
+  if (invalidChars.test(newName)) {
+    throw new ValidationError('Project name contains invalid characters');
+  }
+  
+  const projects = await loadProjectsMetadata();
+  const projectIndex = projects.findIndex((p) => p.id === id);
+  
+  if (projectIndex === -1) {
+    throw new NotFoundError('Project', id);
+  }
+  
+  // Check for name conflicts (case-insensitive, exclude self)
+  const trimmedName = newName.trim();
+  const existingProject = projects.find(
+    (p) => p.id !== id && p.name.toLowerCase() === trimmedName.toLowerCase()
+  );
+  
+  if (existingProject) {
+    throw new ConflictError(`Project with name "${trimmedName}" already exists`);
+  }
+  
+  // Update project
+  const project = projects[projectIndex];
+  project.name = trimmedName;
+  project.updatedAt = new Date().toISOString();
+  
+  await saveProjectsMetadata(projects);
+  
+  return project;
+}

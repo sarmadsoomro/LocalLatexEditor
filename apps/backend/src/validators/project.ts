@@ -28,6 +28,18 @@ export const importProjectSchema = z.object({
     .max(100, 'Project name must be less than 100 characters'),
 });
 
+export const renameProjectSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Project name is required')
+    .max(100, 'Project name must be less than 100 characters')
+    .regex(
+      /^[^<>:"\\/|?*]+$/,
+      'Project name contains invalid characters'
+    ),
+});
+
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type ProjectIdInput = z.infer<typeof projectIdSchema>;
 export type ImportProjectInput = z.infer<typeof importProjectSchema>;
+export type RenameProjectInput = z.infer<typeof renameProjectSchema>;

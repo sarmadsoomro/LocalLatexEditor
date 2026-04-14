@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ProjectWithMetadata, FileNode } from '@local-latex-editor/shared-types';
+import { projectApi } from '../services/projectApi';
 
 interface ProjectState {
   // Data
@@ -18,6 +19,7 @@ interface ProjectState {
   addProject: (project: ProjectWithMetadata) => void;
   removeProject: (id: string) => void;
   updateProject: (id: string, updates: Partial<ProjectWithMetadata>) => void;
+  renameProject: (id: string, newName: string) => Promise<void>;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
@@ -73,4 +75,45 @@ export const useProjectStore = create<ProjectState>((set) => ({
   setError: (error) => set({ error }),
 
   clearError: () => set({ error: null }),
+
+  renameProject: async (id, newName) => {
+    const { projects, currentProject } = useProjectStore.getState();
+
+    // Optimistic update - update UI immediately
+    const previousProjects = [...projects];
+    const optimisticProjects = projects.map((p) =>
+      p.id === id
+        ? { ...p, name: newName, updatedAt: new Date().toISOString() }
+        : p,
+    );
+
+    set({
+      projects: optimisticProjects,
+      currentProject:
+        currentProject?.id === id
+          ? { ...currentProject, name: newName, updatedAt: new Date().toISOString() }
+          : currentProject,
+    });
+
+    try {
+      const response = await projectApi.renameProject(id, newName);
+
+      // Update with server response (ensures timestamp precision)
+      set({
+        projects: optimisticProjects.map((p) =>
+          p.id === id ? response.project : p,
+        ),
+        currentProject:
+          currentProject?.id === id ? response.project : currentProject,
+      });
+    } catch (error) {
+      // Rollback on error
+      set({
+        projects: previousProjects,
+        currentProject:
+          currentProject?.id === id ? currentProject : useProjectStore.getState().currentProject,
+      });
+      throw error;
+    }
+  },
 }));

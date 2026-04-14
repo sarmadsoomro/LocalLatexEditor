@@ -5,6 +5,7 @@ import type {
   GetProjectResponse,
   FileTreeResponse,
   Template,
+  ProjectWithMetadata,
 } from "@local-latex-editor/shared-types";
 
 export const projectApi = {
@@ -25,6 +26,15 @@ export const projectApi = {
 
   async deleteProject(id: string): Promise<{ success: boolean }> {
     return api.delete<{ success: boolean }>(`/api/projects/${id}`);
+  },
+
+  async renameProject(
+    id: string,
+    name: string,
+  ): Promise<{ project: ProjectWithMetadata }> {
+    return api.put<{ project: ProjectWithMetadata }>(`/api/projects/${id}`, {
+      name,
+    });
   },
 
   async importProject(

@@ -8,6 +8,7 @@ import {
   importProject,
   getProjectFiles,
   updateProjectLastOpened,
+  renameProject,
 } from '../services/projectService.js';
 import { exportProjectAsZip } from '../services/exportService.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
@@ -15,8 +16,9 @@ import {
   createProjectSchema,
   projectIdSchema,
   importProjectSchema,
+  renameProjectSchema,
 } from '../validators/project.js';
-import type { CreateProjectInput, ProjectIdInput, ImportProjectInput } from '../validators/project.js';
+import type { CreateProjectInput, ProjectIdInput, ImportProjectInput, RenameProjectInput } from '../validators/project.js';
 
 const router: RouterType = Router();
 
@@ -101,6 +103,20 @@ router.get(
   async (req, res, next) => {
     try {
       await exportProjectAsZip(req.params.id, res);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.put(
+  '/:id',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  validateBody<RenameProjectInput>(renameProjectSchema),
+  async (req, res, next) => {
+    try {
+      const project = await renameProject(req.params.id, req.body.name);
+      res.json(createSuccessResponse({ project }));
     } catch (error) {
       next(error);
     }

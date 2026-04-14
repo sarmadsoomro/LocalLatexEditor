@@ -1,10 +1,13 @@
 import type { ProjectWithMetadata } from "@local-latex-editor/shared-types";
+import { EditableProjectName } from "./EditableProjectName";
+import { useProjectStore } from "../stores/projectStore";
 
 interface ProjectCardProps {
   project: ProjectWithMetadata;
   onClick?: () => void;
   onDelete?: () => void;
   onExport?: () => void;
+  onRename?: (newName: string) => Promise<void>;
   isExporting?: boolean;
 }
 
@@ -26,7 +29,23 @@ function formatDate(dateString: string | Date): string {
   });
 }
 
-export function ProjectCard({ project, onClick, onDelete, onExport, isExporting }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  onClick,
+  onDelete,
+  onExport,
+  onRename,
+  isExporting,
+}: ProjectCardProps) {
+  const { renameProject } = useProjectStore();
+
+  const handleRename = async (newName: string) => {
+    if (onRename) {
+      await onRename(newName);
+    } else {
+      await renameProject(project.id, newName);
+    }
+  };
   return (
     <article
       className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] p-6 cursor-pointer
@@ -45,10 +64,14 @@ export function ProjectCard({ project, onClick, onDelete, onExport, isExporting 
       aria-label={`Open project ${project.name}`}
     >
       <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-heading text-lg font-semibold text-[#134E4A] truncate group-hover:text-[#0D9488] transition-colors duration-150">
-            {project.name}
-          </h3>
+        <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+          <EditableProjectName
+            projectId={project.id}
+            initialName={project.name}
+            onRename={handleRename}
+            size="lg"
+            className="font-heading text-[#134E4A] group-hover:text-[#0D9488] transition-colors duration-150"
+          />
           <p className="mt-1 text-sm text-[#64748B]">
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F0FDFA] text-[#0D9488]">
               {project.metadata.template}

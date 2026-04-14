@@ -8,6 +8,7 @@ import { UnsavedChangesDialog } from "../components/Dialogs";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
 import LogViewer from "../components/LogViewer";
+import { EditableProjectName } from "../components/EditableProjectName";
 import { useProjectStore } from "../stores/projectStore";
 import { useEditorStore } from "../stores/editorStore";
 import { useFileOperations } from "../hooks/useFileOperations";
@@ -46,6 +47,7 @@ export function ProjectDetail() {
     fileTree,
     setCurrentProject,
     setFileTree,
+    renameProject,
     isLoading,
     setLoading,
     error,
@@ -56,6 +58,7 @@ export function ProjectDetail() {
       fileTree: state.fileTree,
       setCurrentProject: state.setCurrentProject,
       setFileTree: state.setFileTree,
+      renameProject: state.renameProject,
       isLoading: state.isLoading,
       setLoading: state.setLoading,
       error: state.error,
@@ -428,7 +431,19 @@ export function ProjectDetail() {
             </button>
             <div>
               <h1 className="font-heading text-xl font-semibold text-heading dark:text-heading">
-                {currentProject?.name || "Loading..."}
+                {currentProject ? (
+                  <EditableProjectName
+                    projectId={currentProject.id}
+                    initialName={currentProject.name}
+                    onRename={async (newName) => {
+                      await renameProject(currentProject.id, newName);
+                    }}
+                    size="lg"
+                    className="text-[#134E4A] dark:text-heading"
+                  />
+                ) : (
+                  "Loading..."
+                )}
               </h1>
               {currentProject && (
                 <p className="text-sm text-muted">
