@@ -1,336 +1,447 @@
 # 📝 Local LaTeX Editor
 
-Welcome! This is a tool that helps you write papers and documents using **LaTeX** - a special way to make beautiful documents with math, science, and more!
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://react.dev/)
 
-## 🎯 What This Does
+A **modern, browser-based LaTeX editor** that runs entirely on your local machine. No cloud required, no subscriptions, no data leaves your computer.
 
-Think of it like Google Docs, but for people who write scientific papers, math homework, or fancy reports. It runs on your computer (no internet needed!) and turns your writing into a PDF file.
+Think of it like **Google Docs meets LaTeX** — beautiful scientific typesetting with the privacy and speed of a local application.
 
-## 🚀 Quick Start (Easy Way!)
-
-We've created **setup scripts** that do all the work for you! 
-
-### 🍎 macOS / 🐧 Linux
-
-1. **Download the setup script** and save it to your computer
-2. **Open Terminal** and go to where you saved the script
-3. **Run this command:**
-   ```bash
-   ./setup-macos-linux.sh
-   ```
-4. **Follow the prompts** - the script will check what you need and help install it!
-
-That's it! The script will:
-- ✅ Check if you have the required tools (Node.js, pnpm, Git)
-- ✅ Install missing tools automatically (when possible)
-- ✅ Download the LaTeX Editor code
-- ✅ Set everything up
-- 🎉 Tell you how to start it!
-
-### 🪟 Windows
-
-1. **Download the setup script** (`setup-windows.bat`) and save it to your computer
-2. **Double-click** the file to run it
-3. **Follow the instructions** on screen
-
-The script will guide you through installing everything you need!
+![Local LaTeX Editor](https://via.placeholder.com/800x400?text=LaTeX+Editor+Screenshot)
 
 ---
 
-## 🛠️ Manual Setup (If You Prefer)
+## 📋 Table of Contents
 
-Don't want to use the script? Here's how to do it yourself:
+- [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
+- [💻 System Requirements](#-system-requirements)
+- [🚀 Quick Start](#-quick-start)
+  - [Option 1: Automated Setup Scripts](#option-1-automated-setup-scripts-recommended)
+  - [Option 2: AI Assistant Installation](#option-2-ai-assistant-installation-easiest)
+  - [Option 3: Manual Installation](#option-3-manual-installation)
+- [▶️ Starting the Editor](#️-starting-the-editor)
+- [🛠️ Development](#️-development)
+- [❓ Troubleshooting](#-troubleshooting)
+- [🔒 Security](#-security)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-### What You Need First
+---
 
-Before you start, make sure you have:
+## ✨ Features
 
-1. **A Computer** 💻 (Mac, Windows, or Linux)
-2. **Node.js** - This is like the engine that makes the program run
-3. **pnpm** - This helps download extra parts the program needs
-4. **LaTeX** - This is the magic that turns your writing into beautiful PDFs
+- ✏️ **Real-time LaTeX Editing** — Write with syntax highlighting and intelligent autocomplete
+- 📄 **Instant PDF Preview** — See your document compile in real-time as you type
+- 🗂️ **Project Management** — Organize multiple documents and projects
+- 📂 **File Import/Export** — Import existing `.tex` files and export to PDF
+- 🎨 **Modern UI** — Clean, responsive interface built with React and Tailwind CSS
+- ⚡ **Fast Compilation** — Optimized LaTeX compilation pipeline
+- 🔒 **100% Private** — Your documents never leave your machine
+- 🌐 **Offline-First** — Works without internet connection
+- 🖥️ **Cross-Platform** — Works on macOS, Windows, and Linux
 
-### 📥 Step 1: Download the Program
+---
 
-#### 🍎 If you have a Mac:
+## 🏗️ Architecture
 
-1. Open **Terminal** (it's in Applications > Utilities)
-2. Type this and press Enter:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-   ```
-3. Then type:
-   ```bash
-   cd local-latex-editor
-   ```
-
-#### 🪟 If you have Windows:
-
-1. Install **Git** first: Go to https://git-scm.com/download/win and download it
-2. Open **Command Prompt** or **PowerShell**
-3. Type this and press Enter:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-   ```
-4. Then type:
-   ```bash
-   cd local-latex-editor
-   ```
-
-#### 🐧 If you have Linux:
-
-1. Open your terminal
-2. Type this and press Enter:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
-   ```
-3. Then type:
-   ```bash
-   cd local-latex-editor
-   ```
-
-### 🔧 Step 2: Install the Tools
-
-Now we need to install some helper tools. Don't worry - this is automatic!
-
-#### 1️⃣ Install Node.js
-
-Go to https://nodejs.org and download the **LTS** version (the one with the green button that says "Recommended For Most Users")
-
-**To check if it worked:** Open Terminal/Command Prompt and type:
-```bash
-node --version
 ```
-You should see a number like `v18.x.x` or higher!
+┌─────────────────────────────────────────────────────────────┐
+│                    BROWSER (Frontend)                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ Monaco Editor│  │  File Tree   │  │   PDF Preview    │  │
+│  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘  │
+│         └──────────────────┴───────────────────┘            │
+│                            │                                │
+│                     ┌──────┴──────┐                         │
+│                     │  Zustand    │                         │
+│                     │    Store    │                         │
+│                     └──────┬──────┘                         │
+└────────────────────────────┼────────────────────────────────┘
+                             │ HTTP / WebSocket
+┌────────────────────────────┼────────────────────────────────┐
+│                    ┌───────┴───────┐                         │
+│                    │ Express API   │                         │
+│                    │  (Port 3001)  │                         │
+│                    └───────┬───────┘                         │
+│         ┌──────────────────┼──────────────────┐              │
+│         ▼                  ▼                  ▼              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │ File System  │  │ Compilation  │  │  Project     │       │
+│  │   Service    │  │   Service    │  │  Service     │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
-#### 2️⃣ Install pnpm
+**Tech Stack:**
+- **Frontend**: React 18 + TypeScript + Vite + Monaco Editor + PDF.js + Zustand + Tailwind CSS
+- **Backend**: Express + TypeScript
+- **Build**: Turborepo + pnpm
+- **Testing**: Vitest + Playwright
 
-Open Terminal/Command Prompt and type:
+---
+
+## 💻 System Requirements
+
+### Minimum Requirements
+
+- **OS**: macOS 10.15+, Windows 10+, or Linux (Ubuntu 20.04+)
+- **RAM**: 4 GB
+- **Disk Space**: 
+  - Editor: ~500 MB
+  - LaTeX Distribution: ~4 GB (MacTeX/MiKTeX/TeX Live)
+- **Node.js**: 18.0.0 or higher
+- **Browser**: Chrome 90+, Firefox 88+, Safari 14+, or Edge 90+
+
+### Required Software
+
+1. **Node.js 18+** — JavaScript runtime ([Download](https://nodejs.org/))
+2. **pnpm 8+** — Package manager (`npm install -g pnpm`)
+3. **Git** — Version control ([Download](https://git-scm.com/))
+4. **LaTeX Distribution** — One of:
+   - **macOS**: [MacTeX](https://www.tug.org/mactex/) (~4GB)
+   - **Windows**: [MiKTeX](https://miktex.org/download) or TeX Live
+   - **Linux**: `sudo apt-get install texlive-full`
+
+---
+
+## 🚀 Quick Start
+
+Choose your preferred installation method:
+
+### Option 1: Automated Setup Scripts (Recommended)
+
+We've created automated setup scripts that check your system, install missing dependencies, and configure everything for you.
+
+**🍎 macOS / 🐧 Linux:**
+```bash
+# Download and run the setup script
+curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-macos-linux.sh | bash
+```
+
+Or manually:
+```bash
+# 1. Download the script
+wget https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-macos-linux.sh
+
+# 2. Make it executable
+chmod +x setup-macos-linux.sh
+
+# 3. Run it
+./setup-macos-linux.sh
+```
+
+**🪟 Windows:**
+```powershell
+# Download and run the setup script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_USERNAME/local-latex-editor/main/scripts/setup-windows.bat" -OutFile "setup-windows.bat"
+.\setup-windows.bat
+```
+
+**What the script does:**
+1. ✅ Checks for Node.js, pnpm, Git, and LaTeX
+2. ✅ Installs missing tools automatically (when possible)
+3. ✅ Clones the repository
+4. ✅ Installs project dependencies (`pnpm install`)
+5. 🎉 Tells you how to start the editor
+
+---
+
+### Option 2: AI Assistant Installation (Easiest!)
+
+If you use **OpenCode**, **VS Code Copilot**, **Claude Code**, **Cursor**, or **Gemini CLI**, just ask them to install it for you!
+
+**Simply say:**
+> "Install the Local LaTeX Editor project for me"
+
+The AI assistant will:
+- ✅ Check your system for prerequisites
+- ✅ Install any missing tools
+- ✅ Clone the repository
+- ✅ Install all dependencies
+- ✅ Set up the development environment
+
+**To start it later:**
+> "Start the LaTeX Editor"
+
+That's it! The AI handles everything for you! 🤖
+
+---
+
+### Option 3: Manual Installation
+
+Prefer to do it yourself? Follow these steps:
+
+#### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
+cd local-latex-editor
+```
+
+#### Step 2: Install Prerequisites
+
+**Install Node.js 18+:**
+- Download from [nodejs.org](https://nodejs.org/) (LTS version recommended)
+- Verify: `node --version` (should show v18.x.x or higher)
+
+**Install pnpm:**
 ```bash
 npm install -g pnpm
 ```
 
-**To check if it worked:** Type:
+**Install LaTeX:**
+
+| OS | Command/Link |
+|----|--------------|
+| macOS | `brew install --cask mactex` or [Download MacTeX](https://www.tug.org/mactex/) |
+| Windows | [Download MiKTeX](https://miktex.org/download) |
+| Ubuntu/Debian | `sudo apt-get install texlive-full` |
+| Fedora | `sudo dnf install texlive-scheme-full` |
+
+#### Step 3: Install Project Dependencies
+
 ```bash
-pnpm --version
+pnpm install
 ```
-You should see a number!
 
-#### 3️⃣ Install LaTeX
-
-This is the big one that makes your documents look pretty!
-
-**🍎 Mac Users:**
-1. Go to https://www.tug.org/mactex/
-2. Download MacTeX
-3. Open the downloaded file and follow the instructions
-4. It's big (about 4GB), so it might take a while to download! ⏰
-
-**🪟 Windows Users:**
-1. Go to https://miktex.org/download
-2. Download MiKTeX
-3. Install it and follow the instructions
-
-**🐧 Linux Users:**
-1. Open Terminal
-2. Type:
-   ```bash
-   sudo apt-get install texlive-full
-   ```
-3. Enter your password when asked
-4. Wait for it to finish (this might take a while!)
-
-### 📦 Step 3: Get Everything Ready
-
-Now that you have the tools, let's get the program ready!
-
-1. Make sure you're in the `local-latex-editor` folder (you should see the $ or > prompt)
-2. Type this and press Enter:
-   ```bash
-   pnpm install
-   ```
-3. Wait! ⌛ This downloads all the pieces the program needs. It might take a few minutes.
-4. When you see the prompt again, you're done! 🎉
+This downloads all required packages. It may take a few minutes.
 
 ---
 
-## 🚀 Start the Program!
+## ▶️ Starting the Editor
 
-### Using the Quick Start Script (Easiest!)
-
-After setup, you can use our quick start script:
+### Using Quick Start Scripts (Recommended)
 
 **🍎 macOS / 🐧 Linux:**
 ```bash
-./start.sh
+./scripts/start.sh
 ```
 
 **🪟 Windows:**
-Double-click `start.bat` or run:
-```
-start.bat
+```batch
+scripts\start.bat
 ```
 
 ### Manual Start
 
-If you prefer to start manually:
-
-1. Open Terminal/Command Prompt
-2. Make sure you're in the project folder:
-   ```bash
-   cd local-latex-editor
-   ```
-3. Type:
-   ```bash
-   pnpm dev
-   ```
-4. Wait a few seconds...
-5. You'll see messages like "Frontend running on port 3000" and "Backend running on port 3001"
-6. Open your web browser (Chrome, Firefox, Safari, etc.)
-7. Go to this address: **http://localhost:3000**
-
-**🎉 YOU DID IT!** You should now see the LaTeX Editor in your browser!
-
-## 🛑 How to Stop the Program
-
-When you're done using the editor:
-
-1. Go back to your Terminal/Command Prompt
-2. Press **Ctrl + C** (hold Ctrl and press C)
-3. You'll see a message asking if you want to stop - type `y` and press Enter
-4. The program stops! 👋
-
-## 🔄 How to Start It Again Later
-
-Next time you want to use it, just run the quick start script:
-
-**🍎 macOS / 🐧 Linux:**
 ```bash
-./start.sh
+# Start both frontend and backend
+pnpm dev
 ```
 
-**🪟 Windows:**
-```
-start.bat
-```
+This will:
+- Start the **frontend** at http://localhost:3000
+- Start the **backend API** at http://localhost:3001
 
-Or manually:
+**Open your browser** and navigate to: **http://localhost:3000**
 
-1. Open Terminal/Command Prompt
-2. Type:
-   ```bash
-   cd local-latex-editor
-   ```
-3. Then type:
-   ```bash
-   pnpm dev
-   ```
-4. Go to **http://localhost:3000** in your browser
-
-That's it! Much faster the second time! 🚀
-
-## 🆘 Help! Something Went Wrong
-
-### ❌ "command not found: pnpm"
-
-**What it means:** The computer can't find pnpm
-
-**How to fix:**
-1. Try installing pnpm again:
-   ```bash
-   npm install -g pnpm
-   ```
-2. Close Terminal and open it again
-3. Try again!
-
-### ❌ "command not found: node"
-
-**What it means:** Node.js isn't installed or can't be found
-
-**How to fix:**
-1. Go back to Step 2 and install Node.js
-2. After installing, close Terminal and open a new one
-3. Try `node --version` again
-
-### ❌ "Cannot find module"
-
-**What it means:** Some pieces are missing
-
-**How to fix:**
-1. Make sure you're in the `local-latex-editor` folder
-2. Run:
-   ```bash
-   pnpm install
-   ```
-3. Wait for it to finish
-
-### ❌ "LaTeX not found" or compilation fails
-
-**What it means:** LaTeX isn't installed properly
-
-**How to fix:**
-1. Go back to Step 2, Part 3
-2. Install LaTeX for your computer
-3. After installing, close everything and start over
-
-### ❌ "Port 3000 already in use"
-
-**What it means:** Something else is using that port
-
-**How to fix:**
-1. Find what's using port 3000 and close it, OR
-2. Change the port in the settings (ask an adult for help with this one!)
-
-### ❌ The page doesn't load
-
-**What it means:** The program might not be running
-
-**How to fix:**
-1. Check your Terminal - is the program still running?
-2. Try refreshing the browser page (press F5)
-3. Make sure you typed the address correctly: **http://localhost:3000**
-
-## 🎨 What Can You Do With It?
-
-Now that it's running, you can:
-
-- ✏️ Write papers and documents
-- 📊 Add math equations and formulas
-- 📚 Create bibliographies
-- 🖼️ Insert pictures
-- 📄 Export as PDF files
-- 🗂️ Organize multiple files in projects
-
-## 📚 Want to Learn More?
-
-- **LaTeX Tutorial:** https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes
-- **Example Documents:** Check the `docs/` folder in the program
-- **Get Help:** Ask a teacher, parent, or friend who knows about computers!
-
-## 📝 Remember
-
-- **Save your work often!** 💾
-- **Don't share your password** if you set one up 🔒
-- **Have fun experimenting!** 🎉
-
-## 🐛 Found a Bug?
-
-If something doesn't work right:
-
-1. Read the error message carefully
-2. Check the "Help!" section above
-3. Ask for help from someone who knows computers
-4. Or tell the person who gave you this program!
+🎉 **You should see the LaTeX Editor!**
 
 ---
 
-## 🤝 For Contributors
+## 🛑 Stopping the Editor
 
-Want to help improve this project? Check out our [Contributing Guide](CONTRIBUTING.md) for detailed information about:
-- Development setup
-- Code conventions
-- How to submit changes
-- Project structure
+When you're done:
+
+1. Go to your terminal
+2. Press **Ctrl + C**
+3. Type `y` and press Enter to confirm
+
+---
+
+## 🔄 Restarting Later
+
+Next time you want to use it:
+
+```bash
+# Navigate to the project (if not already there)
+cd local-latex-editor
+
+# Start the editor
+pnpm dev
+```
+
+Or use the quick start scripts (see [Starting the Editor](#️-starting-the-editor)).
+
+---
+
+## 🛠️ Development
+
+### Available Commands
+
+```bash
+# Start development servers
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Run linting
+pnpm lint
+
+# Format code
+pnpm format
+
+# Type checking
+pnpm typecheck
+
+# Run tests
+pnpm test
+pnpm test:unit       # Unit tests only
+pnpm test:e2e        # E2E tests only
+
+# Clean build artifacts
+pnpm clean
+```
+
+### Project Structure
+
+```
+local-latex-editor/
+├── apps/
+│   ├── frontend/          # React + Vite frontend (port 3000)
+│   └── backend/           # Express API (port 3001)
+├── packages/
+│   └── shared-types/      # Shared TypeScript definitions
+├── scripts/               # Setup and utility scripts
+├── docs/                  # Documentation
+├── tooling/               # ESLint and TypeScript configs
+├── package.json           # Root monorepo config
+└── turbo.json             # Turborepo pipeline
+```
+
+---
+
+## ❓ Troubleshooting
+
+### "command not found: pnpm"
+
+**Fix:**
+```bash
+npm install -g pnpm
+```
+Close and reopen your terminal, then try again.
+
+### "command not found: node"
+
+**Fix:** 
+1. Install Node.js from https://nodejs.org/
+2. Close and reopen your terminal
+3. Verify with `node --version`
+
+### "Cannot find module"
+
+**Fix:**
+```bash
+pnpm install
+```
+
+### "LaTeX not found" or compilation fails
+
+**Fix:** 
+Install a LaTeX distribution (see [System Requirements](#-system-requirements))
+
+### "Port 3000 already in use"
+
+**Fix:**
+Kill the process using port 3000:
+```bash
+# macOS/Linux
+lsof -ti:3000 | xargs kill -9
+
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+### The page doesn't load
+
+**Check:**
+1. Is the dev server running? (Look for "Frontend running on port 3000")
+2. Try refreshing the browser (F5)
+3. Check the URL: http://localhost:3000
+
+### Permission denied (macOS/Linux)
+
+**Fix:**
+```bash
+chmod +x scripts/*.sh
+```
+
+---
+
+## 🔒 Security
+
+Your **privacy is our priority**:
+
+- ✅ **Local Only** — All processing happens on your machine
+- ✅ **No Cloud** — Documents never leave your computer
+- ✅ **No Tracking** — No analytics or telemetry
+- ✅ **Sandboxed** — LaTeX compilation runs with user-level privileges
+- ✅ **No Shell Escape** — LaTeX shell escape is disabled for security
+
+**Security Best Practices:**
+- Keep your LaTeX distribution updated
+- Don't enable shell escape unless you trust the document source
+- Bind to localhost only (127.0.0.1) — never expose to the internet
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for:
+
+- Development setup instructions
+- Code conventions and style guide
+- How to submit pull requests
+- Project architecture details
+
+### Quick Contributor Setup
+
+```bash
+# Fork and clone your fork
+git clone https://github.com/YOUR_USERNAME/local-latex-editor.git
+cd local-latex-editor
+
+# Install dependencies
+pnpm install
+
+# Create a branch
+git checkout -b feature/my-feature
+
+# Make your changes and commit
+git commit -m "feat: add my feature"
+
+# Push and create PR
+git push origin feature/my-feature
+```
+
+---
+
+## 📚 Resources
+
+- **LaTeX Tutorial**: [Overleaf's 30-minute LaTeX Guide](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes)
+- **Documentation**: See the `docs/` folder for detailed specs
+- **Examples**: Check `examples/` for sample documents
+- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/local-latex-editor/issues)
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [Monaco Editor](https://microsoft.github.io/monaco-editor/) (the editor that powers VS Code)
+- PDF rendering by [PDF.js](https://mozilla.github.io/pdf.js/)
+- LaTeX compilation powered by your system's LaTeX distribution
 
 ---
 
