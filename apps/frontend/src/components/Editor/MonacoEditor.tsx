@@ -2,6 +2,9 @@ import { useRef, useCallback, useEffect } from "react";
 import Editor, { OnMount, OnChange } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useSettingsStore } from "../../stores/settingsStore";
+import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
+import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokenizer";
+import { registerThemes } from "../../editor/latexThemes";
 
 export interface MonacoEditorProps {
   content: string;
@@ -25,43 +28,45 @@ export function MonacoEditor({
 
   const getMonacoOptions = useSettingsStore((state) => state.getMonacoOptions);
   const settingsOptions = useSettingsStore((state) => state.getMonacoOptions());
+  const syntaxTheme = useSettingsStore((state) => state.editor.syntaxTheme);
 
   const handleEditorDidMount: OnMount = useCallback(
     (editor, monaco) => {
       editorRef.current = editor;
       monacoRef.current = monaco;
 
-      editor.updateOptions(getMonacoOptions());
-
       // Register LaTeX language if not already registered
-      monaco.languages.register({ id: "latex" });
+      if (!monaco.languages.getLanguages().some((lang: { id: string }) => lang.id === "latex")) {
+        monaco.languages.register({ id: "latex" });
+      }
 
-      // Configure LaTeX language settings
-      monaco.languages.setLanguageConfiguration("latex", {
-        comments: {
-          lineComment: "%",
-        },
-        brackets: [
-          ["{", "}"],
-          ["[", "]"],
-          ["(", ")"],
-        ],
-        autoClosingPairs: [
-          { open: "{", close: "}" },
-          { open: "[", close: "]" },
-          { open: "(", close: ")" },
-          { open: '"', close: '"' },
-          { open: "'", close: "'" },
-          { open: "`", close: "'" },
-        ],
-        surroundingPairs: [
-          { open: "{", close: "}" },
-          { open: "[", close: "]" },
-          { open: "(", close: ")" },
-          { open: '"', close: '"' },
-          { open: "'", close: "'" },
-        ],
-      });
+      // Register BibTeX language if not already registered
+      if (!monaco.languages.getLanguages().some((lang: { id: string }) => lang.id === "bibtex")) {
+        monaco.languages.register({ id: "bibtex" });
+      }
+
+      // Set language configuration
+      monaco.languages.setLanguageConfiguration("latex", latexLanguageConfig);
+      monaco.languages.setLanguageConfiguration("bibtex", bibtexLanguageConfig);
+
+      // Set Monarch tokenizer for syntax highlighting
+      monaco.languages.setMonarchTokensProvider("latex", latexTokenizer);
+      monaco.languages.setMonarchTokensProvider("bibtex", bibtexTokenizer);
+
+      // Register all syntax themes
+      registerThemes(monaco);
+
+      // Apply current theme
+      monaco.editor.setTheme(syntaxTheme);
+
+      // Force tokenization refresh
+      const model = editor.getModel();
+      if (model) {
+        monaco.editor.tokenize(model.getValue(), "latex");
+      }
+
+      // Update editor options
+      editor.updateOptions(getMonacoOptions());
 
       // Add save keyboard shortcut (Ctrl/Cmd + S)
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
@@ -71,7 +76,7 @@ export function MonacoEditor({
       // Focus the editor
       editor.focus();
     },
-    [onSave, getMonacoOptions],
+    [onSave, getMonacoOptions, syntaxTheme],
   );
 
   useEffect(() => {
@@ -98,6 +103,13 @@ export function MonacoEditor({
       }
     }
   }, [content]);
+
+  // Listen for syntax theme changes
+  useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.setTheme(syntaxTheme);
+    }
+  }, [syntaxTheme]);
 
   // Don't set model markers - rely on LogViewer for error display
 
@@ -138,7 +150,7 @@ export function MonacoEditor({
           overviewRulerBorder: false,
           ...getMonacoOptions(),
         }}
-        theme="vs"
+        theme={syntaxTheme}
         loading={
           <div className="flex items-center justify-center h-full bg-gray-50">
             <div className="text-gray-500">Loading editor...</div>

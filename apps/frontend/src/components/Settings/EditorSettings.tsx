@@ -1,4 +1,4 @@
-import type { EditorSettings as EditorSettingsType } from '@/types/settings';
+import type { EditorSettings as EditorSettingsType, SyntaxThemeId } from '@/types/settings';
 import {
   SettingsSection,
   SliderSetting,
@@ -7,6 +7,7 @@ import {
   SettingItem,
 } from './SettingsComponents';
 import { useSettingsStore } from '@/stores';
+import { SYNTAX_THEMES } from '@/editor/latexThemes';
 
 const FONT_FAMILIES = [
   { value: 'JetBrains Mono', label: 'JetBrains Mono' },
@@ -70,6 +71,26 @@ export function EditorSettings() {
             value={String(editor.tabSize)}
             options={TAB_SIZES}
             onChange={(tabSize) => updateEditorSettings({ tabSize: Number(tabSize) })}
+          />
+        </SettingItem>
+      </SettingsSection>
+
+      <SettingsSection
+        title="Syntax Theme"
+        description="Choose a color theme for LaTeX syntax highlighting"
+      >
+        <SettingItem>
+          <SelectSetting
+            label="Theme"
+            value={editor.syntaxTheme}
+            options={SYNTAX_THEMES.map(theme => ({
+              value: theme.id,
+              label: theme.name,
+            }))}
+            onChange={(theme) =>
+              updateEditorSettings({ syntaxTheme: theme as SyntaxThemeId })
+            }
+            description="Select your preferred syntax highlighting colors"
           />
         </SettingItem>
       </SettingsSection>

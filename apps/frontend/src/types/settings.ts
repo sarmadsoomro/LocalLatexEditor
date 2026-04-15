@@ -1,3 +1,11 @@
+export type SyntaxThemeId = 
+  | 'latex-light' 
+  | 'latex-dark' 
+  | 'dracula' 
+  | 'solarized-dark' 
+  | 'one-dark' 
+  | 'github-light';
+
 export interface EditorSettings {
   fontSize: number;           // 10-24, default 16
   fontFamily: string;         // Default: 'JetBrains Mono', 'Fira Code', etc.
@@ -12,6 +20,7 @@ export interface EditorSettings {
   autoSaveDelay: number;      // Delay in ms, default 1000
   autoCompile: boolean;       // Auto-compile on save, default true
   autoCompileDelay: number;   // Delay in ms, default 2000
+  syntaxTheme: SyntaxThemeId; // Syntax highlighting theme
 }
 
 export interface CompilerSettings {
@@ -57,6 +66,7 @@ export const DEFAULT_SETTINGS: Settings = {
     autoSaveDelay: 1000,
     autoCompile: true,
     autoCompileDelay: 2000,
+    syntaxTheme: 'latex-light',
   },
   compiler: {
     defaultEngine: 'pdflatex',
