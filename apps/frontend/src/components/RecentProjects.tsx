@@ -124,9 +124,9 @@ const RecentProjectCard: React.FC<RecentProjectCardProps> = ({ project, onClick 
       </h4>
       <p
         className="text-sm text-[var(--color-text-secondary)] mt-1"
-        title={formatFullDate(project.metadata.lastOpened?.toISOString())}
+        title={formatFullDate(project.metadata.lastOpened)}
       >
-        {formatTimeAgo(project.metadata.lastOpened?.toISOString())}
+        {formatTimeAgo(project.metadata.lastOpened)}
       </p>
       <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5 truncate">
         {project.path}
