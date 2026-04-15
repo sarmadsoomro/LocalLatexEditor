@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, FolderOpen, ChevronRight } from 'lucide-react';
 import type { ProjectWithMetadata } from '@local-latex-editor/shared-types';
-import { formatRelativeDate, formatTimeAgo, formatFullDate, groupByDate } from '../utils/date';
+import { formatTimeAgo, formatFullDate, groupByDate } from '../utils/date';
 
 interface RecentProjectsProps {
   projects: ProjectWithMetadata[];
