@@ -30,7 +30,7 @@ export const RecentProjects: React.FC<RecentProjectsProps> = ({
 
   const grouped = groupByDate(recentProjects.map(p => ({
     ...p,
-    lastOpened: p.metadata.lastOpened?.toISOString()
+    lastOpened: p.metadata.lastOpened
   })));
 
   return (
