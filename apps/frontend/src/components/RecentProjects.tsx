@@ -1,7 +1,8 @@
 import React from 'react';
 import { Clock, FolderOpen, ChevronRight } from 'lucide-react';
 import type { ProjectWithMetadata } from '@local-latex-editor/shared-types';
-import { formatTimeAgo, formatFullDate, groupByDate } from '../utils/date';
+import { formatTimeAgo, formatFullDate } from '../utils/date';
+import { isToday, isYesterday, isThisWeek } from 'date-fns';
 
 interface RecentProjectsProps {
   projects: ProjectWithMetadata[];
@@ -28,10 +29,29 @@ export const RecentProjects: React.FC<RecentProjectsProps> = ({
     return null;
   }
 
-  const grouped = groupByDate(recentProjects.map(p => ({
-    ...p,
-    lastOpened: p.metadata.lastOpened
-  })));
+  // Group projects by date for display
+  const groupedProjects: ProjectWithMetadata[][] = [
+    recentProjects.filter(p => {
+      if (!p.metadata?.lastOpened) return false;
+      const date = typeof p.metadata.lastOpened === 'string' ? new Date(p.metadata.lastOpened) : p.metadata.lastOpened;
+      return isToday(date);
+    }),
+    recentProjects.filter(p => {
+      if (!p.metadata?.lastOpened) return false;
+      const date = typeof p.metadata.lastOpened === 'string' ? new Date(p.metadata.lastOpened) : p.metadata.lastOpened;
+      return isYesterday(date);
+    }),
+    recentProjects.filter(p => {
+      if (!p.metadata?.lastOpened) return false;
+      const date = typeof p.metadata.lastOpened === 'string' ? new Date(p.metadata.lastOpened) : p.metadata.lastOpened;
+      return isThisWeek(date) && !isToday(date) && !isYesterday(date);
+    }),
+    recentProjects.filter(p => {
+      if (!p.metadata?.lastOpened) return false;
+      const date = typeof p.metadata.lastOpened === 'string' ? new Date(p.metadata.lastOpened) : p.metadata.lastOpened;
+      return !isThisWeek(date);
+    }),
+  ];
 
   return (
     <div className="space-y-6">
@@ -41,40 +61,40 @@ export const RecentProjects: React.FC<RecentProjectsProps> = ({
       </div>
 
       {/* Today's projects */}
-      {grouped.today.length > 0 && (
+      {groupedProjects[0].length > 0 && (
         <ProjectGroup
           title="Today"
-          projects={grouped.today}
+          projects={groupedProjects[0]}
           onOpenProject={onOpenProject}
         />
       )}
 
       {/* Yesterday's projects */}
-      {grouped.yesterday.length > 0 && (
+      {groupedProjects[1].length > 0 && (
         <ProjectGroup
           title="Yesterday"
-          projects={grouped.yesterday}
+          projects={groupedProjects[1]}
           onOpenProject={onOpenProject}
         />
       )}
 
       {/* This week's projects */}
-      {grouped.thisWeek.length > 0 && (
+      {groupedProjects[2].length > 0 && (
         <ProjectGroup
           title="This Week"
-          projects={grouped.thisWeek}
+          projects={groupedProjects[2]}
           onOpenProject={onOpenProject}
         />
       )}
 
       {/* Older projects (only show if no recent ones exist) */}
-      {grouped.today.length === 0 &&
-        grouped.yesterday.length === 0 &&
-        grouped.thisWeek.length === 0 &&
-        grouped.older.length > 0 && (
+      {groupedProjects[0].length === 0 &&
+        groupedProjects[1].length === 0 &&
+        groupedProjects[2].length === 0 &&
+        groupedProjects[3].length > 0 && (
           <ProjectGroup
             title="Earlier"
-            projects={grouped.older}
+            projects={groupedProjects[3]}
             onOpenProject={onOpenProject}
           />
         )}
