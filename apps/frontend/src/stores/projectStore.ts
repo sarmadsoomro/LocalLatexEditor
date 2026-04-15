@@ -117,3 +117,28 @@ export const useProjectStore = create<ProjectState>((set) => ({
     }
   },
 }));
+
+// Selectors (for use outside components or with useShallow)
+
+export const selectRecentProjects = (state: ProjectState) => {
+  return [...state.projects]
+    .filter((p) => p.metadata?.lastOpened)
+    .sort((a, b) => {
+      const dateA = new Date(a.metadata!.lastOpened!).getTime();
+      const dateB = new Date(b.metadata!.lastOpened!).getTime();
+      return dateB - dateA;
+    });
+};
+
+export const selectSortedProjects = (state: ProjectState) => {
+  return [...state.projects].sort((a, b) => {
+    // Sort by lastOpened (most recent first), then by name
+    if (a.metadata?.lastOpened && b.metadata?.lastOpened) {
+      const dateDiff = new Date(b.metadata.lastOpened).getTime() - new Date(a.metadata.lastOpened).getTime();
+      if (dateDiff !== 0) return dateDiff;
+    }
+    if (a.metadata?.lastOpened && !b.metadata?.lastOpened) return -1;
+    if (!a.metadata?.lastOpened && b.metadata?.lastOpened) return 1;
+    return a.name.localeCompare(b.name);
+  });
+};

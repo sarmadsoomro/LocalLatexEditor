@@ -182,4 +182,9 @@ export const projectApi = {
     // Cleanup
     window.URL.revokeObjectURL(url);
   },
+
+  updateLastOpened: async (projectId: string): Promise<ProjectWithMetadata> => {
+    const response = await api.patch<GetProjectResponse>(`/api/projects/${projectId}/last-opened`);
+    return response.project;
+  },
 };

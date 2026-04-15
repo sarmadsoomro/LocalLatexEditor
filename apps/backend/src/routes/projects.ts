@@ -9,6 +9,7 @@ import {
   getProjectFiles,
   updateProjectLastOpened,
   renameProject,
+  updateLastOpened,
 } from '../services/projectService.js';
 import { exportProjectAsZip } from '../services/exportService.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
@@ -116,6 +117,20 @@ router.put(
   async (req, res, next) => {
     try {
       const project = await renameProject(req.params.id, req.body.name);
+      res.json(createSuccessResponse({ project }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// PATCH endpoint for updating lastOpened
+router.patch(
+  '/:id/last-opened',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  async (req, res, next) => {
+    try {
+      const project = await updateLastOpened(req.params.id);
       res.json(createSuccessResponse({ project }));
     } catch (error) {
       next(error);

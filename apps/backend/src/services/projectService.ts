@@ -278,6 +278,21 @@ export async function updateProjectLastOpened(id: string): Promise<void> {
   }
 }
 
+export async function updateLastOpened(projectId: string): Promise<ProjectWithMetadata> {
+  const projects = await loadProjectsMetadata();
+  const project = projects.find((p) => p.id === projectId);
+  
+  if (!project) {
+    throw new NotFoundError('Project', projectId);
+  }
+  
+  project.metadata.lastOpened = new Date();
+  project.updatedAt = new Date().toISOString();
+  await saveProjectsMetadata(projects);
+  
+  return project;
+}
+
 export async function renameProject(id: string, newName: string): Promise<ProjectWithMetadata> {
   // Validate name format
   if (!newName || newName.trim().length === 0) {
