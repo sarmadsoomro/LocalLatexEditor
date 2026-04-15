@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useCompilationStore } from "../stores/compilationStore";
 import { useProjectStore } from "../stores/projectStore";
+import { useSettingsStore } from "../stores/settingsStore";
 import { compilationApi } from "../services/compilationApi";
 import { shallow } from "zustand/shallow";
 
@@ -42,6 +43,13 @@ export function useCompilation(): UseCompilationReturn {
   );
 
   const currentProject = useProjectStore((state) => state.currentProject);
+  const compilerSettings = useSettingsStore((state) => ({
+    engine: state.compiler.defaultEngine,
+    synctex: state.compiler.synctex,
+    draftMode: state.compiler.draftMode,
+    shellEscape: state.compiler.shellEscape,
+    additionalArgs: state.compiler.additionalArgs,
+  }));
 
   const compile = useCallback(async () => {
     if (!currentProject) {
@@ -52,8 +60,14 @@ export function useCompilation(): UseCompilationReturn {
     try {
       const response = await compilationApi.compile(
         currentProject.id,
-        currentProject.settings?.compiler,
+        compilerSettings.engine,
         currentProject.metadata?.mainFile,
+        {
+          synctex: compilerSettings.synctex,
+          draftMode: compilerSettings.draftMode,
+          shellEscape: compilerSettings.shellEscape,
+          additionalArgs: compilerSettings.additionalArgs,
+        },
       );
       startCompilation(response.jobId);
     } catch (error) {
@@ -69,7 +83,7 @@ export function useCompilation(): UseCompilationReturn {
         duration: 0,
       });
     }
-  }, [currentProject, startCompilation, setError]);
+  }, [currentProject, compilerSettings, startCompilation, setError]);
 
   const cancel = useCallback(async () => {
     if (!jobId) {

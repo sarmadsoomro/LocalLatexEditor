@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from "react";
 import Editor, { OnMount, OnChange } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
+import { useSettingsStore } from "../../stores/settingsStore";
 
 export interface MonacoEditorProps {
   content: string;
@@ -22,10 +23,15 @@ export function MonacoEditor({
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<any>(null);
 
+  const getMonacoOptions = useSettingsStore((state) => state.getMonacoOptions);
+  const settingsOptions = useSettingsStore((state) => state.getMonacoOptions());
+
   const handleEditorDidMount: OnMount = useCallback(
     (editor, monaco) => {
       editorRef.current = editor;
       monacoRef.current = monaco;
+
+      editor.updateOptions(getMonacoOptions());
 
       // Register LaTeX language if not already registered
       monaco.languages.register({ id: "latex" });
@@ -65,8 +71,14 @@ export function MonacoEditor({
       // Focus the editor
       editor.focus();
     },
-    [onSave],
+    [onSave, getMonacoOptions],
   );
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.updateOptions(getMonacoOptions());
+    }
+  }, [settingsOptions, getMonacoOptions]);
 
   const handleChange: OnChange = useCallback(
     (value) => {
@@ -124,6 +136,7 @@ export function MonacoEditor({
           overviewRulerLanes: 0,
           hideCursorInOverviewRuler: true,
           overviewRulerBorder: false,
+          ...getMonacoOptions(),
         }}
         theme="vs"
         loading={

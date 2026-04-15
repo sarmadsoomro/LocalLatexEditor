@@ -4,6 +4,7 @@ import { FileIcon, FolderIcon } from "./icons/FileIcon";
 import { isEditableFile } from "@local-latex-editor/shared-types";
 import { projectApi } from "../services/projectApi";
 import { useToast } from "./Toast";
+import { useSettingsStore } from "../stores/settingsStore";
 
 interface FileTreeProps {
   projectId: string;
@@ -196,6 +197,8 @@ export const FileTree = memo(function FileTree({
   selectedFileId,
 }: FileTreeProps) {
   const { addToast } = useToast();
+  const showHiddenFiles = useSettingsStore((state) => state.ui.showHiddenFiles);
+  const showCompiledFiles = useSettingsStore((state) => state.ui.showCompiledFiles);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [creating, setCreating] = useState<{
@@ -232,9 +235,37 @@ export const FileTree = memo(function FileTree({
     });
   }, [files]);
 
-  const flatItems = useMemo(
-    () => flattenVisibleTree(files, expandedIds),
-    [files, expandedIds],
+  const filteredFiles = useMemo(() => {
+    const filterNode = (node: FileNode): FileNode | null => {
+      if (node.type === "file") {
+        const name = node.name;
+        const isHidden = name.startsWith(".");
+        const isCompiledFile =
+          /\.(aux|log|out|toc|bbl|blg|synctex\.gz|fdb_latexmk|fls)$/.test(name);
+
+        if (!showHiddenFiles && isHidden) return null;
+        if (!showCompiledFiles && isCompiledFile) return null;
+      }
+
+      if (node.children) {
+        const filteredChildren = node.children
+          .map(filterNode)
+          .filter((child): child is FileNode => child !== null);
+        if (filteredChildren.length === 0 && node.type === "directory") {
+          return null;
+        }
+        return { ...node, children: filteredChildren };
+      }
+
+      return node;
+    };
+
+    return files.map(filterNode).filter((node): node is FileNode => node !== null);
+  }, [files, showHiddenFiles, showCompiledFiles]);
+
+  const filteredFlatItems = useMemo(
+    () => flattenVisibleTree(filteredFiles, expandedIds),
+    [filteredFiles, expandedIds],
   );
 
   const handleToggleExpand = useCallback((nodeId: string) => {
@@ -392,29 +423,29 @@ export const FileTree = memo(function FileTree({
 
   const handleTreeKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (flatItems.length === 0) return;
+      if (filteredFlatItems.length === 0) return;
 
-      const currentIndex = flatItems.findIndex((item) => item.id === focusedId);
+      const currentIndex = filteredFlatItems.findIndex((item) => item.id === focusedId);
 
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          if (currentIndex < flatItems.length - 1) {
-            setFocusedId(flatItems[currentIndex + 1].id);
-          } else if (currentIndex === -1 && flatItems.length > 0) {
-            setFocusedId(flatItems[0].id);
+          if (currentIndex < filteredFlatItems.length - 1) {
+            setFocusedId(filteredFlatItems[currentIndex + 1].id);
+          } else if (currentIndex === -1 && filteredFlatItems.length > 0) {
+            setFocusedId(filteredFlatItems[0].id);
           }
           break;
         case "ArrowUp":
           e.preventDefault();
           if (currentIndex > 0) {
-            setFocusedId(flatItems[currentIndex - 1].id);
+            setFocusedId(filteredFlatItems[currentIndex - 1].id);
           }
           break;
         case "ArrowRight":
           e.preventDefault();
           if (currentIndex >= 0) {
-            const node = flatItems[currentIndex];
+            const node = filteredFlatItems[currentIndex];
             if (node.type === "directory" && !expandedIds.has(node.id)) {
               handleToggleExpand(node.id);
             }
@@ -423,7 +454,7 @@ export const FileTree = memo(function FileTree({
         case "ArrowLeft":
           e.preventDefault();
           if (currentIndex >= 0) {
-            const node = flatItems[currentIndex];
+            const node = filteredFlatItems[currentIndex];
             if (node.type === "directory" && expandedIds.has(node.id)) {
               handleToggleExpand(node.id);
             }
@@ -431,7 +462,7 @@ export const FileTree = memo(function FileTree({
           break;
       }
     },
-    [flatItems, focusedId, expandedIds, handleToggleExpand],
+    [filteredFlatItems, focusedId, expandedIds, handleToggleExpand],
   );
 
   const renderItems = (nodes: FileNode[], depth: number): React.ReactNode => {
@@ -589,7 +620,7 @@ export const FileTree = memo(function FileTree({
         </div>
       )}
 
-      {files.length === 0 ? (
+      {filteredFiles.length === 0 ? (
         <div className="p-4 text-sm text-muted text-center" role="status">
           No files in this project
         </div>
@@ -602,13 +633,13 @@ export const FileTree = memo(function FileTree({
           tabIndex={0}
           onKeyDown={handleTreeKeyDown}
           onFocus={() => {
-            if (!focusedId && files.length > 0) {
-              setFocusedId(files[0].id);
+            if (!focusedId && filteredFiles.length > 0) {
+              setFocusedId(filteredFiles[0].id);
             }
           }}
           onClick={() => closeContextMenu()}
         >
-          {renderItems(files, 0)}
+          {renderItems(filteredFiles, 0)}
         </div>
       )}
 

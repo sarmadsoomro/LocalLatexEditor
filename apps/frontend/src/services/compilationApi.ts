@@ -11,16 +11,25 @@ interface LatexCheckResponse {
   message: string;
 }
 
+interface CompileOptions {
+  synctex?: boolean;
+  draftMode?: boolean;
+  shellEscape?: boolean;
+  additionalArgs?: string[];
+}
+
 export const compilationApi = {
   async compile(
     projectId: string,
     engine?: CompileRequest["engine"],
     mainFile?: string,
+    options?: CompileOptions,
   ): Promise<CompileResponse> {
     return api.post<CompileResponse>(`/api/projects/${projectId}/compile`, {
       projectId,
       engine,
       mainFile,
+      ...options,
     });
   },
 
