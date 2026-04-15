@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { Settings, EditorSettings, CompilerSettings, UISettings } from '../types/settings';
+import type { Settings, EditorSettings, CompilerSettings, UISettings, SyntaxThemeId } from '../types/settings';
 import { DEFAULT_SETTINGS } from '../types/settings';
 
 interface SettingsState extends Settings {
@@ -12,6 +12,8 @@ interface SettingsState extends Settings {
   resetCompilerSettings: () => void;
   resetUISettings: () => void;
   getMonacoOptions: () => Record<string, unknown>;
+  updateSyntaxTheme: (theme: SyntaxThemeId) => void;
+  getCurrentSyntaxTheme: () => SyntaxThemeId;
 }
 
 const STORAGE_KEY = 'latex-editor-settings';
@@ -72,6 +74,13 @@ export const useSettingsStore = create<SettingsState>()(
           scrollBeyondLastLine: false,
         };
       },
+
+      updateSyntaxTheme: (theme) =>
+        set((state) => ({
+          editor: { ...state.editor, syntaxTheme: theme },
+        })),
+
+      getCurrentSyntaxTheme: () => get().editor.syntaxTheme,
     }),
     {
       name: STORAGE_KEY,

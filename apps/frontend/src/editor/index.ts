@@ -1,4 +1,5 @@
 export { latexLanguageConfig, latexTokenizer } from './latexTokenizer';
+export { bibtexLanguageConfig, bibtexTokenizer } from './bibtexTokenizer';
 export {
   type SyntaxTheme,
   latexLightTheme,
