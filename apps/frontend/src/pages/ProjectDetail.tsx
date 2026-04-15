@@ -162,6 +162,13 @@ export function ProjectDetail() {
     }
   }, [status, result]);
 
+  useEffect(() => {
+    // Update last opened when project is opened
+    if (projectId) {
+      projectApi.updateLastOpened(projectId).catch(console.error);
+    }
+  }, [projectId]);
+
   const loadProject = async (pid: string) => {
     setLoading(true);
     setError(null);

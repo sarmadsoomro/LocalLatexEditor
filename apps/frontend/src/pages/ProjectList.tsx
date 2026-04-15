@@ -5,8 +5,9 @@ import { CreateProjectDialog } from "../components/CreateProjectDialog";
 import { ImportProjectDialog } from "../components/ImportProjectDialog";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
-import { useProjectStore } from "../stores/projectStore";
+import { useProjectStore, selectSortedProjects } from "../stores/projectStore";
 import { projectApi } from "../services/projectApi";
+import { RecentProjects } from "../components/RecentProjects";
 import type { Template } from "@local-latex-editor/shared-types";
 
 export function ProjectList() {
@@ -14,6 +15,7 @@ export function ProjectList() {
   const { addToast } = useToast();
   const { projects, setProjects, isLoading, setLoading, error, setError } =
     useProjectStore();
+  const sortedProjects = useProjectStore(selectSortedProjects);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -109,6 +111,12 @@ export function ProjectList() {
     } finally {
       setExportingProjectId(null);
     }
+  };
+
+  const handleOpenProject = async (projectId: string) => {
+    // Update lastOpened timestamp before navigating
+    await projectApi.updateLastOpened(projectId);
+    navigate(`/project/${projectId}`);
   };
 
   return (
@@ -302,12 +310,33 @@ export function ProjectList() {
             </div>
           </div>
         ) : (
+          <>
+            {/* Recent Projects Section */}
+            <section className="mb-12">
+              <RecentProjects
+                projects={projects}
+                onOpenProject={handleOpenProject}
+                maxItems={6}
+              />
+            </section>
+
+            {/* All Projects Section */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                  All Projects
+                </h2>
+                <span className="text-sm text-[var(--color-text-secondary)]">
+                  {projects.length} project{projects.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
           <ul
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
             role="list"
             aria-label="Project list"
           >
-            {projects.map((project, index) => (
+            {sortedProjects.map((project, index) => (
               <li
                 key={project.id}
                 className="relative animate-fade-in"
@@ -315,7 +344,7 @@ export function ProjectList() {
               >
                 <ProjectCard
                   project={project}
-                  onClick={() => navigate(`/project/${project.id}`)}
+                  onClick={() => handleOpenProject(project.id)}
                   onDelete={() => handleDeleteProject(project.id)}
                   onExport={() => handleExportProject(project.id, project.name)}
                   isExporting={exportingProjectId === project.id}
@@ -376,6 +405,8 @@ export function ProjectList() {
               </li>
             ))}
           </ul>
+            </section>
+          </>
         )}
       </main>
 
