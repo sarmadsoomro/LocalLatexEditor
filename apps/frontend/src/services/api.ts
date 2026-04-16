@@ -56,13 +56,19 @@ export async function apiClient<T>(
     ...options,
   };
 
+  // Add cache-busting headers to prevent browser caching
+  config.headers = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    ...config.headers,
+  };
+
   if (hasBody) {
     config.headers = {
       'Content-Type': 'application/json',
       ...config.headers,
     };
-  } else {
-    delete config.headers;
   }
 
   const response = await fetch(url, config);

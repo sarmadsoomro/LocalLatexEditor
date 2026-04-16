@@ -244,6 +244,7 @@ async function copyDirectory(source: string, destination: string): Promise<void>
 async function detectMainFile(projectPath: string): Promise<string> {
   const commonNames = ['main.tex', 'document.tex', 'thesis.tex', 'paper.tex'];
   
+  // First check for common main file names at root level
   for (const name of commonNames) {
     try {
       await fs.access(path.join(projectPath, name));
@@ -253,11 +254,47 @@ async function detectMainFile(projectPath: string): Promise<string> {
     }
   }
   
-  const entries = await fs.readdir(projectPath);
-  const texFiles = entries.filter((e) => e.endsWith('.tex'));
+  // Recursively search for .tex files in all subdirectories
+  async function findTexFilesRecursive(dir: string, baseDir: string): Promise<string[]> {
+    const texFiles: string[] = [];
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relativePath = path.relative(baseDir, fullPath);
+      
+      if (entry.isDirectory()) {
+        // Recursively search subdirectories
+        const subDirFiles = await findTexFilesRecursive(fullPath, baseDir);
+        texFiles.push(...subDirFiles);
+      } else if (entry.name.endsWith('.tex')) {
+        texFiles.push(relativePath);
+      }
+    }
+    
+    return texFiles;
+  }
   
-  if (texFiles.length > 0) {
-    return texFiles[0];
+  // Search recursively for all .tex files
+  const allTexFiles = await findTexFilesRecursive(projectPath, projectPath);
+  
+  // Prefer common main file names anywhere in the tree
+  for (const name of commonNames) {
+    const found = allTexFiles.find(f => f === name || path.basename(f) === name);
+    if (found) {
+      return found;
+    }
+  }
+  
+  // Return the first .tex file found (shallowest path first)
+  if (allTexFiles.length > 0) {
+    // Sort by path depth (number of separators) to prefer files closer to root
+    allTexFiles.sort((a, b) => {
+      const depthA = a.split(path.sep).length;
+      const depthB = b.split(path.sep).length;
+      return depthA - depthB;
+    });
+    return allTexFiles[0];
   }
   
   return 'main.tex';

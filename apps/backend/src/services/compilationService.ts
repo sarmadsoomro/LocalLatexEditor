@@ -60,30 +60,50 @@ export async function compileProject(
 
   const needsBibTeX = await detectBibTeX(projectPath, mainFile);
   
+  // Recursively find all .bib files in project directory
+  async function findBibFilesRecursive(dir: string): Promise<string[]> {
+    const bibFiles: string[] = [];
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory() && entry.name !== 'output') {
+        // Recursively search subdirectories (skip output dir)
+        const subDirFiles = await findBibFilesRecursive(fullPath);
+        bibFiles.push(...subDirFiles);
+      } else if (entry.name.endsWith('.bib')) {
+        bibFiles.push(fullPath);
+      }
+    }
+    
+    return bibFiles;
+  }
+  
   // Debug: List all .bib files in project directory
+  let allBibFiles: string[] = [];
   try {
-    const projectFiles = await fs.readdir(projectPath);
-    const bibFilesInProject = projectFiles.filter(f => f.endsWith('.bib'));
-    logOutput += `\n=== BIB FILES IN PROJECT DIR: ${bibFilesInProject.join(', ') || 'NONE'} ===\n`;
+    allBibFiles = await findBibFilesRecursive(projectPath);
+    const relativePaths = allBibFiles.map(f => path.relative(projectPath, f));
+    logOutput += `\n=== BIB FILES FOUND: ${relativePaths.join(', ') || 'NONE'} ===\n`;
   } catch {
-    logOutput += "\n=== COULD NOT LIST PROJECT DIRECTORY ===\n";
+    logOutput += "\n=== COULD NOT SEARCH FOR BIB FILES ===\n";
   }
   
   let bblCreated = false;
   if (needsBibTeX && result1.exitCode === 0) {
     // Copy .bib files to output directory so biber can find them
     try {
-      const files = await fs.readdir(projectPath);
-      for (const file of files) {
-        if (file.endsWith('.bib')) {
-          const srcPath = path.join(projectPath, file);
-          const destPath = path.join(outputDir, file);
-          await fs.copyFile(srcPath, destPath);
-        }
+      for (const bibFilePath of allBibFiles) {
+        const fileName = path.basename(bibFilePath);
+        const destPath = path.join(outputDir, fileName);
+        await fs.copyFile(bibFilePath, destPath);
       }
-    } catch {
-      // Ignore errors copying .bib files
+      logOutput += `\n=== COPIED ${allBibFiles.length} BIB FILE(S) TO OUTPUT ===\n`;
+    } catch (err) {
+      logOutput += `\n=== ERROR COPYING BIB FILES: ${err} ===\n`;
     }
+    
+    logOutput += `\n=== BIBINPUTS: ${projectPath}${path.delimiter}${process.env.BIBINPUTS || '(empty)'} ===\n`;
     
     const bibResult = await runBibTeX(projectPath, mainFile, engine);
     logOutput += "\n=== BIBLIOGRAPHY PROCESSING ===\n" + bibResult.output;
@@ -293,6 +313,11 @@ export async function runBibTeX(
     const childProcess = spawn(bibtexEngine, args, {
       cwd: outputDir,
       shell: false,
+      env: {
+        ...process.env,
+        // Add project path to BIBINPUTS so BibTeX can find .bib files in subdirectories
+        BIBINPUTS: projectPath + path.delimiter + (process.env.BIBINPUTS || ''),
+      },
     });
 
     let stdout = "";

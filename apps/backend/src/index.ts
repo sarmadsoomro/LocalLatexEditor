@@ -44,7 +44,7 @@ const compileLimiter = rateLimit({
 app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Cache-Control', 'Pragma', 'Expires'],
 }));
 app.use(express.json());
 

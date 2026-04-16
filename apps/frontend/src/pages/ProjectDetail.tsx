@@ -261,7 +261,9 @@ export function ProjectDetail() {
 
   const handleEditorChange = useCallback(
     (value: string) => {
-      if (activeFileId) {
+      console.log('[handleEditorChange] Called with value length:', value?.length, 'activeFileId:', activeFileId);
+      if (activeFileId && value !== undefined) {
+        console.log('[handleEditorChange] Calling updateFileContent with content preview:', value.substring(0, 50));
         updateFileContent(activeFileId, value);
       }
     },
@@ -282,16 +284,23 @@ export function ProjectDetail() {
   }, [activeFileId, activeFile, saveFile, projectId, compile, addToast]);
 
   const handleSave = useCallback(async () => {
+    console.log('[handleSave] Called:', { activeFileId, projectId });
     if (activeFileId && projectId) {
       try {
+        console.log('[handleSave] Calling saveFile...');
         await saveFile(activeFileId, projectId);
+        console.log('[handleSave] saveFile completed successfully');
         addToast("File saved successfully", "success");
         if (autoCompileEnabled) {
+          console.log('[handleSave] Triggering auto-compile...');
           triggerAutoCompile();
         }
       } catch (err) {
+        console.error('[handleSave] Error:', err);
         addToast("Failed to save file", "error");
       }
+    } else {
+      console.warn('[handleSave] Missing activeFileId or projectId:', { activeFileId, projectId });
     }
   }, [activeFileId, projectId, saveFile, addToast, autoCompileEnabled, triggerAutoCompile]);
 

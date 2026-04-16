@@ -56,8 +56,16 @@ async function extractZip(zipPath: string, extractDir: string): Promise<void> {
 function findExtractedRoot(extractDir: string): string {
   const entries = fs.readdirSync(extractDir, { withFileTypes: true });
   
-  if (entries.length === 1 && entries[0].isDirectory()) {
-    const singleDir = path.join(extractDir, entries[0].name);
+  // Filter out macOS metadata directories and hidden files
+  const relevantEntries = entries.filter(e => 
+    e.name !== '__MACOSX' && 
+    e.name !== '.DS_Store' &&
+    !e.name.startsWith('.')
+  );
+  
+  // If there's a single directory that contains .tex files, use its contents as root
+  if (relevantEntries.length === 1 && relevantEntries[0].isDirectory()) {
+    const singleDir = path.join(extractDir, relevantEntries[0].name);
     const subEntries = fs.readdirSync(singleDir);
     if (subEntries.some(e => e.endsWith('.tex'))) {
       return singleDir;
