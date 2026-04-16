@@ -1,6 +1,6 @@
-import { FileEdit, Terminal, Palette, Keyboard } from 'lucide-react';
+import { FileEdit, Terminal, Palette, Keyboard, Info } from 'lucide-react';
 
-export type TabId = 'editor' | 'compiler' | 'ui' | 'shortcuts';
+export type TabId = 'editor' | 'compiler' | 'ui' | 'shortcuts' | 'about';
 
 interface Tab {
   id: TabId;
@@ -13,6 +13,7 @@ const TABS: Tab[] = [
   { id: 'compiler', label: 'Compiler', icon: Terminal },
   { id: 'ui', label: 'Appearance', icon: Palette },
   { id: 'shortcuts', label: 'Shortcuts', icon: Keyboard },
+  { id: 'about', label: 'About', icon: Info },
 ];
 
 interface SettingsTabsProps {

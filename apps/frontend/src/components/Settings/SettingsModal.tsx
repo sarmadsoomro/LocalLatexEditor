@@ -4,6 +4,7 @@ import { SettingsTabs, type TabId } from './SettingsTabs';
 import { EditorSettings } from './EditorSettings';
 import { CompilerSettings } from './CompilerSettings';
 import { UISettings } from './UISettings';
+import { AboutSection } from './AboutSection';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -34,6 +35,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <p>Keyboard shortcuts coming soon</p>
           </div>
         );
+      case 'about':
+        return <AboutSection />;
       default:
         return null;
     }
