@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ProjectWithMetadata, FileNode } from '@local-latex-editor/shared-types';
+import type { ProjectWithMetadata, FileNode, ProjectFilter, ProjectStatus } from '@local-latex-editor/shared-types';
 import { projectApi } from '../services/projectApi';
 
 interface ProjectState {
@@ -11,6 +11,7 @@ interface ProjectState {
   // UI State
   isLoading: boolean;
   error: string | null;
+  currentFilter: ProjectFilter;
 
   // Actions
   setProjects: (projects: ProjectWithMetadata[]) => void;
@@ -23,6 +24,10 @@ interface ProjectState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  setCurrentFilter: (filter: ProjectFilter) => void;
+  updateProjectStatus: (id: string, status: ProjectStatus) => Promise<void>;
+  restoreProject: (id: string) => Promise<void>;
+  permanentlyDeleteProject: (id: string) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -32,6 +37,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
   fileTree: null,
   isLoading: false,
   error: null,
+  currentFilter: 'all',
 
   // Actions
   setProjects: (projects) => set({ projects }),
@@ -76,6 +82,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   clearError: () => set({ error: null }),
 
+  setCurrentFilter: (filter) => set({ currentFilter: filter }),
+
   renameProject: async (id, newName) => {
     const { projects, currentProject } = useProjectStore.getState();
 
@@ -116,6 +124,49 @@ export const useProjectStore = create<ProjectState>((set) => ({
       throw error;
     }
   },
+
+  updateProjectStatus: async (id, status) => {
+    const { projects, currentProject } = useProjectStore.getState();
+
+    // Optimistic update
+    const previousProjects = [...projects];
+    const optimisticProjects = projects.map((p) =>
+      p.id === id
+        ? { ...p, metadata: { ...p.metadata, status } }
+        : p
+    );
+
+    set({
+      projects: optimisticProjects,
+      currentProject:
+        currentProject?.id === id
+          ? { ...currentProject, metadata: { ...currentProject.metadata, status } }
+          : currentProject,
+    });
+
+    try {
+      await projectApi.updateStatus(id, status);
+    } catch (error) {
+      // Rollback on error
+      set({
+        projects: previousProjects,
+        currentProject,
+      });
+      throw error;
+    }
+  },
+
+  restoreProject: async (id) => {
+    const response = await projectApi.restoreProject(id);
+    set((state) => ({
+      projects: [response.project, ...state.projects],
+    }));
+  },
+
+  permanentlyDeleteProject: async (id) => {
+    await projectApi.permanentlyDeleteProject(id);
+    // No need to update state as trashed projects are in a separate view
+  },
 }));
 
 // Selectors (for use outside components or with useShallow)
@@ -141,4 +192,21 @@ export const selectSortedProjects = (state: ProjectState) => {
     if (!a.metadata?.lastOpened && b.metadata?.lastOpened) return 1;
     return a.name.localeCompare(b.name);
   });
+};
+
+export const selectFilteredProjects = (state: ProjectState) => {
+  const { projects, currentFilter } = state;
+
+  switch (currentFilter) {
+    case 'published':
+      return projects.filter((p) => p.metadata.status === 'published');
+    case 'in_progress':
+      return projects.filter((p) => p.metadata.status === 'in_progress');
+    case 'draft':
+      return projects.filter((p) => !p.metadata.status || p.metadata.status === 'draft');
+    case 'your_projects':
+    case 'all':
+    default:
+      return projects;
+  }
 };

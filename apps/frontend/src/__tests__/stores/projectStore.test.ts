@@ -13,6 +13,8 @@ const createMockProject = (id: string, name: string): ProjectWithMetadata => ({
     template: 'article',
     fileCount: 1,
     totalSize: 1024,
+    status: 'draft',
+    deletedAt: null,
   },
   settings: {
     compiler: 'pdflatex',

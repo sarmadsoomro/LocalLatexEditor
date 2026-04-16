@@ -8,34 +8,59 @@ import { useToast } from "../components/Toast";
 import { useProjectStore, selectSortedProjects } from "../stores/projectStore";
 import { projectApi } from "../services/projectApi";
 import { RecentProjects } from "../components/RecentProjects";
-import type { Template } from "@local-latex-editor/shared-types";
-import { Search, Plus, AlertCircle, X, FilePlus } from "lucide-react";
+import type { Template, ProjectWithMetadata, ProjectFilter } from "@local-latex-editor/shared-types";
+import { Search, AlertCircle, X, FilePlus, Trash2 } from "lucide-react";
 
 export function ProjectList() {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { projects, setProjects, isLoading, setLoading, error, setError } =
-    useProjectStore();
+  const {
+    projects,
+    setProjects,
+    isLoading,
+    setLoading,
+    error,
+    setError,
+    currentFilter,
+    setCurrentFilter,
+    restoreProject: restoreProjectFromStore,
+  } = useProjectStore();
   const sortedProjects = useProjectStore(selectSortedProjects);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [exportingProjectId, setExportingProjectId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isTrashView, setIsTrashView] = useState(false);
+  const [trashedProjects, setTrashedProjects] = useState<ProjectWithMetadata[]>([]);
 
   useEffect(() => {
     loadProjects();
   }, []);
 
-  const loadProjects = async () => {
+  const loadProjects = async (filter?: ProjectFilter) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await projectApi.listProjects();
+      const data = await projectApi.listProjects(filter === 'trash' ? undefined : filter);
       setProjects(data.projects);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load projects");
       addToast("Failed to load projects", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTrashedProjects = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await projectApi.listTrashedProjects();
+      setTrashedProjects(data.projects);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load trash");
+      addToast("Failed to load trash", "error");
     } finally {
       setLoading(false);
     }
@@ -121,13 +146,64 @@ export function ProjectList() {
     navigate(`/project/${projectId}`);
   };
 
-  const filteredProjects = useMemo(() => {
+  const handleRestoreProject = async (id: string) => {
+    try {
+      await restoreProjectFromStore(id);
+      setTrashedProjects(trashedProjects.filter((p) => p.id !== id));
+      addToast("Project restored successfully", "success");
+    } catch (err) {
+      addToast(
+        err instanceof Error ? err.message : "Failed to restore project",
+        "error"
+      );
+    }
+  };
+
+  const handlePermanentDelete = async (id: string) => {
+    try {
+      await projectApi.permanentlyDeleteProject(id);
+      setTrashedProjects(trashedProjects.filter((p) => p.id !== id));
+      addToast("Project permanently deleted", "success");
+    } catch (err) {
+      addToast(
+        err instanceof Error ? err.message : "Failed to delete project",
+        "error"
+      );
+    }
+  };
+
+  const displayProjects = useMemo(() => {
+    // If in trash view, return trashed projects
+    if (isTrashView) {
+      return trashedProjects;
+    }
+
     const query = searchQuery.toLowerCase();
+
+    // Start with all projects and apply status filter
+    let results = projects;
     
+    // Apply status filter
+    switch (currentFilter) {
+      case 'published':
+        results = results.filter((p) => p.metadata.status === 'published');
+        break;
+      case 'in_progress':
+        results = results.filter((p) => p.metadata.status === 'in_progress');
+        break;
+      case 'draft':
+        results = results.filter((p) => !p.metadata.status || p.metadata.status === 'draft');
+        break;
+      case 'your_projects':
+      case 'all':
+      default:
+        // No status filtering
+        break;
+    }
+
     // Filter by search query if exists
-    let results = sortedProjects;
     if (query.trim()) {
-      results = sortedProjects.filter(
+      results = results.filter(
         (p) =>
           p.name.toLowerCase().includes(query) ||
           p.metadata.template.toLowerCase().includes(query) ||
@@ -135,8 +211,9 @@ export function ProjectList() {
       );
     }
 
-    // If not searching, exclude the top 3 recent projects from the main list to avoid duplication
-    if (!query.trim()) {
+    // If not searching and in 'all' view, exclude the top 3 recent projects from the main list to avoid duplication
+    // But only if there are more than 3 projects total
+    if (!query.trim() && currentFilter === 'all' && projects.length > 3) {
       const recentIds = sortedProjects
         .filter((p) => p.metadata?.lastOpened)
         .sort((a, b) => {
@@ -146,12 +223,12 @@ export function ProjectList() {
         })
         .slice(0, 3)
         .map(p => p.id);
-      
+
       results = results.filter(p => !recentIds.includes(p.id));
     }
 
     return results;
-  }, [sortedProjects, searchQuery]);
+  }, [sortedProjects, projects, searchQuery, isTrashView, trashedProjects, currentFilter]);
 
   return (
     <div className="w-full min-h-screen bg-background flex flex-col font-body selection:bg-cta/20 selection:text-cta-dark">
@@ -205,33 +282,87 @@ export function ProjectList() {
           
           {/* Sidebar Navigation - Overleaf Style */}
           <aside className="w-64 shrink-0 hidden lg:flex flex-col gap-1">
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-cta bg-cta/5 rounded-xl border border-cta/10">
+            <button
+              onClick={() => {
+                setCurrentFilter('all');
+                setIsTrashView(false);
+                loadProjects('all');
+              }}
+              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                currentFilter === 'all' && !isTrashView
+                  ? 'text-cta bg-cta/5 border border-cta/10'
+                  : 'text-secondary hover:bg-surface-hover'
+              }`}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
               All Projects
             </button>
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-secondary hover:bg-surface-hover rounded-xl transition-all">
+            <button
+              onClick={() => {
+                setCurrentFilter('your_projects');
+                setIsTrashView(false);
+                loadProjects('your_projects');
+              }}
+              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                currentFilter === 'your_projects' && !isTrashView
+                  ? 'text-cta bg-cta/5 border border-cta/10'
+                  : 'text-secondary hover:bg-surface-hover'
+              }`}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               Your Projects
             </button>
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-secondary hover:bg-surface-hover rounded-xl transition-all">
+            <button
+              onClick={() => {
+                setIsTrashView(true);
+                loadTrashedProjects();
+              }}
+              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                isTrashView
+                  ? 'text-cta bg-cta/5 border border-cta/10'
+                  : 'text-secondary hover:bg-surface-hover'
+              }`}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
               Trash
             </button>
-            
+
             <div className="my-4 h-px bg-border mx-2" />
-            
+
             <p className="px-4 text-[10px] font-black text-muted uppercase tracking-widest mb-2">Filters</p>
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-secondary hover:bg-surface-hover rounded-xl transition-all">
+            <button
+              onClick={() => {
+                setCurrentFilter('published');
+                setIsTrashView(false);
+                loadProjects('published');
+              }}
+              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                currentFilter === 'published' && !isTrashView
+                  ? 'text-cta bg-cta/5 border border-cta/10'
+                  : 'text-secondary hover:bg-surface-hover'
+              }`}
+            >
               <span className="w-2 h-2 rounded-full bg-success" />
               Published
             </button>
-            <button className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-secondary hover:bg-surface-hover rounded-xl transition-all">
+            <button
+              onClick={() => {
+                setCurrentFilter('in_progress');
+                setIsTrashView(false);
+                loadProjects('in_progress');
+              }}
+              className={`flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                currentFilter === 'in_progress' && !isTrashView
+                  ? 'text-cta bg-cta/5 border border-cta/10'
+                  : 'text-secondary hover:bg-surface-hover'
+              }`}
+            >
               <span className="w-2 h-2 rounded-full bg-warning" />
               In Progress
             </button>
@@ -255,9 +386,19 @@ export function ProjectList() {
                   <div className="absolute inset-0 border-4 border-cta/10 rounded-full"></div>
                   <div className="absolute inset-0 border-4 border-cta border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                <span className="mt-6 text-sm font-bold text-muted tracking-widest uppercase opacity-40">Loading Workspace</span>
+                <span className="mt-6 text-sm font-bold text-muted tracking-widest uppercase opacity-40">{isTrashView ? 'Loading Trash' : 'Loading Workspace'}</span>
               </div>
-            ) : projects.length === 0 ? (
+            ) : isTrashView && trashedProjects.length === 0 ? (
+              <div id="main-content" className="text-center py-24 bg-surface rounded-[2rem] border-2 border-dashed border-border animate-fade-in shadow-inner outline-none" tabIndex={-1}>
+                <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/5 flex items-center justify-center mb-8">
+                  <Trash2 className="h-10 w-10 text-primary/30" />
+                </div>
+                <h3 className="text-3xl font-black text-heading mb-4">Trash is Empty</h3>
+                <p className="text-lg text-secondary max-w-sm mx-auto mb-10 opacity-70">
+                  Deleted projects will appear here. You can restore them or permanently delete them.
+                </p>
+              </div>
+            ) : !isTrashView && projects.length === 0 ? (
               <div id="main-content" className="text-center py-24 bg-surface rounded-[2rem] border-2 border-dashed border-border animate-fade-in shadow-inner outline-none" tabIndex={-1}>
                 <div className="w-24 h-24 mx-auto rounded-3xl bg-primary/5 flex items-center justify-center mb-8">
                   <FilePlus className="h-10 w-10 text-primary/30" />
@@ -279,31 +420,37 @@ export function ProjectList() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
                   <div>
                     <h1 className="text-3xl font-black text-heading tracking-tight">
-                      {searchQuery ? "Search Results" : "All Projects"}
+                      {isTrashView ? "Trash" : searchQuery ? "Search Results" : currentFilter === 'all' ? "All Projects" : currentFilter === 'your_projects' ? "Your Projects" : currentFilter === 'published' ? "Published Projects" : currentFilter === 'in_progress' ? "In Progress" : "Projects"}
                     </h1>
                     <p className="text-sm text-secondary font-medium mt-1 opacity-60">
-                      Managing <span className="text-primary font-bold">{projects.length} documents</span> in your local workspace
+                      {isTrashView ? (
+                        <><span className="text-primary font-bold">{trashedProjects.length} deleted</span> projects in trash</>
+                      ) : (
+                        <>Managing <span className="text-primary font-bold">{projects.length} documents</span> in your local workspace</>
+                      )}
                     </p>
                   </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setIsImportDialogOpen(true)}
-                      className="px-4 py-2 text-sm font-bold text-secondary bg-surface border border-border rounded-xl hover:border-cta transition-all"
-                    >
-                      Import ZIP
-                    </button>
-                    <button
-                      onClick={() => setIsCreateDialogOpen(true)}
-                      className="px-4 py-2 text-sm font-bold text-white bg-cta rounded-xl hover:bg-cta-dark transition-all"
-                    >
-                      New Project
-                    </button>
-                  </div>
+
+                  {!isTrashView && (
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setIsImportDialogOpen(true)}
+                        className="px-4 py-2 text-sm font-bold text-secondary bg-surface border border-border rounded-xl hover:border-cta transition-all"
+                      >
+                        Import ZIP
+                      </button>
+                      <button
+                        onClick={() => setIsCreateDialogOpen(true)}
+                        className="px-4 py-2 text-sm font-bold text-white bg-cta rounded-xl hover:bg-cta-dark transition-all"
+                      >
+                        New Project
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {/* Recent Projects Section */}
-                {!searchQuery && (
+                {/* Recent Projects Section - Only show in 'all' view without search */}
+                {!searchQuery && !isTrashView && currentFilter === 'all' && (
                   <section className="animate-fade-in">
                     <RecentProjects
                       projects={projects}
@@ -315,59 +462,110 @@ export function ProjectList() {
 
                 {/* Main Grid Section */}
                 <section className="animate-fade-in" style={{ animationDelay: "100ms" }}>
-                  {!searchQuery && (
+                  {!searchQuery && !isTrashView && (
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xs font-black text-muted uppercase tracking-[0.2em]">Project Library</h2>
+                      <h2 className="text-xs font-black text-muted uppercase tracking-[0.2em]">
+                        {currentFilter === 'all' ? 'Project Library' : currentFilter === 'your_projects' ? 'Your Projects' : currentFilter === 'published' ? 'Published' : currentFilter === 'in_progress' ? 'In Progress' : 'Projects'}
+                      </h2>
                     </div>
                   )}
 
-                  {filteredProjects.length === 0 ? (
+                  {displayProjects.length === 0 ? (
                     <div className="text-center py-20 bg-surface/30 rounded-3xl border border-dashed border-border">
-                      <Search className="w-16 h-16 mx-auto mb-6 text-muted/10" />
-                      <p className="text-xl font-bold text-heading opacity-40">No projects match your search.</p>
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="mt-4 text-sm text-cta font-black hover:underline underline-offset-8"
-                      >
-                        Clear filters
-                      </button>
+                      {searchQuery.trim() ? (
+                        <>
+                          <Search className="w-16 h-16 mx-auto mb-6 text-muted/10" />
+                          <p className="text-xl font-bold text-heading opacity-40">No projects match your search.</p>
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="mt-4 text-sm text-cta font-black hover:underline underline-offset-8"
+                          >
+                            Clear search
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-16 h-16 mx-auto mb-6 text-muted/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                          </svg>
+                          <p className="text-xl font-bold text-heading opacity-40">
+                            {projects.length <= 3 ? 'All projects shown in Recent Projects above' : 'No additional projects'}
+                          </p>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {filteredProjects.map((project, index) => (
+                      {displayProjects.map((project, index) => (
                         <li
                           key={project.id}
                           className="relative animate-fade-in"
                           style={{ animationDelay: `${index * 40}ms` }}
                         >
-                          <ProjectCard
-                            project={project}
-                            onClick={() => handleOpenProject(project.id)}
-                            onDelete={() => handleDeleteProject(project.id)}
-                            onExport={() => handleExportProject(project.id, project.name)}
-                            isExporting={exportingProjectId === project.id}
-                          />
-                          {deleteConfirmId === project.id && (
-                            <div className="absolute inset-0 bg-surface/98 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center p-8 animate-fade-in z-20 shadow-soft-xl border border-error/20">
-                              <AlertCircle className="w-8 h-8 text-error mb-4" />
-                              <p className="text-lg font-black text-heading mb-6 text-center">
-                                Delete "{project.name}"?
-                              </p>
-                              <div className="flex gap-3 w-full">
+                          {isTrashView ? (
+                            <div className="group bg-surface rounded-2xl shadow-soft-sm border border-border p-5 opacity-75 hover:opacity-100 transition-all">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-heading text-xl font-bold text-heading">
+                                    {project.name}
+                                  </h3>
+                                  <p className="text-xs text-muted mt-1">
+                                    Deleted on {new Date(project.metadata.deletedAt!).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
                                 <button
-                                  onClick={() => setDeleteConfirmId(null)}
-                                  className="flex-1 py-2.5 text-xs font-bold text-secondary hover:bg-border/30 rounded-xl transition-all"
+                                  onClick={() => handleRestoreProject(project.id)}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-cta bg-cta/5 border border-cta/10 rounded-xl hover:bg-cta/10 transition-all"
                                 >
-                                  Cancel
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                  </svg>
+                                  Restore
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteProject(project.id)}
-                                  className="flex-1 py-2.5 text-xs font-bold text-white bg-error hover:bg-error/90 rounded-xl shadow-soft-md transition-all"
+                                  onClick={() => handlePermanentDelete(project.id)}
+                                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-error bg-error/5 border border-error/10 rounded-xl hover:bg-error/10 transition-all"
                                 >
-                                  Confirm
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete Forever
                                 </button>
                               </div>
                             </div>
+                          ) : (
+                            <>
+                              <ProjectCard
+                                project={project}
+                                onClick={() => handleOpenProject(project.id)}
+                                onDelete={() => handleDeleteProject(project.id)}
+                                onExport={() => handleExportProject(project.id, project.name)}
+                                isExporting={exportingProjectId === project.id}
+                              />
+                              {deleteConfirmId === project.id && (
+                                <div className="absolute inset-0 bg-surface/98 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center p-8 animate-fade-in z-20 shadow-soft-xl border border-error/20">
+                                  <AlertCircle className="w-8 h-8 text-error mb-4" />
+                                  <p className="text-lg font-black text-heading mb-6 text-center">
+                                    Delete "{project.name}"?
+                                  </p>
+                                  <div className="flex gap-3 w-full">
+                                    <button
+                                      onClick={() => setDeleteConfirmId(null)}
+                                      className="flex-1 py-2.5 text-xs font-bold text-secondary hover:bg-border/30 rounded-xl transition-all"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteProject(project.id)}
+                                      className="flex-1 py-2.5 text-xs font-bold text-white bg-error hover:bg-error/90 rounded-xl shadow-soft-md transition-all"
+                                    >
+                                      Confirm
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
                         </li>
                       ))}

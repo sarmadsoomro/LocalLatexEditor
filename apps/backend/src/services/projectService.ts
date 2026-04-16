@@ -6,6 +6,7 @@ import type {
   CreateProjectRequest,
   FileNode,
   Template,
+  ProjectStatus,
 } from '@local-latex-editor/shared-types';
 import { storageConfig, getProjectPath } from '../config/storage.js';
 import { buildFileTree, getProjectStats } from './fileSystemService.js';
@@ -20,7 +21,7 @@ interface StoredProject extends ProjectWithMetadata {}
 let projectsMetadataCache: StoredProject[] | null = null;
 let projectsMetadataCacheAt = 0;
 
-async function loadProjectsMetadata(forceRefresh = false): Promise<StoredProject[]> {
+export async function loadProjectsMetadata(forceRefresh = false): Promise<StoredProject[]> {
   const cachedProjects = projectsMetadataCache;
   const cacheIsFresh =
     !forceRefresh &&
@@ -44,7 +45,7 @@ async function loadProjectsMetadata(forceRefresh = false): Promise<StoredProject
   }
 }
 
-async function saveProjectsMetadata(projects: StoredProject[]): Promise<void> {
+export async function saveProjectsMetadata(projects: StoredProject[]): Promise<void> {
   await fs.mkdir(path.dirname(PROJECTS_METADATA_FILE), { recursive: true });
   
   const tempFile = `${PROJECTS_METADATA_FILE}.tmp.${nanoid()}`;
@@ -63,8 +64,33 @@ async function saveProjectsMetadata(projects: StoredProject[]): Promise<void> {
   }
 }
 
-export async function listProjects(): Promise<ProjectWithMetadata[]> {
-  return loadProjectsMetadata();
+export async function listProjects(
+  filter?: 'all' | 'published' | 'in_progress' | 'draft' | 'your_projects'
+): Promise<ProjectWithMetadata[]> {
+  const projects = await loadProjectsMetadata();
+
+  // Filter out deleted projects
+  let filtered = projects.filter((p) => !p.metadata.deletedAt);
+
+  // Apply status filters
+  switch (filter) {
+    case 'published':
+      filtered = filtered.filter((p) => p.metadata.status === 'published');
+      break;
+    case 'in_progress':
+      filtered = filtered.filter((p) => p.metadata.status === 'in_progress');
+      break;
+    case 'draft':
+      filtered = filtered.filter((p) => !p.metadata.status || p.metadata.status === 'draft');
+      break;
+    case 'your_projects':
+    case 'all':
+    default:
+      // No additional filtering
+      break;
+  }
+
+  return filtered;
 }
 
 export async function getProject(id: string): Promise<ProjectWithMetadata> {
@@ -132,6 +158,8 @@ export async function createProject(request: CreateProjectRequest): Promise<Proj
       lastOpened: new Date(),
       fileCount: stats.fileCount,
       totalSize: stats.totalSize,
+      status: 'draft',
+      deletedAt: null,
     },
     settings: {
       compiler: 'pdflatex',
@@ -145,24 +173,54 @@ export async function createProject(request: CreateProjectRequest): Promise<Proj
   return project;
 }
 
-export async function deleteProject(id: string): Promise<void> {
+export async function deleteProject(id: string): Promise<ProjectWithMetadata> {
   const projects = await loadProjectsMetadata();
   const projectIndex = projects.findIndex((p) => p.id === id);
-  
+
   if (projectIndex === -1) {
     throw new NotFoundError('Project', id);
   }
-  
-  const project = projects[projectIndex];
-  
-  try {
-    await fs.rm(project.path, { recursive: true, force: true });
-  } catch (error) {
-    console.error('Failed to delete project directory:', error);
-  }
-  
-  projects.splice(projectIndex, 1);
+
+  // Soft delete - mark as deleted
+  const updatedProject = {
+    ...projects[projectIndex],
+    metadata: {
+      ...projects[projectIndex].metadata,
+      deletedAt: new Date().toISOString(),
+    },
+    updatedAt: new Date().toISOString(),
+  };
+
+  projects[projectIndex] = updatedProject;
   await saveProjectsMetadata(projects);
+
+  return updatedProject;
+}
+
+export async function updateProjectStatus(
+  id: string,
+  status: ProjectStatus
+): Promise<ProjectWithMetadata> {
+  const projects = await loadProjectsMetadata();
+  const projectIndex = projects.findIndex((p) => p.id === id);
+
+  if (projectIndex === -1) {
+    throw new NotFoundError('Project', id);
+  }
+
+  const updatedProject = {
+    ...projects[projectIndex],
+    metadata: {
+      ...projects[projectIndex].metadata,
+      status,
+    },
+    updatedAt: new Date().toISOString(),
+  };
+
+  projects[projectIndex] = updatedProject;
+  await saveProjectsMetadata(projects);
+
+  return updatedProject;
 }
 
 export async function importProject(sourcePath: string, name: string): Promise<ProjectWithMetadata> {
@@ -212,6 +270,8 @@ export async function importProject(sourcePath: string, name: string): Promise<P
       lastOpened: new Date(),
       fileCount: projectStats.fileCount,
       totalSize: projectStats.totalSize,
+      status: 'draft',
+      deletedAt: null,
     },
     settings: {
       compiler: 'pdflatex',

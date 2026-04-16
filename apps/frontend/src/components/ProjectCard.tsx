@@ -1,6 +1,8 @@
-import type { ProjectWithMetadata } from "@local-latex-editor/shared-types";
+import { useState } from "react";
+import type { ProjectWithMetadata, ProjectStatus } from "@local-latex-editor/shared-types";
 import { EditableProjectName } from "./EditableProjectName";
 import { useProjectStore } from "../stores/projectStore";
+import { ChevronDown } from "lucide-react";
 
 interface ProjectCardProps {
   project: ProjectWithMetadata;
@@ -29,6 +31,30 @@ function formatDate(dateString: string | Date): string {
   });
 }
 
+function getStatusColor(status: ProjectStatus | undefined): string {
+  switch (status) {
+    case 'published':
+      return 'bg-success/10 text-success border-success/20';
+    case 'in_progress':
+      return 'bg-warning/10 text-warning border-warning/20';
+    case 'draft':
+    default:
+      return 'bg-muted/10 text-muted border-border';
+  }
+}
+
+function getStatusLabel(status: ProjectStatus | undefined): string {
+  switch (status) {
+    case 'published':
+      return 'Published';
+    case 'in_progress':
+      return 'In Progress';
+    case 'draft':
+    default:
+      return 'Draft';
+  }
+}
+
 export function ProjectCard({
   project,
   onClick,
@@ -37,7 +63,8 @@ export function ProjectCard({
   onRename,
   isExporting,
 }: ProjectCardProps) {
-  const { renameProject } = useProjectStore();
+  const { renameProject, updateProjectStatus } = useProjectStore();
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
 
   const handleRename = async (newName: string) => {
     if (onRename) {
@@ -46,6 +73,21 @@ export function ProjectCard({
       await renameProject(project.id, newName);
     }
   };
+
+  const handleStatusChange = async (newStatus: ProjectStatus) => {
+    try {
+      await updateProjectStatus(project.id, newStatus);
+      setIsStatusMenuOpen(false);
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
+  const statusOptions: { value: ProjectStatus; label: string; color: string }[] = [
+    { value: 'draft', label: 'Draft', color: 'bg-muted' },
+    { value: 'in_progress', label: 'In Progress', color: 'bg-warning' },
+    { value: 'published', label: 'Published', color: 'bg-success' },
+  ];
   return (
     <article
       className="group bg-surface rounded-2xl shadow-soft-sm border border-border p-5
@@ -65,6 +107,44 @@ export function ProjectCard({
             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider text-muted border border-border">
               {project.metadata.template}
             </span>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsStatusMenuOpen(!isStatusMenuOpen);
+                }}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider border cursor-pointer hover:opacity-80 transition-opacity ${getStatusColor(project.metadata.status)}`}
+              >
+                {getStatusLabel(project.metadata.status)}
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              
+              {isStatusMenuOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsStatusMenuOpen(false)}
+                  />
+                  <div className="absolute top-full left-0 mt-1 w-40 bg-surface border border-border rounded-xl shadow-soft-lg z-50 py-1">
+                    {statusOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(option.value);
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-left hover:bg-surface-hover transition-colors ${
+                          project.metadata.status === option.value ? 'bg-surface-hover' : ''
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${option.color}`} />
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1">

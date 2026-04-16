@@ -10,7 +10,13 @@ import {
   updateProjectLastOpened,
   renameProject,
   updateLastOpened,
+  updateProjectStatus,
 } from '../services/projectService.js';
+import {
+  listTrashedProjects,
+  restoreProject,
+  permanentlyDeleteProject,
+} from '../services/trashService.js';
 import { exportProjectAsZip } from '../services/exportService.js';
 import { validateBody, validateParams } from '../middleware/validate.js';
 import {
@@ -18,14 +24,16 @@ import {
   projectIdSchema,
   importProjectSchema,
   renameProjectSchema,
+  updateStatusSchema,
 } from '../validators/project.js';
-import type { CreateProjectInput, ProjectIdInput, ImportProjectInput, RenameProjectInput } from '../validators/project.js';
+import type { CreateProjectInput, ProjectIdInput, ImportProjectInput, RenameProjectInput, UpdateStatusInput } from '../validators/project.js';
 
 const router: RouterType = Router();
 
-router.get('/', async (_req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    const projects = await listProjects();
+    const filter = req.query.filter as 'all' | 'published' | 'in_progress' | 'your_projects' | undefined;
+    const projects = await listProjects(filter);
     res.json(createSuccessResponse({ projects }));
   } catch (error) {
     next(error);
@@ -44,6 +52,16 @@ router.post(
     }
   }
 );
+
+// Trash endpoint must come BEFORE /:id routes
+router.get('/trash', async (_req, res, next) => {
+  try {
+    const projects = await listTrashedProjects();
+    res.json(createSuccessResponse({ projects }));
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get(
   '/:id',
@@ -132,6 +150,48 @@ router.patch(
     try {
       const project = await updateLastOpened(req.params.id);
       res.json(createSuccessResponse({ project }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Status update endpoint
+router.put(
+  '/:id/status',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  validateBody<UpdateStatusInput>(updateStatusSchema),
+  async (req, res, next) => {
+    try {
+      const project = await updateProjectStatus(req.params.id, req.body.status);
+      res.json(createSuccessResponse({ project }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Trash restore and permanent delete endpoints
+router.post(
+  '/:id/restore',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  async (req, res, next) => {
+    try {
+      const project = await restoreProject(req.params.id);
+      res.json(createSuccessResponse({ project }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  '/:id/permanent',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  async (req, res, next) => {
+    try {
+      await permanentlyDeleteProject(req.params.id);
+      res.json(createSuccessResponse({ success: true }));
     } catch (error) {
       next(error);
     }

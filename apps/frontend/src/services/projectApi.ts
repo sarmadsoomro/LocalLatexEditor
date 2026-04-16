@@ -6,11 +6,32 @@ import type {
   FileTreeResponse,
   Template,
   ProjectWithMetadata,
+  ProjectFilter,
+  ProjectStatus,
 } from "@local-latex-editor/shared-types";
 
 export const projectApi = {
-  async listProjects(): Promise<ListProjectsResponse> {
-    return api.get<ListProjectsResponse>("/api/projects");
+  async listProjects(filter?: ProjectFilter): Promise<ListProjectsResponse> {
+    const queryParams = filter && filter !== 'all' && filter !== 'trash'
+      ? `?filter=${filter}`
+      : '';
+    return api.get<ListProjectsResponse>(`/api/projects${queryParams}`);
+  },
+
+  async listTrashedProjects(): Promise<ListProjectsResponse> {
+    return api.get<ListProjectsResponse>("/api/projects/trash");
+  },
+
+  async restoreProject(id: string): Promise<GetProjectResponse> {
+    return api.post<GetProjectResponse>(`/api/projects/${id}/restore`, {});
+  },
+
+  async permanentlyDeleteProject(id: string): Promise<{ success: boolean }> {
+    return api.delete<{ success: boolean }>(`/api/projects/${id}/permanent`);
+  },
+
+  async updateStatus(id: string, status: ProjectStatus): Promise<GetProjectResponse> {
+    return api.put<GetProjectResponse>(`/api/projects/${id}/status`, { status });
   },
 
   async getProject(id: string): Promise<GetProjectResponse> {

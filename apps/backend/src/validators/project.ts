@@ -39,7 +39,12 @@ export const renameProjectSchema = z.object({
     ),
 });
 
+export const updateStatusSchema = z.object({
+  status: z.enum(['draft', 'in_progress', 'published']),
+});
+
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type ProjectIdInput = z.infer<typeof projectIdSchema>;
 export type ImportProjectInput = z.infer<typeof importProjectSchema>;
 export type RenameProjectInput = z.infer<typeof renameProjectSchema>;
+export type UpdateStatusInput = z.infer<typeof updateStatusSchema>;

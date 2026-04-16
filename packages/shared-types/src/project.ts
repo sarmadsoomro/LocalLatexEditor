@@ -2,12 +2,16 @@ import type { Project } from './index';
 
 export type Template = 'article' | 'report' | 'book' | 'beamer' | 'letter' | 'empty';
 
+export type ProjectStatus = 'draft' | 'in_progress' | 'published';
+
 export interface ProjectMetadata {
   mainFile: string;
   template: Template;
   lastOpened?: Date;
   fileCount: number;
   totalSize: number;
+  status: ProjectStatus;
+  deletedAt?: string | null;
 }
 
 export interface ProjectSettings {
@@ -37,4 +41,18 @@ export interface ListProjectsResponse {
 
 export interface GetProjectResponse {
   project: ProjectWithMetadata;
+}
+
+export type ProjectFilter = 'all' | 'your_projects' | 'draft' | 'published' | 'in_progress' | 'trash';
+
+export interface ListProjectsQuery {
+  filter?: ProjectFilter;
+}
+
+export interface TrashProjectResponse {
+  project: ProjectWithMetadata;
+}
+
+export interface ListTrashResponse {
+  projects: ProjectWithMetadata[];
 }
