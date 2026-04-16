@@ -532,10 +532,10 @@ export const PDFPreview = memo(function PDFPreview({
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center text-red-500 p-4">
+      <div className="h-full flex items-center justify-center text-error p-4">
         <div className="text-center">
           <svg
-            className="mx-auto h-12 w-12 text-red-400 mb-2"
+            className="mx-auto h-12 w-12 text-error/60 mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -548,10 +548,10 @@ export const PDFPreview = memo(function PDFPreview({
             />
           </svg>
           <p className="font-medium">Failed to load PDF</p>
-          <p className="text-sm text-red-400 mt-1">{error}</p>
+          <p className="text-sm text-error/70 mt-1">{error}</p>
           <button
             onClick={() => window.open(pdfUrl, "_blank")}
-            className="mt-4 px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 px-3 py-1.5 text-sm bg-primary text-white rounded hover:bg-primary-dark transition-colors cursor-pointer"
           >
             Open in New Tab
           </button>
@@ -599,7 +599,7 @@ export const PDFPreview = memo(function PDFPreview({
 
       {/* Toolbar */}
       <div
-        className="flex items-center justify-between px-3 py-1.5 bg-gray-100 border-b border-gray-200 gap-4"
+        className="flex items-center justify-between px-3 py-1.5 bg-surface border-b border-border gap-4"
         role="toolbar"
         aria-label="PDF controls"
       >
@@ -670,7 +670,7 @@ export const PDFPreview = memo(function PDFPreview({
               onChange={handlePageInputChange}
               onKeyDown={handlePageInputSubmit}
               onBlur={handlePageInputBlur}
-              className="w-10 px-1.5 py-0.5 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-10 px-1.5 py-0.5 text-sm text-center border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               aria-label={`Page ${pageNumber} of ${numPages || 1}`}
               title={`Current page (of ${numPages}). Type page number and press Enter.`}
             />
@@ -829,7 +829,7 @@ export const PDFPreview = memo(function PDFPreview({
               onChange={handleZoomInputChange}
               onKeyDown={handleZoomInputSubmit}
               onBlur={handleZoomInputBlur}
-              className="w-12 px-1.5 py-0.5 text-sm text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-12 px-1.5 py-0.5 text-sm text-center border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
               aria-label={`Zoom: ${zoomInputValue}%`}
               title="Zoom percentage (25-400%). Type and press Enter."
             />
@@ -892,7 +892,7 @@ export const PDFPreview = memo(function PDFPreview({
 
             {isDropdownOpen && (
               <ul
-                className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 py-1 min-w-[80px]"
+                className="absolute top-full left-0 mt-1 bg-surface border border-border rounded-md shadow-lg z-10 py-1 min-w-[80px]"
                 role="listbox"
                 aria-label="Zoom level options"
               >
@@ -900,10 +900,10 @@ export const PDFPreview = memo(function PDFPreview({
                   <li key={preset.value}>
                     <button
                       onClick={() => setZoomValue(preset.value)}
-                      className={`w-full px-3 py-1 text-sm text-left hover:bg-gray-100 ${
+                      className={`w-full px-3 py-1 text-sm text-left hover:bg-surface-hover ${
                         Math.abs(scale - preset.value) < 0.01
-                          ? "bg-blue-50 text-blue-700"
-                          : "text-gray-700"
+                          ? "bg-primary/10 text-primary"
+                          : "text-secondary"
                       }`}
                       role="option"
                       aria-selected={Math.abs(scale - preset.value) < 0.01}
@@ -927,7 +927,7 @@ export const PDFPreview = memo(function PDFPreview({
       </div>
 
       {/* PDF Content */}
-      <div className="flex-1 overflow-auto bg-gray-200 flex items-start justify-center p-4">
+      <div className="flex-1 overflow-auto bg-background flex items-start justify-center p-4">
         <Document
           file={pdfData}
           onLoadSuccess={onDocumentLoadSuccess}
@@ -935,7 +935,7 @@ export const PDFPreview = memo(function PDFPreview({
           loading={
             <div className="flex items-center justify-center h-64">
               <svg
-                className="animate-spin h-8 w-8 text-blue-600"
+                className="animate-spin h-8 w-8 text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
