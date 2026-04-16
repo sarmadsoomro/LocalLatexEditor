@@ -174,10 +174,10 @@ export function ResizableSplitPane({
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
         className={`
-          flex-shrink-0 w-1 bg-gray-200 hover:bg-blue-400
+          flex-shrink-0 w-1 bg-border hover:bg-primary-light
           cursor-col-resize select-none
           transition-colors duration-150
-          ${isDragging ? 'bg-blue-500' : ''}
+          ${isDragging ? 'bg-primary' : ''}
         `}
         role="separator"
         aria-orientation="vertical"
@@ -204,7 +204,7 @@ export function ResizableSplitPane({
             className={`
               w-1 h-8 rounded-full
               transition-colors duration-150
-              ${isDragging ? 'bg-blue-600' : 'bg-gray-400 group-hover:bg-blue-500'}
+              ${isDragging ? 'bg-primary-dark' : 'bg-text-muted group-hover:bg-primary-light'}
             `}
           />
         </div>
