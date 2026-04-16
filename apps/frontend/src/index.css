@@ -32,6 +32,11 @@
   --color-border: #e2e8f0;
   --color-border-light: #f1f5f9;
 
+  /* Status colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
   /* Typography */
   --font-heading: "JetBrains Mono", monospace;
   --font-body: "IBM Plex Sans", system-ui, sans-serif;
@@ -177,9 +182,9 @@ button:active {
   --color-border: #334155;
   --color-border-light: #1e293b;
 
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
 }
 
 /* Utility classes */
