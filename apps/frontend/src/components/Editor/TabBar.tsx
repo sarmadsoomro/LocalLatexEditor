@@ -3,6 +3,7 @@ import { useRef, useEffect, useCallback } from "react";
 export interface Tab {
   id: string;
   name: string;
+  path?: string;
   isDirty: boolean;
   isActive: boolean;
 }
@@ -90,10 +91,20 @@ export function TabBar({
       ref={scrollContainerRef}
       role="tablist"
       aria-label="Open files"
-      className={`flex h-11 items-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto ${className}`}
+      className={`flex h-11 items-center bg-surface border-b border-border overflow-x-auto relative ${className}`}
       style={{ scrollbarWidth: "thin" }}
       onKeyDown={handleKeyDown}
     >
+      {/* Overflow shadow indicator */}
+      <div 
+        className={`
+          absolute right-0 top-0 bottom-0 w-8 
+          bg-gradient-to-l from-surface to-transparent
+          pointer-events-none z-10
+          ${tabs.length > 3 ? 'opacity-100' : 'opacity-0'}
+          transition-opacity duration-200
+        `}
+      />
       {tabs.map((tab) => (
         <div
           key={tab.id}
@@ -112,17 +123,17 @@ export function TabBar({
           }}
           className={`
             group flex items-center gap-2 px-3 py-2 text-sm font-medium
-            border-r border-gray-200 dark:border-gray-700 min-w-0 max-w-[200px]
+            border-r border-border min-w-0 max-w-[200px]
             cursor-pointer
             focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary
             transition-colors duration-150
             ${
               tab.isActive
-                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-b-2 border-b-primary"
-                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200"
+                ? "bg-background text-heading border-b-2 border-b-primary"
+                : "bg-surface text-muted hover:bg-surface-hover hover:text-heading"
             }
           `}
-          title={tab.name}
+          title={`${tab.path || tab.name}${tab.isDirty ? ' (unsaved changes)' : ''}`}
         >
           {tab.isDirty && (
             <span
@@ -137,10 +148,11 @@ export function TabBar({
             type="button"
             onClick={(e) => handleCloseClick(e, tab.id)}
             className={`
-              flex-shrink-0 w-4 h-4 flex items-center justify-center
-              rounded opacity-0 group-hover:opacity-100
-              text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
-              hover:bg-gray-300 dark:hover:bg-gray-600
+              flex-shrink-0 w-5 h-5 flex items-center justify-center
+              rounded 
+              opacity-60 hover:opacity-100
+              text-muted hover:text-heading
+              hover:bg-surface-hover
               transition-all duration-150
               focus:outline-none focus:opacity-100 focus:ring-2 focus:ring-primary
             `}

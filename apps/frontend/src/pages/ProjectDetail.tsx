@@ -91,7 +91,7 @@ export function ProjectDetail() {
     activeFile,
   } = useFileOperations();
 
-  const { isCompiling, status, result, compile, cancel } = useCompilation();
+  const { isCompiling, status, result, compile } = useCompilation();
   const { triggerAutoCompile } = useAutoCompile();
   const [compiler, setCompiler] = useState("pdflatex");
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -296,10 +296,6 @@ export function ProjectDetail() {
       }
     }
   }, [activeFileId, projectId, saveFile, addToast, autoCompileEnabled, triggerAutoCompile]);
-
-  const handleCancel = useCallback(async () => {
-    await cancel();
-  }, [cancel]);
 
   const handleEngineChange = useCallback((engine: string) => {
     setCompiler(engine);

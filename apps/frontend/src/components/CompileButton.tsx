@@ -33,8 +33,6 @@ export function CompileButton({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const currentEngine = ENGINES.find(e => e.value === engine) || ENGINES[0];
-
   return (
     <div className="flex items-center">
       <button
