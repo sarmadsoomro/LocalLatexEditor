@@ -1,6 +1,6 @@
-# Setup Scripts
+# TexCraft Setup Scripts
 
-This folder contains automated setup scripts to make installing and running the LaTeX Editor easy!
+This folder contains automated setup scripts to make installing and running **TexCraft** easy!
 
 ## Available Scripts
 
@@ -15,12 +15,12 @@ Use these when you're setting up the project for the first time:
 
 ### Quick Start Scripts
 
-Use these after setup to quickly start the development server:
+Use these after setup to quickly start **TexCraft**:
 
 | Script | Platform | What It Does |
 |--------|----------|--------------|
-| `start.sh` | macOS, Linux | Finds the project directory, checks dependencies, starts the dev server |
-| `start.bat` | Windows | Finds the project directory, checks dependencies, starts the dev server |
+| `start.sh` | macOS, Linux | Finds the project directory, checks dependencies, starts TexCraft |
+| `start.bat` | Windows | Finds the project directory, checks dependencies, starts TexCraft |
 
 ## How to Use
 
@@ -57,7 +57,7 @@ start.bat
 
 The setup scripts will verify you have:
 
-1. ✅ **Git** - For downloading the code
+1. ✅ **Git** - For downloading TexCraft
 2. ✅ **Node.js 18+** - The runtime for the application
 3. ✅ **pnpm** - Package manager for dependencies
 4. ✅ **LaTeX** - For compiling documents to PDF
@@ -95,4 +95,4 @@ No problem! The scripts are designed to be run multiple times. Fix the issue and
 
 ## Need More Help?
 
-See the main [README.md](../README.md) for detailed troubleshooting steps and manual installation instructions.
+See the main [README.md](../README.md) for detailed troubleshooting steps, manual installation instructions, and information about the latest [TexCraft releases](https://github.com/sarmadsoomro/LocalLatexEditor/releases).

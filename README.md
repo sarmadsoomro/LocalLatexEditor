@@ -1,5 +1,6 @@
-# 📝 Local LaTeX Editor
+# 📝 TexCraft
 
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/sarmadsoomro/LocalLatexEditor/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
@@ -33,9 +34,12 @@ Think of it like **Google Docs meets LaTeX** — beautiful scientific typesettin
 
 - ✏️ **Real-time LaTeX Editing** — Write with syntax highlighting and intelligent autocomplete
 - 📄 **Instant PDF Preview** — See your document compile in real-time as you type
-- 🗂️ **Project Management** — Organize multiple documents and projects
+- 🗂️ **Project Management** — Create, organize, and manage multiple LaTeX projects
+- 🏷️ **Project Status Tracking** — Mark projects as Active, Completed, or Archived
+- 🔍 **Smart Filtering & Search** — Quickly find projects with advanced filters
+- 🗑️ **Trash Functionality** — Safely delete and recover projects
 - 📂 **File Import/Export** — Import existing `.tex` files and export to PDF
-- 🎨 **Modern UI** — Clean, responsive interface built with React and Tailwind CSS
+- 🎨 **Modern UI** — Beautiful, responsive interface with dark mode support
 - ⚡ **Fast Compilation** — Optimized LaTeX compilation pipeline
 - 🔒 **100% Private** — Your documents never leave your machine
 - 🌐 **Offline-First** — Works without internet connection
@@ -440,6 +444,10 @@ git commit -m "feat: add my feature"
 git push origin feature/my-feature
 ```
 
+## 📦 Releases
+
+See our [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases) for the latest version and changelog.
+
 ---
 
 ## 📚 Resources
@@ -466,4 +474,5 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 **Good luck and happy writing!** 🎓✨
 
-*Made with ❤️ for students, teachers, and anyone who loves beautiful documents!*
+*Made with ❤️ for students, teachers, and anyone who loves beautiful documents!*  
+**TexCraft** — Your Local LaTeX Companion
