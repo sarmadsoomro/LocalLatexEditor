@@ -1,6 +1,7 @@
 {
-  "name": "@local-latex-editor/frontend",
-  "version": "0.1.0",
+  "name": "texcraft-frontend",
+  "productName": "TexCraft",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
