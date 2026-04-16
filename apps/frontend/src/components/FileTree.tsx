@@ -125,12 +125,12 @@ const FileTreeItem = memo(function FileTreeItem({
       tabIndex={isFocused ? 0 : -1}
       data-id={node.id}
       className={`flex items-center py-1 px-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset rounded-md mx-1
-        transition-colors duration-100
+        transition-colors duration-fast group
         ${
           isSelected
-            ? "bg-primary-50 dark:bg-primary-900/30 text-primary dark:text-primary-light"
-            : "hover:bg-surface-hover dark:hover:bg-gray-700 text-secondary dark:text-gray-300"
-        } ${isEditable ? "hover:text-primary dark:hover:text-primary-light" : ""}`}
+            ? "bg-primary-50 text-primary dark:bg-primary-900/30 dark:text-primary-light"
+            : "hover:bg-surface-hover text-secondary"
+        } ${isEditable && !isSelected ? "hover:text-primary" : ""}`}
       style={{ paddingLeft }}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -140,7 +140,7 @@ const FileTreeItem = memo(function FileTreeItem({
       {node.type === "directory" ? (
         <>
           <svg
-            className={`w-4 h-4 mr-1 text-primary-light transform transition-transform duration-100 ${
+            className={`w-4 h-4 mr-1 text-primary-light transform transition-transform duration-fast ${
               isExpanded ? "rotate-90" : ""
             }`}
             fill="none"
@@ -157,7 +157,7 @@ const FileTreeItem = memo(function FileTreeItem({
           </svg>
           <FolderIcon
             isOpen={isExpanded}
-            className={`w-5 h-5 mr-2 ${isSelected ? "text-primary" : "text-yellow-500"}`}
+            className={`w-5 h-5 mr-2 ${isSelected ? "text-primary" : "text-amber-500/80"}`}
             aria-hidden="true"
           />
         </>
@@ -172,13 +172,13 @@ const FileTreeItem = memo(function FileTreeItem({
         </>
       )}
       <span
-        className={`text-sm truncate ${isSelected ? "font-medium text-heading dark:text-heading" : ""}`}
+        className={`text-sm truncate ${isSelected ? "font-medium text-heading" : ""}`}
       >
         {node.name}
       </span>
       {isEditable && !isSelected && (
         <span
-          className="ml-auto text-xs text-primary-light opacity-0 group-hover:opacity-100 transition-opacity duration-100"
+          className="ml-auto text-[10px] font-medium uppercase tracking-wider text-primary-light opacity-0 group-hover:opacity-100 transition-opacity duration-fast"
           aria-hidden="true"
         >
           edit
@@ -493,7 +493,7 @@ export const FileTree = memo(function FileTree({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-end px-2 py-1 space-x-1 border-b border-border dark:border-border-light bg-surface dark:bg-gray-900">
+      <div className="flex items-center justify-end px-2 py-1 space-x-1 border-b border-border bg-surface">
         <button
           onClick={() => handleCreateStart("file")}
           className="p-1 text-muted hover:text-primary hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded transition-colors cursor-pointer"
@@ -560,10 +560,10 @@ export const FileTree = memo(function FileTree({
       </div>
 
       {creating && (
-        <div className="px-3 py-2 bg-border-light dark:bg-gray-800 border-b border-border dark:border-border-light">
-          <div className="text-xs text-muted mb-1">
+        <div className="px-3 py-2 bg-border-light border-b border-border">
+          <div className="text-[10px] font-medium uppercase tracking-wider text-muted mb-1">
             Create {creating.type} in{" "}
-            {creating.parentPath ? `/${creating.parentPath}` : "/ (root)"}
+            <span className="text-secondary">{creating.parentPath ? `/${creating.parentPath}` : "/ (root)"}</span>
           </div>
           <div className="flex gap-2">
             <input
@@ -575,7 +575,7 @@ export const FileTree = memo(function FileTree({
                 if (e.key === "Escape") setCreating(null);
               }}
               disabled={isSubmitting}
-              className="flex-1 px-2 py-1 text-sm border border-border dark:border-gray-600 bg-surface dark:bg-gray-900 focus:outline-none focus:ring-1 focus:ring-primary rounded cursor-text"
+              className="flex-1 px-2 py-1 text-sm border border-border bg-surface focus:outline-none focus:ring-1 focus:ring-primary rounded cursor-text"
               placeholder="Name..."
             />
             <button
@@ -645,13 +645,13 @@ export const FileTree = memo(function FileTree({
 
       {contextMenu && (
         <div
-          className="fixed z-50 bg-surface dark:bg-gray-800 border border-border dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-[140px]"
+          className="fixed z-50 bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[140px]"
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={() => handleRenameStart(contextMenu.node)}
-            className="w-full px-4 py-2 text-sm text-left text-secondary dark:text-gray-300 hover:bg-surface-hover dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+            className="w-full px-4 py-2 text-sm text-left text-secondary hover:bg-surface-hover cursor-pointer flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -660,7 +660,7 @@ export const FileTree = memo(function FileTree({
           </button>
           <button
             onClick={() => handleDeleteStart(contextMenu.node)}
-            className="w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 cursor-pointer flex items-center gap-2"
+            className="w-full px-4 py-2 text-sm text-left text-error hover:bg-error/10 cursor-pointer flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -671,9 +671,9 @@ export const FileTree = memo(function FileTree({
       )}
 
       {deleting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-surface dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-medium text-heading dark:text-heading mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 border border-border">
+            <h3 className="text-lg font-medium text-heading mb-2">
               Delete File?
             </h3>
             <p className="text-sm text-muted mb-4">
@@ -683,14 +683,14 @@ export const FileTree = memo(function FileTree({
               <button
                 onClick={() => setDeleting(null)}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm text-secondary dark:text-gray-300 hover:bg-surface-hover dark:hover:bg-gray-700 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm text-secondary hover:bg-surface-hover rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm text-white bg-error hover:bg-error/90 rounded-lg transition-all active:scale-[0.98] cursor-pointer"
               >
                 Delete
               </button>
@@ -700,9 +700,9 @@ export const FileTree = memo(function FileTree({
       )}
 
       {renaming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-surface dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
-            <h3 className="text-lg font-medium text-heading dark:text-heading mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 border border-border">
+            <h3 className="text-lg font-medium text-heading mb-4">
               Rename File
             </h3>
             <input
@@ -714,21 +714,21 @@ export const FileTree = memo(function FileTree({
                 if (e.key === "Escape") setRenaming(null);
               }}
               disabled={isSubmitting}
-              className="w-full px-3 py-2 text-sm border border-border dark:border-gray-600 bg-surface dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary rounded cursor-text mb-4"
+              className="w-full px-3 py-2 text-sm border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary rounded cursor-text mb-4 transition-all"
               placeholder="New name..."
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setRenaming(null)}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm text-secondary dark:text-gray-300 hover:bg-surface-hover dark:hover:bg-gray-700 rounded-lg cursor-pointer"
+                className="px-4 py-2 text-sm text-secondary hover:bg-surface-hover rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRenameSubmit}
                 disabled={isSubmitting || !nameInput.trim()}
-                className="px-4 py-2 text-sm text-white bg-primary hover:bg-primary-dark rounded-lg cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 text-sm text-white bg-primary hover:bg-primary-dark rounded-lg transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50"
               >
                 Rename
               </button>

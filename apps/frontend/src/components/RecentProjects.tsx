@@ -56,8 +56,8 @@ export const RecentProjects: React.FC<RecentProjectsProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <Clock className="text-[var(--color-primary)]" size={20} />
-        <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Recent Projects</h2>
+        <Clock className="text-primary" size={20} />
+        <h2 className="text-lg font-semibold text-heading">Recent Projects</h2>
       </div>
 
       {/* Today's projects */}
@@ -110,7 +110,7 @@ interface ProjectGroupProps {
 
 const ProjectGroup: React.FC<ProjectGroupProps> = ({ title, projects, onOpenProject }) => (
   <div>
-    <h3 className="text-sm font-medium text-[var(--color-text-secondary)] mb-3 uppercase tracking-wide">
+    <h3 className="text-[10px] font-bold text-muted mb-3 uppercase tracking-wider">
       {title}
     </h3>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -133,27 +133,28 @@ interface RecentProjectCardProps {
 const RecentProjectCard: React.FC<RecentProjectCardProps> = ({ project, onClick }) => (
   <button
     onClick={onClick}
-    className="group flex items-start gap-3 p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] hover:border-[var(--color-primary)] rounded-lg transition-all text-left w-full"
+    className="group flex items-start gap-3 p-4 bg-surface hover:bg-surface-hover border border-border hover:border-primary rounded-xl transition-all duration-base text-left w-full hover-lift cursor-pointer shadow-sm hover:shadow-md shadow-primary/5"
   >
-    <div className="flex-shrink-0 p-2 bg-[var(--color-primary)]/10 rounded-lg">
-      <FolderOpen className="text-[var(--color-primary)]" size={24} />
+    <div className="flex-shrink-0 p-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
+      <FolderOpen className="text-primary group-hover:text-inherit" size={24} />
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="font-medium text-[var(--color-text-primary)] truncate group-hover:text-[var(--color-primary)] transition-colors">
+      <h4 className="font-semibold text-heading truncate group-hover:text-primary transition-colors">
         {project.name}
       </h4>
       <p
-        className="text-sm text-[var(--color-text-secondary)] mt-1"
+        className="text-xs text-secondary mt-1 flex items-center gap-1.5"
         title={formatFullDate(project.metadata.lastOpened)}
       >
+        <span className="w-1 h-1 rounded-full bg-primary-light" />
         {formatTimeAgo(project.metadata.lastOpened)}
       </p>
-      <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5 truncate">
+      <p className="text-[10px] font-mono text-muted mt-1.5 truncate opacity-60">
         {project.path}
       </p>
     </div>
     <ChevronRight
-      className="flex-shrink-0 text-[var(--color-text-tertiary)] group-hover:text-[var(--color-primary)] transition-colors"
+      className="flex-shrink-0 text-muted group-hover:text-primary transition-colors self-center"
       size={18}
     />
   </button>

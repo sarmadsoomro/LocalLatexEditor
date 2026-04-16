@@ -48,10 +48,10 @@ export function ProjectCard({
   };
   return (
     <article
-      className="group bg-white rounded-xl shadow-sm border border-[#E2E8F0] p-6 cursor-pointer
-        hover:shadow-lg hover:border-[#14B8A6] hover:-translate-y-0.5
-        transition-all duration-150 ease-out
-        focus-within:ring-2 focus-within:ring-[#0D9488] focus-within:ring-offset-2"
+      className="group bg-surface rounded-xl shadow-sm border border-border p-6 cursor-pointer
+        hover:shadow-lg hover:border-primary hover-lift
+        transition-all duration-base ease-out
+        focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -70,13 +70,13 @@ export function ProjectCard({
             initialName={project.name}
             onRename={handleRename}
             size="lg"
-            className="font-heading text-[#134E4A] group-hover:text-[#0D9488] transition-colors duration-150"
+            className="font-heading text-heading group-hover:text-primary transition-colors duration-fast"
           />
-          <p className="mt-1 text-sm text-[#64748B]">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#F0FDFA] text-[#0D9488]">
+          <div className="mt-1">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary dark:bg-primary-900/30 dark:text-primary-light">
               {project.metadata.template}
             </span>
-          </p>
+          </div>
         </div>
         <div className="flex items-center space-x-1">
           {onExport && (
@@ -86,14 +86,14 @@ export function ProjectCard({
                 onExport();
               }}
               disabled={isExporting}
-              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#0D9488] hover:bg-teal-50 
-                transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#14B8A6]
-                disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1.5 rounded-lg text-muted hover:text-primary hover:bg-primary-50 dark:hover:bg-primary-900/20
+                transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary
+                disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               aria-label={`Export project ${project.name} as ZIP`}
               title="Export as ZIP"
             >
               {isExporting ? (
-                <span className="inline-block w-5 h-5 border-2 border-[#14B8A6] border-t-transparent rounded-full animate-spin" />
+                <span className="inline-block w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               ) : (
                 <svg
                   className="w-5 h-5"
@@ -118,8 +118,8 @@ export function ProjectCard({
                 e.stopPropagation();
                 onDelete();
               }}
-              className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-red-50 
-                transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="p-1.5 rounded-lg text-muted hover:text-error hover:bg-error-light/10 
+                transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-error cursor-pointer"
               aria-label={`Delete project ${project.name}`}
             >
               <svg
@@ -141,11 +141,11 @@ export function ProjectCard({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-sm text-[#64748B]">
+      <div className="mt-4 flex items-center justify-between text-sm text-secondary">
         <div className="flex items-center space-x-4">
           <span className="flex items-center">
             <svg
-              className="w-4 h-4 mr-1.5 text-[#14B8A6]"
+              className="w-4 h-4 mr-1.5 text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -167,7 +167,7 @@ export function ProjectCard({
             aria-label={`Total size ${formatFileSize(project.metadata.totalSize)}`}
           >
             <svg
-              className="w-4 h-4 mr-1.5 text-[#94A3B8]"
+              className="w-4 h-4 mr-1.5 text-muted"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -189,15 +189,15 @@ export function ProjectCard({
               ? project.createdAt
               : (project.createdAt as Date).toISOString()
           }
-          className="text-[#94A3B8]"
+          className="text-muted"
         >
           {formatDate(project.createdAt)}
         </time>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-[#F1F5F9] flex items-center text-xs text-[#94A3B8]">
+      <div className="mt-3 pt-3 border-t border-border-light flex items-center text-xs text-muted">
         <svg
-          className="w-3.5 h-3.5 mr-1.5 text-[#CBD5E1]"
+          className="w-3.5 h-3.5 mr-1.5 text-border"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -211,7 +211,7 @@ export function ProjectCard({
           />
         </svg>
         Main:{" "}
-        <span className="ml-1 font-medium text-[#64748B]">
+        <span className="ml-1 font-medium text-secondary">
           {project.metadata.mainFile}
         </span>
       </div>

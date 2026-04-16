@@ -119,25 +119,25 @@ export function CreateProjectDialog({
     >
       <div
         ref={dialogRef}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
+        className="bg-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
         role="document"
         style={{ animationDelay: "50ms" }}
       >
-        <div className="flex items-center justify-between p-6 border-b border-[#E2E8F0] bg-gradient-to-r from-[#F0FDFA] to-white">
+        <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary-50 to-surface dark:from-primary-900/10">
           <div>
             <h2
               id="create-dialog-title"
-              className="font-heading text-xl font-semibold text-[#134E4A]"
+              className="font-heading text-xl font-semibold text-heading"
             >
               Create New Project
             </h2>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Set up a new LaTeX project
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-lg text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#0D9488]"
+            className="p-2 rounded-lg text-muted hover:text-heading hover:bg-surface-hover transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
             aria-label="Close dialog"
           >
             <svg
@@ -160,7 +160,7 @@ export function CreateProjectDialog({
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
             <div
-              className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm animate-fade-in"
+              className="mb-4 p-3 bg-error-light/10 border border-error/20 text-error rounded-lg text-sm animate-fade-in"
               role="alert"
             >
               <div className="flex items-center">
@@ -186,7 +186,7 @@ export function CreateProjectDialog({
           <div className="mb-5">
             <label
               htmlFor="project-name"
-              className="block text-sm font-medium text-[#134E4A] mb-1.5"
+              className="block text-sm font-medium text-heading mb-1.5"
             >
               Project Name
             </label>
@@ -197,17 +197,17 @@ export function CreateProjectDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Research Paper"
-              className="w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:border-[#0D9488]
-                placeholder:text-[#CBD5E1] text-[#134E4A]
-                transition-all duration-150"
+              className="w-full px-3.5 py-2.5 border border-border rounded-lg 
+                focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                placeholder:text-muted text-heading bg-surface
+                transition-all duration-fast"
               aria-required="true"
               aria-invalid={error ? "true" : "false"}
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-[#134E4A] mb-2">
+            <label className="block text-sm font-medium text-heading mb-2">
               Template
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -216,11 +216,11 @@ export function CreateProjectDialog({
                   key={t.value}
                   type="button"
                   onClick={() => setTemplate(t.value)}
-                  className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium border transition-all duration-150 text-left
+                  className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium border transition-all duration-fast text-left cursor-pointer
                     ${
                       template === t.value
-                        ? "bg-[#F0FDFA] border-[#0D9488] text-[#0D9488] ring-1 ring-[#0D9488]"
-                        : "bg-white border-[#E2E8F0] text-[#475569] hover:border-[#14B8A6] hover:bg-[#F8FAFC]"
+                        ? "bg-primary-50 border-primary text-primary ring-1 ring-primary dark:bg-primary-900/20"
+                        : "bg-surface border-border text-secondary hover:border-primary-light hover:bg-surface-hover"
                     }`}
                 >
                   <span className="mr-2 text-base">{t.icon}</span>
@@ -234,19 +234,19 @@ export function CreateProjectDialog({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-[#475569] bg-white border border-[#E2E8F0] rounded-lg 
-                hover:bg-[#F8FAFC] hover:border-[#CBD5E1] 
-                focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:ring-offset-2
-                transition-all duration-150"
+              className="px-4 py-2 text-sm font-medium text-secondary bg-surface border border-border rounded-lg 
+                hover:bg-surface-hover hover:border-muted
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                transition-all duration-fast cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-[#F97316] rounded-lg
-                hover:bg-[#EA580C] hover:shadow-md hover:shadow-orange-200
-                focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2
-                transition-all duration-150 active:scale-[0.98]"
+              className="px-4 py-2 text-sm font-medium text-white gradient-cta rounded-lg
+                hover:shadow-cta
+                focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2
+                transition-all duration-fast active:scale-[0.98] cursor-pointer"
             >
               Create Project
             </button>

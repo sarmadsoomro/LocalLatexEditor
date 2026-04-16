@@ -166,25 +166,25 @@ export function ImportProjectDialog({
     >
       <div
         ref={dialogRef}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
+        className="bg-surface rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
         role="document"
         style={{ animationDelay: "50ms" }}
       >
-        <div className="flex items-center justify-between p-6 border-b border-[#E2E8F0] bg-gradient-to-r from-[#F0FDFA] to-white">
+        <div className="flex items-center justify-between p-6 border-b border-border bg-gradient-to-r from-primary-50 to-surface dark:from-primary-900/10">
           <div>
             <h2
               id="import-dialog-title"
-              className="font-heading text-xl font-semibold text-[#134E4A]"
+              className="font-heading text-xl font-semibold text-heading"
             >
               Import Project
             </h2>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Import from directory or ZIP file
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-lg text-[#94A3B8] hover:text-[#475569] hover:bg-[#F1F5F9] transition-all duration-100 focus:outline-none focus:ring-2 focus:ring-[#0D9488]"
+            className="p-2 rounded-lg text-muted hover:text-heading hover:bg-surface-hover transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
             aria-label="Close dialog"
           >
             <svg
@@ -207,7 +207,7 @@ export function ImportProjectDialog({
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
             <div
-              className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm animate-fade-in"
+              className="mb-4 p-3 bg-error-light/10 border border-error/20 text-error rounded-lg text-sm animate-fade-in"
               role="alert"
             >
               <div className="flex items-center">
@@ -232,7 +232,7 @@ export function ImportProjectDialog({
 
           <div className="mb-4">
             <div
-              className="flex space-x-1 bg-[#F1F5F9] p-1 rounded-xl"
+              className="flex space-x-1 bg-border-light p-1 rounded-xl"
               role="tablist"
               aria-label="Import method"
             >
@@ -243,11 +243,11 @@ export function ImportProjectDialog({
                 aria-controls="path-panel"
                 id="path-tab"
                 onClick={() => setMode("path")}
-                className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#0D9488]
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer
                   ${
                     mode === "path"
-                      ? "bg-white text-[#0D9488] shadow-sm ring-1 ring-[#E2E8F0]"
-                      : "text-[#64748B] hover:text-[#475569]"
+                      ? "bg-surface text-primary shadow-sm ring-1 ring-border"
+                      : "text-muted hover:text-secondary"
                   }`}
               >
                 From Directory
@@ -259,11 +259,11 @@ export function ImportProjectDialog({
                 aria-controls="zip-panel"
                 id="zip-tab"
                 onClick={() => setMode("zip")}
-                className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#0D9488]
+                className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer
                   ${
                     mode === "zip"
-                      ? "bg-white text-[#0D9488] shadow-sm ring-1 ring-[#E2E8F0]"
-                      : "text-[#64748B] hover:text-[#475569]"
+                      ? "bg-surface text-primary shadow-sm ring-1 ring-border"
+                      : "text-muted hover:text-secondary"
                   }`}
               >
                 From ZIP File
@@ -280,7 +280,7 @@ export function ImportProjectDialog({
             >
               <label
                 htmlFor="source-path"
-                className="block text-sm font-medium text-[#134E4A] mb-1.5"
+                className="block text-sm font-medium text-heading mb-1.5"
               >
                 Source Directory Path
               </label>
@@ -298,13 +298,13 @@ export function ImportProjectDialog({
                   }
                 }}
                 placeholder="/path/to/existing/project"
-                className="w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg 
-                  focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:border-[#0D9488]
-                  placeholder:text-[#CBD5E1] text-[#134E4A] font-mono text-sm
-                  transition-all duration-150"
+                className="w-full px-3.5 py-2.5 border border-border rounded-lg 
+                  focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                  placeholder:text-muted text-heading font-mono text-sm bg-surface
+                  transition-all duration-fast"
                 aria-required="true"
               />
-              <p className="mt-1.5 text-xs text-[#64748B]">
+              <p className="mt-1.5 text-xs text-muted">
                 Enter the full path to the directory containing your LaTeX files
               </p>
             </div>
@@ -315,7 +315,7 @@ export function ImportProjectDialog({
               aria-labelledby="zip-tab"
               className="mb-4"
             >
-              <label className="block text-sm font-medium text-[#134E4A] mb-1.5">
+              <label className="block text-sm font-medium text-heading mb-1.5">
                 Upload ZIP File
               </label>
               <div
@@ -323,13 +323,13 @@ export function ImportProjectDialog({
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#0D9488]
+                className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-fast focus:outline-none focus:ring-2 focus:ring-primary
                   ${
                     isDragging
-                      ? "border-[#0D9488] bg-[#F0FDFA] scale-[1.02]"
+                      ? "border-primary bg-primary-50 dark:bg-primary-900/10 scale-[1.02]"
                       : selectedFile
-                        ? "border-green-500 bg-green-50"
-                        : "border-[#E2E8F0] hover:border-[#14B8A6] hover:bg-[#F8FAFC]"
+                        ? "border-success bg-success/5"
+                        : "border-border hover:border-primary-light hover:bg-surface-hover"
                   }`}
                 role="button"
                 tabIndex={0}
@@ -358,9 +358,9 @@ export function ImportProjectDialog({
                 />
                 {selectedFile ? (
                   <div className="animate-fade-in">
-                    <div className="w-12 h-12 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-2">
                       <svg
-                        className="w-6 h-6 text-green-600"
+                        className="w-6 h-6 text-success"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -374,10 +374,10 @@ export function ImportProjectDialog({
                         />
                       </svg>
                     </div>
-                    <p className="text-sm font-medium text-[#134E4A]">
+                    <p className="text-sm font-medium text-heading">
                       {selectedFile.name}
                     </p>
-                    <p className="text-xs text-[#64748B] mt-1">
+                    <p className="text-xs text-muted mt-1">
                       {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                     <button
@@ -386,16 +386,16 @@ export function ImportProjectDialog({
                         e.stopPropagation();
                         setSelectedFile(null);
                       }}
-                      className="mt-3 text-xs text-red-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                      className="mt-3 text-xs text-error hover:text-error/80 px-2 py-1 rounded hover:bg-error/10 transition-colors cursor-pointer"
                     >
                       Remove file
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <div className="w-12 h-12 mx-auto rounded-full bg-[#F0FDFA] flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 mx-auto rounded-full bg-primary-50 dark:bg-primary-900/10 flex items-center justify-center mb-2">
                       <svg
-                        className="w-6 h-6 text-[#14B8A6]"
+                        className="w-6 h-6 text-primary"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -409,10 +409,10 @@ export function ImportProjectDialog({
                         />
                       </svg>
                     </div>
-                    <p className="text-sm font-medium text-[#134E4A]">
+                    <p className="text-sm font-medium text-heading">
                       Drop your ZIP file here, or click to browse
                     </p>
-                    <p className="text-xs text-[#64748B] mt-1">
+                    <p className="text-xs text-muted mt-1">
                       Supports .zip files up to 100MB
                     </p>
                   </div>
@@ -424,7 +424,7 @@ export function ImportProjectDialog({
           <div className="mb-6">
             <label
               htmlFor="project-name"
-              className="block text-sm font-medium text-[#134E4A] mb-1.5"
+              className="block text-sm font-medium text-heading mb-1.5"
             >
               Project Name
             </label>
@@ -434,10 +434,10 @@ export function ImportProjectDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Imported Project"
-              className="w-full px-3.5 py-2.5 border border-[#E2E8F0] rounded-lg 
-                focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:border-[#0D9488]
-                placeholder:text-[#CBD5E1] text-[#134E4A]
-                transition-all duration-150"
+              className="w-full px-3.5 py-2.5 border border-border rounded-lg 
+                focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
+                placeholder:text-muted text-heading bg-surface
+                transition-all duration-fast"
               aria-required="true"
             />
           </div>
@@ -446,19 +446,19 @@ export function ImportProjectDialog({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-[#475569] bg-white border border-[#E2E8F0] rounded-lg 
-                hover:bg-[#F8FAFC] hover:border-[#CBD5E1]
-                focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:ring-offset-2
-                transition-all duration-150"
+              className="px-4 py-2 text-sm font-medium text-secondary bg-surface border border-border rounded-lg 
+                hover:bg-surface-hover hover:border-muted
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                transition-all duration-fast cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-[#F97316] rounded-lg
-                hover:bg-[#EA580C] hover:shadow-md hover:shadow-orange-200
-                focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:ring-offset-2
-                transition-all duration-150 active:scale-[0.98]"
+              className="px-4 py-2 text-sm font-medium text-white gradient-cta rounded-lg
+                hover:shadow-cta
+                focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2
+                transition-all duration-fast active:scale-[0.98] cursor-pointer"
             >
               Import Project
             </button>

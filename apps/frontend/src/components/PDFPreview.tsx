@@ -491,21 +491,21 @@ export const PDFPreview = memo(function PDFPreview({
   // Memoized toolbar button classes
   const toolbarButtonClass = useMemo(
     () =>
-      "p-1.5 rounded hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors",
+      "p-1.5 rounded hover:bg-surface-hover text-muted hover:text-heading disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer",
     [],
   );
 
   const toolbarButtonActiveClass = useMemo(
-    () => "p-1.5 rounded bg-gray-200 hover:bg-gray-300 transition-colors",
+    () => "p-1.5 rounded bg-surface-hover text-primary transition-colors cursor-pointer",
     [],
   );
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-500">
+      <div className="h-full flex items-center justify-center text-muted">
         <div className="flex flex-col items-center gap-2">
           <svg
-            className="animate-spin h-8 w-8 text-blue-600"
+            className="animate-spin h-8 w-8 text-primary"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -524,7 +524,7 @@ export const PDFPreview = memo(function PDFPreview({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <span className="text-sm">Loading PDF...</span>
+          <span className="text-sm font-medium">Loading PDF...</span>
         </div>
       </div>
     );
@@ -532,8 +532,8 @@ export const PDFPreview = memo(function PDFPreview({
 
   if (error) {
     return (
-      <div className="h-full flex items-center justify-center text-error p-4">
-        <div className="text-center">
+      <div className="h-full flex items-center justify-center text-error p-4 bg-background">
+        <div className="text-center animate-fade-in">
           <svg
             className="mx-auto h-12 w-12 text-error/60 mb-2"
             fill="none"
@@ -547,11 +547,11 @@ export const PDFPreview = memo(function PDFPreview({
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <p className="font-medium">Failed to load PDF</p>
-          <p className="text-sm text-error/70 mt-1">{error}</p>
+          <p className="font-semibold text-heading">Failed to load PDF</p>
+          <p className="text-sm text-error/70 mt-1 max-w-xs mx-auto">{error}</p>
           <button
             onClick={() => window.open(pdfUrl, "_blank")}
-            className="mt-4 px-3 py-1.5 text-sm bg-primary text-white rounded hover:bg-primary-dark transition-colors cursor-pointer"
+            className="mt-4 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-all active:scale-[0.98] cursor-pointer"
           >
             Open in New Tab
           </button>
@@ -562,10 +562,10 @@ export const PDFPreview = memo(function PDFPreview({
 
   if (!pdfData) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400 p-4">
-        <div className="text-center">
+      <div className="h-full flex items-center justify-center text-muted p-4 bg-background">
+        <div className="text-center opacity-60">
           <svg
-            className="mx-auto h-12 w-12 text-gray-300"
+            className="mx-auto h-12 w-12 text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -573,11 +573,11 @@ export const PDFPreview = memo(function PDFPreview({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
             />
           </svg>
-          <p className="mt-2">PDF Preview</p>
+          <p className="mt-2 font-medium">PDF Preview</p>
           <p className="text-sm">No PDF available</p>
         </div>
       </div>
@@ -670,15 +670,15 @@ export const PDFPreview = memo(function PDFPreview({
               onChange={handlePageInputChange}
               onKeyDown={handlePageInputSubmit}
               onBlur={handlePageInputBlur}
-              className="w-10 px-1.5 py-0.5 text-sm text-center border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-10 px-1.5 py-0.5 text-sm text-center border border-border bg-surface text-heading rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
               aria-label={`Page ${pageNumber} of ${numPages || 1}`}
               title={`Current page (of ${numPages}). Type page number and press Enter.`}
             />
-            <span className="text-sm text-gray-500" aria-hidden="true">
+            <span className="text-sm text-muted" aria-hidden="true">
               /
             </span>
             <span
-              className="text-sm text-gray-700"
+              className="text-sm text-secondary font-medium"
               aria-label={`total ${numPages || 0} pages`}
             >
               {numPages || "-"}
@@ -787,7 +787,7 @@ export const PDFPreview = memo(function PDFPreview({
           </button>
 
           <div
-            className="w-px h-5 bg-gray-300 mx-1"
+            className="w-px h-5 bg-border mx-1"
             role="separator"
             aria-orientation="vertical"
           />
@@ -829,11 +829,11 @@ export const PDFPreview = memo(function PDFPreview({
               onChange={handleZoomInputChange}
               onKeyDown={handleZoomInputSubmit}
               onBlur={handleZoomInputBlur}
-              className="w-12 px-1.5 py-0.5 text-sm text-center border border-border rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+              className="w-12 px-1.5 py-0.5 text-sm text-center border border-border bg-surface text-heading rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
               aria-label={`Zoom: ${zoomInputValue}%`}
               title="Zoom percentage (25-400%). Type and press Enter."
             />
-            <span className="text-sm text-gray-500" aria-hidden="true">
+            <span className="text-sm text-muted" aria-hidden="true">
               %
             </span>
           </div>
@@ -892,7 +892,7 @@ export const PDFPreview = memo(function PDFPreview({
 
             {isDropdownOpen && (
               <ul
-                className="absolute top-full left-0 mt-1 bg-surface border border-border rounded-md shadow-lg z-10 py-1 min-w-[80px]"
+                className="absolute top-full left-0 mt-1 bg-surface border border-border rounded-lg shadow-lg z-10 py-1 min-w-[80px] animate-fade-in"
                 role="listbox"
                 aria-label="Zoom level options"
               >
@@ -900,9 +900,9 @@ export const PDFPreview = memo(function PDFPreview({
                   <li key={preset.value}>
                     <button
                       onClick={() => setZoomValue(preset.value)}
-                      className={`w-full px-3 py-1 text-sm text-left hover:bg-surface-hover ${
+                      className={`w-full px-3 py-1.5 text-sm text-left hover:bg-surface-hover transition-colors cursor-pointer ${
                         Math.abs(scale - preset.value) < 0.01
-                          ? "bg-primary/10 text-primary"
+                          ? "bg-primary/10 text-primary font-medium"
                           : "text-secondary"
                       }`}
                       role="option"
@@ -919,7 +919,7 @@ export const PDFPreview = memo(function PDFPreview({
 
         {/* Keyboard Shortcuts Hint */}
         <div
-          className="text-xs text-gray-400 hidden lg:block"
+          className="text-[10px] uppercase tracking-wider font-semibold text-muted hidden lg:block"
           aria-hidden="true"
         >
           Ctrl+Scroll to zoom • PgUp/PgDn to navigate
@@ -962,7 +962,7 @@ export const PDFPreview = memo(function PDFPreview({
             scale={scale}
             renderTextLayer={true}
             renderAnnotationLayer={true}
-            className="shadow-lg"
+            className="shadow-xl"
             onRenderSuccess={onPageRenderSuccess}
           />
         </Document>

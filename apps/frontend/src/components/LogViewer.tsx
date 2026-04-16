@@ -34,9 +34,9 @@ export default function LogViewer({
   return (
     <div className="flex flex-col h-full bg-background">
       {errors.length > 0 && (
-        <div className="border-b border-border bg-error-light max-h-48 overflow-auto">
-          <div className="px-4 py-2 border-b border-error/20 bg-error/10 sticky top-0">
-            <span className="text-sm font-semibold text-error">
+        <div className="border-b border-border bg-error/5 max-h-48 overflow-auto">
+          <div className="px-4 py-2 border-b border-error/10 bg-error/5 sticky top-0 flex items-center justify-between backdrop-blur-sm">
+            <span className="text-xs font-bold uppercase tracking-wider text-error">
               {errors.length} Error{errors.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -46,30 +46,31 @@ export default function LogViewer({
                 key={idx}
                 onClick={() => handleErrorClick(error)}
                 className={`
-                  px-4 py-2 cursor-pointer transition-colors
-                  ${selectedError === error ? 'bg-error/30' : 'hover:bg-error/10'}
+                  px-4 py-3 cursor-pointer transition-all duration-fast
+                  ${selectedError === error ? 'bg-error/10' : 'hover:bg-error/5'}
                 `}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-error text-white">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-error text-white">
                     Line {error.line || '?'}
                   </span>
                   {error.file && (
-                    <span className="text-xs text-error/80 truncate">
+                    <span className="text-xs font-medium text-error/80 truncate">
                       {error.file}
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-error font-mono">
+                <p className="text-sm text-error font-mono leading-relaxed">
                   {error.message}
                 </p>
                 {error.fixes && error.fixes.length > 0 && selectedError === error && (
-                  <div className="mt-2 pt-2 border-t border-error/20">
-                    <span className="text-xs font-medium text-error/80">Suggestions:</span>
-                    <ul className="mt-1 space-y-1">
+                  <div className="mt-2.5 pt-2.5 border-t border-error/10 animate-fade-in">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-error/70">Suggestions:</span>
+                    <ul className="mt-1.5 space-y-1">
                       {error.fixes.map((fix, fixIdx) => (
-                        <li key={fixIdx} className="text-xs text-error/80">
-                          • {fix.title}
+                        <li key={fixIdx} className="text-xs text-error/80 flex items-start gap-1.5">
+                          <span className="text-error/50">•</span>
+                          {fix.title}
                         </li>
                       ))}
                     </ul>
@@ -81,32 +82,33 @@ export default function LogViewer({
         </div>
       )}
 
-      <div className="flex items-center gap-4 px-4 py-2 border-b border-border bg-surface">
-        <span className="text-sm font-medium text-heading">Compilation Log</span>
-        {hasErrors && (
-          <span className="flex items-center gap-1 text-sm text-error">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            {errors.length} error{errors.length !== 1 ? 's' : ''}
-          </span>
-        )}
-        {hasWarnings && (
-          <span className="flex items-center gap-1 text-sm text-warning">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            {warnings.length} warning{warnings.length !== 1 ? 's' : ''}
-          </span>
-        )}
+      <div className="flex items-center gap-4 px-4 py-2.5 border-b border-border bg-surface">
+        <span className="text-xs font-bold uppercase tracking-wider text-muted">Compilation Log</span>
+        <div className="flex items-center gap-3 ml-auto">
+          {hasErrors && (
+            <span className="flex items-center gap-1.5 text-xs font-bold text-error">
+              <div className="w-2 h-2 rounded-full bg-error animate-pulse" />
+              {errors.length} ERROR{errors.length !== 1 ? 'S' : ''}
+            </span>
+          )}
+          {hasWarnings && (
+            <span className="flex items-center gap-1.5 text-xs font-bold text-warning">
+              <div className="w-2 h-2 rounded-full bg-warning" />
+              {warnings.length} WARNING{warnings.length !== 1 ? 'S' : ''}
+            </span>
+          )}
+        </div>
       </div>
 
       <div
         ref={containerRef}
-        className="flex-1 overflow-auto p-4 font-mono text-sm"
+        className="flex-1 overflow-auto p-4 font-mono text-sm leading-relaxed"
       >
         {logs.length === 0 ? (
-          <div className="text-muted text-center py-8">
+          <div className="text-muted text-center py-12 animate-fade-in opacity-60">
+            <svg className="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             No compilation logs yet
           </div>
         ) : (
@@ -114,9 +116,9 @@ export default function LogViewer({
             {logs.map((line, index) => (
               <div
                 key={index}
-                className="flex items-start py-0.5 px-2 -mx-2 rounded hover:bg-surface-hover"
+                className="flex items-start py-0.5 px-2 -mx-2 rounded hover:bg-surface-hover transition-colors group"
               >
-                <span className="select-none text-muted w-8 text-right mr-3 flex-shrink-0">
+                <span className="select-none text-muted/50 group-hover:text-muted w-10 text-right mr-4 flex-shrink-0 tabular-nums">
                   {index + 1}
                 </span>
                 <span className="flex-1 whitespace-pre-wrap break-all text-secondary">
