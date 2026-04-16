@@ -174,10 +174,10 @@ export function ResizableSplitPane({
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
         className={`
-          flex-shrink-0 w-1 bg-border hover:bg-primary-light
+          flex-shrink-0 w-1 bg-border hover:bg-cta
           cursor-col-resize select-none
           transition-colors duration-150
-          ${isDragging ? 'bg-primary' : ''}
+          ${isDragging ? 'bg-cta' : ''}
         `}
         role="separator"
         aria-orientation="vertical"

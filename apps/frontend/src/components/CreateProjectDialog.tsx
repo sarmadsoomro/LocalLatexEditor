@@ -243,8 +243,8 @@ export function CreateProjectDialog({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white gradient-cta rounded-lg
-                hover:shadow-cta
+              className="px-4 py-2 text-sm font-medium text-white bg-cta rounded-lg
+                hover:bg-cta-dark hover:shadow-cta
                 focus:outline-none focus:ring-2 focus:ring-cta focus:ring-offset-2
                 transition-all duration-fast active:scale-[0.98] cursor-pointer"
             >

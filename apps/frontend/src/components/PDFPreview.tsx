@@ -129,15 +129,16 @@ export const PDFPreview = memo(function PDFPreview({
 
   // Track container width for fit-to-width
   useEffect(() => {
-    const updateContainerWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
-      }
-    };
+    if (!containerRef.current) return;
 
-    updateContainerWidth();
-    window.addEventListener("resize", updateContainerWidth);
-    return () => window.removeEventListener("resize", updateContainerWidth);
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, []);
 
   // Close dropdown when clicking outside
@@ -326,21 +327,25 @@ export const PDFPreview = memo(function PDFPreview({
     setLoading(false);
   }, []);
 
-  const onPageRenderSuccess = useCallback(() => {
-    const pageElement = document.querySelector(".react-pdf__Page");
-    if (pageElement) {
-      setPageWidth(pageElement.clientWidth);
-      setPageHeight(pageElement.clientHeight);
+  const onPageLoadSuccess = useCallback(
+    (page: any) => {
+      setPageWidth(page.width);
+      setPageHeight(page.height);
 
       // Auto-fit to width on first render if no saved zoom exists
       const savedZoom = localStorage.getItem(ZOOM_STORAGE_KEY);
-      if (!savedZoom && containerWidth > 0 && pageElement.clientWidth > 0) {
+      if (!savedZoom && containerWidth > 0 && page.width > 0) {
         const availableWidth = containerWidth - 64;
-        const newScale = availableWidth / pageElement.clientWidth;
+        const newScale = availableWidth / page.width;
         setScale(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale)));
       }
-    }
-  }, [containerWidth]);
+    },
+    [containerWidth],
+  );
+
+  const onPageRenderSuccess = useCallback(() => {
+    // Page rendered successfully
+  }, []);
 
   // Navigation functions
   const goToFirstPage = useCallback(() => {
@@ -963,6 +968,7 @@ export const PDFPreview = memo(function PDFPreview({
             renderTextLayer={true}
             renderAnnotationLayer={true}
             className="shadow-xl"
+            onLoadSuccess={onPageLoadSuccess}
             onRenderSuccess={onPageRenderSuccess}
           />
         </Document>

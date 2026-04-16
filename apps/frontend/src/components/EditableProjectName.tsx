@@ -133,9 +133,9 @@ export function EditableProjectName({
             ${sizeClasses[size]}
             w-full px-2 py-1 rounded
             border-2 
-            ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-[#14B8A6] focus:border-[#0D9488] focus:ring-[#14B8A6]'}
+            ${error ? 'border-error focus:border-error focus:ring-error' : 'border-cta focus:border-cta-dark focus:ring-cta'}
             focus:outline-none focus:ring-2 focus:ring-opacity-50
-            bg-white
+            bg-surface
             disabled:opacity-50 disabled:cursor-not-allowed
           `}
           aria-label="Edit project name"
@@ -144,13 +144,13 @@ export function EditableProjectName({
         />
         {isSaving && (
           <span className="absolute right-2 top-1/2 -translate-y-1/2">
-            <span className="inline-block w-4 h-4 border-2 border-[#14B8A6] border-t-transparent rounded-full animate-spin" />
+            <span className="inline-block w-4 h-4 border-2 border-cta border-t-transparent rounded-full animate-spin" />
           </span>
         )}
         {error && (
           <p
             id={`error-${projectId}`}
-            className="absolute -bottom-5 left-0 text-xs text-red-600 whitespace-nowrap"
+            className="absolute -bottom-5 left-0 text-xs text-error whitespace-nowrap"
             role="alert"
           >
             {error}
@@ -167,7 +167,7 @@ export function EditableProjectName({
         ${sizeClasses[size]}
         ${className}
         cursor-pointer
-        hover:text-[#0D9488]
+        hover:text-cta
         transition-colors duration-150
         truncate
         inline-block

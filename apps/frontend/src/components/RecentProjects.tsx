@@ -54,10 +54,15 @@ export const RecentProjects: React.FC<RecentProjectsProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Clock className="text-primary" size={20} />
-        <h2 className="text-lg font-semibold text-heading">Recent Projects</h2>
+    <div className="space-y-8">
+      <div className="flex items-center gap-3 border-b border-border pb-4">
+        <div className="p-2 bg-cta/10 rounded-xl">
+          <Clock className="text-cta" size={24} />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-heading">Recent Papers</h2>
+          <p className="text-xs font-medium text-muted uppercase tracking-widest mt-0.5 opacity-60">Continue your research</p>
+        </div>
       </div>
 
       {/* Today's projects */}
@@ -109,11 +114,11 @@ interface ProjectGroupProps {
 }
 
 const ProjectGroup: React.FC<ProjectGroupProps> = ({ title, projects, onOpenProject }) => (
-  <div>
-    <h3 className="text-[10px] font-bold text-muted mb-3 uppercase tracking-wider">
+  <div className="animate-fade-in">
+    <h3 className="text-xs font-bold text-muted mb-4 uppercase tracking-[0.2em] opacity-40">
       {title}
     </h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {projects.map((project) => (
         <RecentProjectCard
           key={project.id}
@@ -133,30 +138,38 @@ interface RecentProjectCardProps {
 const RecentProjectCard: React.FC<RecentProjectCardProps> = ({ project, onClick }) => (
   <button
     onClick={onClick}
-    className="group flex items-start gap-3 p-4 bg-surface hover:bg-surface-hover border border-border hover:border-primary rounded-xl transition-all duration-base text-left w-full hover-lift cursor-pointer shadow-sm hover:shadow-md shadow-primary/5"
+    className="group flex items-start gap-4 p-4 bg-surface hover:bg-surface-hover border border-border hover:border-cta rounded-2xl transition-all text-left w-full shadow-soft-sm hover:shadow-soft-md cursor-pointer animate-fade-in"
+    aria-label={`Open project ${project.name}`}
   >
-    <div className="flex-shrink-0 p-2 bg-primary-50 dark:bg-primary-900/20 rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
-      <FolderOpen className="text-primary group-hover:text-inherit" size={24} />
+    <div className="flex-shrink-0 w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center group-hover:bg-cta group-hover:text-white transition-all duration-base shadow-inner">
+      <FolderOpen className="text-primary/60 group-hover:text-inherit" size={24} />
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="font-semibold text-heading truncate group-hover:text-primary transition-colors">
+      <h4 className="font-heading text-base font-bold text-heading truncate group-hover:text-cta transition-colors">
         {project.name}
       </h4>
-      <p
-        className="text-xs text-secondary mt-1 flex items-center gap-1.5"
-        title={formatFullDate(project.metadata.lastOpened)}
-      >
-        <span className="w-1 h-1 rounded-full bg-primary-light" />
-        {formatTimeAgo(project.metadata.lastOpened)}
-      </p>
-      <p className="text-[10px] font-mono text-muted mt-1.5 truncate opacity-60">
+      <div className="flex items-center gap-2 mt-1">
+        <span className="text-xs font-bold text-cta uppercase tracking-widest bg-cta/5 px-1.5 py-0.5 rounded">
+          {project.metadata.template}
+        </span>
+        <span
+          className="text-xs text-muted flex items-center gap-1"
+          title={formatFullDate(project.metadata.lastOpened)}
+        >
+          <Clock size={12} className="opacity-40" />
+          {formatTimeAgo(project.metadata.lastOpened)}
+        </span>
+      </div>
+      <p className="text-xs text-secondary mt-2 truncate opacity-60 italic font-medium">
         {project.path}
       </p>
     </div>
-    <ChevronRight
-      className="flex-shrink-0 text-muted group-hover:text-primary transition-colors self-center"
-      size={18}
-    />
+    <div className="flex-shrink-0 self-center p-1.5 rounded-full bg-border/20 group-hover:bg-cta/10 transition-colors">
+      <ChevronRight
+        className="text-muted group-hover:text-cta transition-colors"
+        size={16}
+      />
+    </div>
   </button>
 );
 

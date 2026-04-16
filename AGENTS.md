@@ -115,6 +115,17 @@ pnpm test:e2e         # Playwright E2E tests
 
 ## NOTES
 
+### UI/UX Planning Requirements
+
+**Mandatory:** When adding any new feature or UI component, you MUST use the ui-ux-pro-max skill during planning.
+
+This skill provides design patterns, accessibility guidelines, and UX best practices. Invoke it before implementing any UI changes to ensure consistent, accessible interfaces.
+
+**Process:**
+1. Invoke ui-ux-pro-max skill when planning new features
+2. Apply recommended patterns and guidelines
+3. Verify accessibility compliance
+
 ### Critical Context
 
 - **Phase 1 Complete** — Monorepo scaffolded with apps/frontend, apps/backend, packages/shared-types

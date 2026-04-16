@@ -38,7 +38,7 @@ export function CompileButton({
       <button
         onClick={onClick}
         disabled={isCompiling}
-        className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-cta hover:bg-cta-dark rounded-l-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="flex items-center px-4 py-1.5 text-sm font-bold text-white bg-cta hover:bg-cta-dark rounded-l-xl transition-all shadow-soft-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         title="Compile (Ctrl+B)"
       >
         {isCompiling ? (
@@ -51,7 +51,7 @@ export function CompileButton({
           </>
         ) : (
           <>
-            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -62,7 +62,7 @@ export function CompileButton({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-2 py-1.5 text-sm font-medium text-white bg-cta hover:bg-cta-dark border-l border-cta-dark rounded-r-lg transition-colors cursor-pointer"
+          className="px-2 py-1.5 text-sm font-bold text-white bg-cta hover:bg-cta-dark border-l border-white/10 rounded-r-xl transition-all shadow-soft-md cursor-pointer"
           aria-label="Select engine"
           aria-expanded={isOpen}
         >
@@ -71,7 +71,7 @@ export function CompileButton({
           </svg>
         </button>
         {isOpen && (
-          <div className="absolute top-full right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[140px] z-50">
+          <div className="absolute top-full right-0 mt-2 bg-surface border border-border rounded-xl shadow-soft-xl py-1.5 min-w-[140px] z-50 animate-fade-in">
             {ENGINES.map((e) => (
               <button
                 key={e.value}
@@ -79,8 +79,8 @@ export function CompileButton({
                   onEngineChange(e.value);
                   setIsOpen(false);
                 }}
-                className={`w-full px-4 py-2 text-sm text-left hover:bg-surface-hover transition-colors ${
-                  engine === e.value ? 'text-primary font-medium bg-primary/5' : 'text-secondary'
+                className={`w-full px-4 py-2 text-sm text-left hover:bg-cta/5 transition-colors ${
+                  engine === e.value ? 'text-cta font-bold bg-cta/5' : 'text-secondary'
                 }`}
               >
                 {e.label}

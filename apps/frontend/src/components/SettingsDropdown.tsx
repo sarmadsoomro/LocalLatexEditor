@@ -2,20 +2,10 @@ import { useState, useRef, useEffect, ReactNode } from 'react';
 
 interface SettingsDropdownProps {
   children: ReactNode;
-  engine?: string;
-  onEngineChange?: (engine: string) => void;
 }
-
-const ENGINES = [
-  { value: 'pdflatex', label: 'pdfLaTeX' },
-  { value: 'xelatex', label: 'XeLaTeX' },
-  { value: 'lualatex', label: 'LuaLaTeX' },
-];
 
 export function SettingsDropdown({
   children,
-  engine,
-  onEngineChange,
 }: SettingsDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,37 +39,6 @@ export function SettingsDropdown({
       {isOpen && (
         <div className="absolute top-full right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[180px] z-50">
           {children}
-          
-          {engine && onEngineChange && (
-            <>
-              <div className="border-t border-border my-1" />
-              <div className="px-4 py-2 text-xs text-muted uppercase tracking-wider">
-                Engine
-              </div>
-              {ENGINES.map((e) => (
-                <button
-                  key={e.value}
-                  onClick={() => {
-                    onEngineChange(e.value);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full px-4 py-2 text-sm text-left hover:bg-surface-hover transition-colors ${
-                    engine === e.value ? 'text-primary font-medium' : 'text-secondary'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    {engine === e.value && (
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                    {(!engine || engine !== e.value) && <span className="w-4 mr-2" />}
-                    {e.label}
-                  </div>
-                </button>
-              ))}
-            </>
-          )}
         </div>
       )}
     </div>

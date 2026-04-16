@@ -7,29 +7,18 @@ export function AutoCompileToggle({ enabled, onChange }: AutoCompileToggleProps)
   return (
     <button
       onClick={() => onChange(!enabled)}
-      className={`flex items-center px-2 py-1.5 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+      className={`flex items-center px-3 py-1.5 text-sm font-bold rounded-xl transition-all shadow-soft-sm cursor-pointer border ${
         enabled
-          ? 'text-primary bg-primary/10 hover:bg-primary/20'
-          : 'text-muted bg-surface border border-border hover:bg-surface-hover'
+          ? "text-cta bg-cta/5 border-cta/20 hover:bg-cta/10 shadow-cta"
+          : "text-muted bg-surface border-border hover:bg-surface-hover"
       }`}
-      title={enabled ? 'Auto-compile: On (compiles after save)' : 'Auto-compile: Off'}
+      title={enabled ? "Auto-compile: On (compiles after save)" : "Auto-compile: Off"}
       aria-pressed={enabled}
     >
-      {enabled ? (
-        <>
-          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          Auto
-        </>
-      ) : (
-        <>
-          <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Auto
-        </>
-      )}
+      <div className={`relative w-8 h-4 rounded-full transition-colors mr-2 ${enabled ? "bg-cta" : "bg-muted/30"}`}>
+        <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-4" : "translate-x-0"}`} />
+      </div>
+      Auto
     </button>
   );
 }

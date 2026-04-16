@@ -65,8 +65,8 @@ export default {
         },
       },
       boxShadow: {
-        primary: "0 4px 14px 0 rgba(13, 148, 136, 0.25)",
-        cta: "0 4px 14px 0 rgba(249, 115, 22, 0.25)",
+        primary: "0 4px 14px 0 rgba(15, 23, 42, 0.25)",
+        cta: "0 4px 14px 0 rgba(3, 105, 161, 0.25)",
         "soft-xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       },
     },

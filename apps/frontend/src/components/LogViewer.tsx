@@ -46,16 +46,16 @@ export default function LogViewer({
                 key={idx}
                 onClick={() => handleErrorClick(error)}
                 className={`
-                  px-4 py-3 cursor-pointer transition-all duration-fast
+                  px-4 py-4 cursor-pointer transition-all duration-fast
                   ${selectedError === error ? 'bg-error/10' : 'hover:bg-error/5'}
                 `}
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-error text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold uppercase tracking-wider bg-error text-white">
                     Line {error.line || '?'}
                   </span>
                   {error.file && (
-                    <span className="text-xs font-medium text-error/80 truncate">
+                    <span className="text-sm font-medium text-error/80 truncate">
                       {error.file}
                     </span>
                   )}
@@ -64,12 +64,12 @@ export default function LogViewer({
                   {error.message}
                 </p>
                 {error.fixes && error.fixes.length > 0 && selectedError === error && (
-                  <div className="mt-2.5 pt-2.5 border-t border-error/10 animate-fade-in">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-error/70">Suggestions:</span>
-                    <ul className="mt-1.5 space-y-1">
+                  <div className="mt-3 pt-3 border-t border-error/10 animate-fade-in">
+                    <span className="text-xs font-bold uppercase tracking-wider text-error/70">Suggestions:</span>
+                    <ul className="mt-2 space-y-1.5">
                       {error.fixes.map((fix, fixIdx) => (
-                        <li key={fixIdx} className="text-xs text-error/80 flex items-start gap-1.5">
-                          <span className="text-error/50">•</span>
+                        <li key={fixIdx} className="text-sm text-error/80 flex items-start gap-2">
+                          <span className="text-error/50 mt-1">•</span>
                           {fix.title}
                         </li>
                       ))}
