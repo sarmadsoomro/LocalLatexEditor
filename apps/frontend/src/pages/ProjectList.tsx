@@ -120,7 +120,7 @@ export function ProjectList() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background">
+    <div className="w-full min-h-screen bg-background flex flex-col">
       <header className="bg-surface dark:bg-surface shadow-sm border-b border-border dark:border-border-light sticky top-0 z-10">
         <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-start justify-between gap-4">
@@ -143,9 +143,9 @@ export function ProjectList() {
               </div>
               <div className="ml-4">
                 <h1 className="font-heading text-2xl font-bold text-heading dark:text-heading">
-                  LaTeX Editor
+                  TexCraft
                 </h1>
-                <p className="text-xs text-muted">Local document editing</p>
+                <p className="text-xs text-muted">Local LaTeX Editor</p>
                 <p className="mt-1 text-xs text-primary font-medium">
                   {projects.length} project{projects.length === 1 ? "" : "s"}
                 </p>
@@ -422,6 +422,17 @@ export function ProjectList() {
         onImport={handleImportProject}
         onImportZip={handleImportZip}
       />
+
+      <footer className="mt-auto py-4 px-6 border-t border-border">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-heading">TexCraft</span>
+            <span>•</span>
+            <span>Local LaTeX Editor</span>
+          </div>
+          <p>Copyright (c) 2026 Sarmad Soomro. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
