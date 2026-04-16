@@ -2,11 +2,13 @@ import { useEffect, useState, useCallback, useRef, lazy, Suspense, startTransiti
 import { useNavigate, useParams } from "react-router-dom";
 import { FileTree } from "../components/FileTree";
 import { EditorArea } from "../components/Editor";
-import CompileControls from "../components/CompileControls";
 import { ResizableSplitPane } from "../components/ResizableSplitPane";
 import { UnsavedChangesDialog } from "../components/Dialogs";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
+import { CompileButton } from "../components/CompileButton";
+import { AutoCompileToggle } from "../components/AutoCompileToggle";
+import { SettingsDropdown } from "../components/SettingsDropdown";
 import LogViewer from "../components/LogViewer";
 import { EditableProjectName } from "../components/EditableProjectName";
 import { SettingsModal } from "../components/Settings/SettingsModal";
@@ -416,161 +418,115 @@ export function ProjectDetail() {
   return (
     <div className="w-full h-screen bg-background flex flex-col overflow-hidden">
       <header className="bg-surface dark:bg-surface shadow-sm border-b border-border dark:border-border-light sticky top-0 z-10">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={handleBack}
-              className="mr-4 p-2 text-muted hover:text-heading hover:bg-surface-hover dark:hover:bg-gray-700 rounded-lg transition-all duration-100 cursor-pointer"
-              aria-label="Back to projects"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+        <div className="px-4 py-3">
+          {/* Top Row: Navigation + Title */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center min-w-0">
+              <button
+                onClick={handleBack}
+                className="mr-3 p-2 text-muted hover:text-heading hover:bg-surface-hover dark:hover:bg-gray-700 rounded-lg transition-all duration-100 cursor-pointer flex-shrink-0"
+                aria-label="Back to projects"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-            </button>
-            <div>
-              <h1 className="font-heading text-xl font-semibold text-heading dark:text-heading">
-                {currentProject ? (
-                  <EditableProjectName
-                    projectId={currentProject.id}
-                    initialName={currentProject.name}
-                    onRename={async (newName) => {
-                      await renameProject(currentProject.id, newName);
-                    }}
-                    size="lg"
-                    className="text-[#134E4A] dark:text-heading"
-                  />
-                ) : (
-                  "Loading..."
-                )}
-              </h1>
-              {currentProject && (
-                <p className="text-sm text-muted">
-                  {currentProject.metadata.mainFile} •{" "}
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-50 dark:bg-primary-900/30 text-primary dark:text-primary-light">
-                    {currentProject.metadata.template}
-                  </span>
-                  {hasUnsavedChanges && (
-                    <span className="ml-2 text-cta font-medium">
-                      • Unsaved changes
-                    </span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <div className="min-w-0">
+                <h1 className="font-heading text-xl font-semibold text-heading dark:text-heading truncate">
+                  {currentProject ? (
+                    <EditableProjectName
+                      projectId={currentProject.id}
+                      initialName={currentProject.name}
+                      onRename={async (newName) => {
+                        await renameProject(currentProject.id, newName);
+                      }}
+                      size="lg"
+                      className="text-primary dark:text-heading"
+                    />
+                  ) : (
+                    "Loading..."
                   )}
-                </p>
-              )}
+                </h1>
+                {currentProject && (
+                  <p className="text-sm text-muted flex items-center flex-wrap gap-2">
+                    <span className="truncate">{currentProject.metadata.mainFile}</span>
+                    <span>•</span>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-primary-50 dark:bg-primary-900/30 text-primary dark:text-primary-light">
+                      {currentProject.metadata.template}
+                    </span>
+                    {hasUnsavedChanges && (
+                      <span className="text-cta font-medium">• Unsaved changes</span>
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-            <ThemeToggle />
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 text-muted hover:text-primary hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors cursor-pointer"
-              title="Settings"
+
+            <SettingsDropdown
+              engine={compiler}
+              onEngineChange={handleEngineChange}
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
+              <div className="px-4 py-2">
+                <ThemeToggle />
+              </div>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="w-full px-4 py-2 text-sm text-left text-secondary hover:bg-surface-hover transition-colors flex items-center gap-2"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </button>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </button>
+            </SettingsDropdown>
+          </div>
+
+          {/* Bottom Row: Actions Toolbar */}
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleSave}
               disabled={!activeFile?.isDirty}
-              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 active:scale-[0.98] whitespace-nowrap cursor-pointer ${
+              className={`flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap cursor-pointer ${
                 activeFile?.isDirty
-                  ? "text-white bg-primary hover:bg-primary-dark hover:shadow-md hover:shadow-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                  : "text-muted bg-border-light dark:bg-gray-700 cursor-not-allowed"
+                  ? "text-white bg-primary hover:bg-primary-dark shadow-sm hover:shadow"
+                  : "text-muted bg-surface border border-border cursor-not-allowed"
               }`}
             >
-              <svg
-                className="w-4 h-4 mr-1.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                />
+              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
               Save
-              <span className="ml-1 text-xs opacity-75">(Ctrl+S)</span>
             </button>
 
-            <label className="flex items-center gap-2 px-3 py-1.5 text-sm text-secondary cursor-pointer hover:bg-surface-hover dark:hover:bg-gray-700 border border-border dark:border-gray-600 rounded-lg transition-colors whitespace-nowrap">
-              <input
-                type="checkbox"
-                checked={autoCompileEnabled}
-                onChange={(e) => {
-                  setAutoCompileEnabled(e.target.checked);
-                  localStorage.setItem(
-                    "latex-editor-auto-compile",
-                    e.target.checked.toString(),
-                  );
-                }}
-                className="w-4 h-4 text-primary border-border rounded focus:ring-primary cursor-pointer"
-              />
-              <span>Auto-compile</span>
-            </label>
-
-            <CompileControls
+            <CompileButton
+              onClick={handleCompile}
               isCompiling={isCompiling}
-              status={status}
               engine={compiler}
-              onCompile={handleCompile}
-              onCancel={handleCancel}
               onEngineChange={handleEngineChange}
             />
+
+            <AutoCompileToggle
+              enabled={autoCompileEnabled}
+              onChange={(enabled) => {
+                setAutoCompileEnabled(enabled);
+                localStorage.setItem("latex-editor-auto-compile", enabled.toString());
+              }}
+            />
+
+            <div className="w-px h-6 bg-border mx-1" />
 
             <button
               onClick={handleExport}
               disabled={isExporting}
-              className="flex items-center px-3 py-1.5 text-sm font-medium text-secondary bg-surface border border-border dark:border-gray-600 rounded-lg hover:bg-surface-hover hover:border-primary-light transition-all duration-150 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center px-3 py-1.5 text-sm font-medium text-secondary bg-surface border border-border rounded-lg hover:bg-surface-hover transition-colors whitespace-nowrap disabled:opacity-50 cursor-pointer"
               title="Export as ZIP"
             >
               {isExporting ? (
                 <span className="inline-block w-4 h-4 mr-1.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg
-                  className="w-4 h-4 mr-1.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
+                <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
               )}
               Export
