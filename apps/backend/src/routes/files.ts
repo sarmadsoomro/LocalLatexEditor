@@ -134,10 +134,7 @@ router.get(
   async (req, res, next) => {
     try {
       const { id, path: filePath } = req.params;
-      console.log(`[FILE READ] Request: project=${id}, path=${filePath}`);
-      
       const { absolutePath } = await resolveProjectFilePath(id, filePath);
-      console.log(`[FILE READ] Absolute path: ${absolutePath}`);
 
       try {
         const stats = await fs.stat(absolutePath);
@@ -170,8 +167,6 @@ router.get(
           }
         } else {
           const content = await fs.readFile(absolutePath, "utf-8");
-          console.log(`[FILE READ] Success: read ${content.length} bytes from ${absolutePath}`);
-          console.log(`[FILE READ] Content preview: ${content.substring(0, 100)}...`);
           res.json(createSuccessResponse({ content }));
         }
       } catch (error: unknown) {
@@ -197,21 +192,14 @@ router.put(
     try {
       const { id, path: filePath } = req.params;
       const { content } = req.body;
-      
-      console.log(`[FILE WRITE] Request: project=${id}, path=${filePath}, contentLength=${content?.length || 0}`);
-      
       const { absolutePath } = await resolveProjectFilePath(id, filePath);
-      console.log(`[FILE WRITE] Absolute path: ${absolutePath}`);
 
       const parentDir = path.dirname(absolutePath);
       await fs.mkdir(parentDir, { recursive: true });
       await fs.writeFile(absolutePath, content, "utf-8");
-      
-      console.log(`[FILE WRITE] Success: wrote ${content.length} bytes to ${absolutePath}`);
 
       res.status(204).send();
     } catch (error) {
-      console.error(`[FILE WRITE] Error:`, error);
       next(error);
     }
   },

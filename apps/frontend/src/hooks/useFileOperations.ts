@@ -102,10 +102,7 @@ export function useFileOperations(): UseFileOperationsReturn {
 
       const openRequest = (async () => {
         try {
-          console.log('[OPEN] Fetching file:', { projectId, filePath });
           const response = await fileApi.getFile(projectId, filePath);
-          console.log('[OPEN] Received content length:', response.content.length);
-          console.log('[OPEN] Content preview:', response.content.substring(0, 100));
           fileContentCache.set(cacheKey, response.content);
 
           const alreadyOpened = useEditorStore
@@ -156,21 +153,12 @@ export function useFileOperations(): UseFileOperationsReturn {
         throw new Error('File not found');
       }
 
-      console.log('[SAVE] Attempting to save file:', {
-        fileId,
-        projectId,
-        path: file.path,
-        contentLength: file.content.length,
-        contentPreview: file.content.substring(0, 100)
-      });
-
       try {
-        const result = await fileApi.saveFile(projectId, file.path, file.content);
-        console.log('[SAVE] Success:', result);
+        await fileApi.saveFile(projectId, file.path, file.content);
         fileContentCache.set(getFileCacheKey(projectId, file.path), file.content);
         markFileSaved(fileId);
       } catch (error) {
-        console.error('[SAVE] Failed:', error);
+        console.error('Failed to save file:', error);
         throw error;
       }
     },

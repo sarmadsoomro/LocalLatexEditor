@@ -79,14 +79,11 @@ export async function compileProject(
     return bibFiles;
   }
   
-  // Debug: List all .bib files in project directory
   let allBibFiles: string[] = [];
   try {
     allBibFiles = await findBibFilesRecursive(projectPath);
-    const relativePaths = allBibFiles.map(f => path.relative(projectPath, f));
-    logOutput += `\n=== BIB FILES FOUND: ${relativePaths.join(', ') || 'NONE'} ===\n`;
   } catch {
-    logOutput += "\n=== COULD NOT SEARCH FOR BIB FILES ===\n";
+    // Ignore errors searching for bib files
   }
   
   let bblCreated = false;
@@ -98,12 +95,9 @@ export async function compileProject(
         const destPath = path.join(outputDir, fileName);
         await fs.copyFile(bibFilePath, destPath);
       }
-      logOutput += `\n=== COPIED ${allBibFiles.length} BIB FILE(S) TO OUTPUT ===\n`;
-    } catch (err) {
-      logOutput += `\n=== ERROR COPYING BIB FILES: ${err} ===\n`;
+    } catch {
+      // Ignore errors copying .bib files
     }
-    
-    logOutput += `\n=== BIBINPUTS: ${projectPath}${path.delimiter}${process.env.BIBINPUTS || '(empty)'} ===\n`;
     
     const bibResult = await runBibTeX(projectPath, mainFile, engine);
     logOutput += "\n=== BIBLIOGRAPHY PROCESSING ===\n" + bibResult.output;

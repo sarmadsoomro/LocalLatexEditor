@@ -64,18 +64,10 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   updateFileContent: (fileId, content) =>
     set((state) => {
-      console.log('[STORE updateFileContent] Called:', { fileId, contentLength: content?.length, contentPreview: content?.substring(0, 50) });
       const fileIndex = state.openFiles.findIndex((f) => f.id === fileId);
-      if (fileIndex === -1) {
-        console.warn('[STORE updateFileContent] File not found:', fileId);
-        return state;
-      }
+      if (fileIndex === -1) return state;
       const file = state.openFiles[fileIndex];
-      console.log('[STORE updateFileContent] Current file:', { path: file.path, currentContentLength: file.content.length });
-      if (file.content === content) {
-        console.log('[STORE updateFileContent] Content unchanged, skipping');
-        return state;
-      }
+      if (file.content === content) return state;
       const newFile = {
         ...file,
         content,
@@ -83,7 +75,6 @@ export const useEditorStore = create<EditorState>((set) => ({
       };
       const newFiles = [...state.openFiles];
       newFiles[fileIndex] = newFile;
-      console.log('[STORE updateFileContent] Updated file:', { path: newFile.path, newContentLength: newFile.content.length, isDirty: newFile.isDirty });
       return { openFiles: newFiles };
     }),
 
