@@ -1,478 +1,85 @@
-# 📝 TexCraft
+# TexCraft
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/sarmadsoomro/LocalLatexEditor/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://react.dev/)
+A local LaTeX editor. The UI runs in the browser. Compilation uses the LaTeX install on your machine. Documents are copied into app storage under `~/.latex-editor/projects` (override with `LATEX_EDITOR_PROJECTS_DIR`). Nothing in the app uploads them.
 
-A **modern, browser-based LaTeX editor** that runs entirely on your local machine. No cloud required, no subscriptions, no data leaves your computer.
+Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/LocalLatexEditor). npm package name: `local-latex-editor`.
 
-Think of it like **Google Docs meets LaTeX** — beautiful scientific typesetting with the privacy and speed of a local application.
+## What it does
 
----
+- Monaco editor with LaTeX and BibTeX syntax highlighting, and a light/dark theme toggle
+- PDF preview after a compile (PDF.js), with zoom
+- Create a project from a template, or import by copying a folder or a zip into app storage
+- File tree: create, upload, rename, move, and delete files inside a project
+- Compile with `pdflatex`, `xelatex`, or `lualatex`. Optional auto-compile waits 2 seconds after a change and will not start again for 8 seconds
+- Project status is `draft`, `in_progress`, or `published`. Trash, restore, and permanent delete
+- Zip export of a project
 
-## 📋 Table of Contents
+## What it does not do
 
-- [✨ Features](#-features)
-- [🏗️ Architecture](#️-architecture)
-- [💻 System Requirements](#-system-requirements)
-- [🚀 Quick Start](#-quick-start)
-  - [Option 1: Automated Setup Scripts](#option-1-automated-setup-scripts-recommended)
-  - [Option 2: AI Assistant Installation](#option-2-ai-assistant-installation-easiest)
-  - [Option 3: Manual Installation](#option-3-manual-installation)
-- [▶️ Starting the Editor](#️-starting-the-editor)
-- [🛠️ Development](#️-development)
-- [❓ Troubleshooting](#-troubleshooting)
-- [🔒 Security](#-security)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- No autocomplete provider
+- No WebSocket. Compile status is ordinary HTTP polling
+- Import does not edit the original folder. It copies
+- No outline view, and no "compile only the files that changed"
+- The compiler never passes `-shell-escape`. The settings toggle for shell escape does not reach the compiler
+- The API is not authenticated, and it is not bound to `127.0.0.1`
 
----
+## Requirements
 
-## ✨ Features
+- Node.js 18+
+- pnpm 8+ (`npm install -g pnpm`)
+- Git
+- A LaTeX install that provides `pdflatex`, `xelatex`, or `lualatex` (`pdflatex --version` should work)
+- A current Chrome, Firefox, Safari, or Edge
 
-- ✏️ **Real-time LaTeX Editing** — Write with syntax highlighting and intelligent autocomplete
-- 📄 **Instant PDF Preview** — See your document compile in real-time as you type
-- 🗂️ **Project Management** — Create, organize, and manage multiple LaTeX projects
-- 🏷️ **Project Status Tracking** — Mark projects as Active, Completed, or Archived
-- 🔍 **Smart Filtering & Search** — Quickly find projects with advanced filters
-- 🗑️ **Trash Functionality** — Safely delete and recover projects
-- 📂 **File Import/Export** — Import existing `.tex` files and export to PDF
-- 🎨 **Modern UI** — Beautiful, responsive interface with dark mode support
-- ⚡ **Fast Compilation** — Optimized LaTeX compilation pipeline
-- 🔒 **100% Private** — Your documents never leave your machine
-- 🌐 **Offline-First** — Works without internet connection
-- 🖥️ **Cross-Platform** — Works on macOS, Windows, and Linux
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    BROWSER (Frontend)                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │ Monaco Editor│  │  File Tree   │  │   PDF Preview    │  │
-│  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘  │
-│         └──────────────────┴───────────────────┘            │
-│                            │                                │
-│                     ┌──────┴──────┐                         │
-│                     │  Zustand    │                         │
-│                     │    Store    │                         │
-│                     └──────┬──────┘                         │
-└────────────────────────────┼────────────────────────────────┘
-                             │ HTTP / WebSocket
-┌────────────────────────────┼────────────────────────────────┐
-│                    ┌───────┴───────┐                         │
-│                    │ Express API   │                         │
-│                    │  (Port 3001)  │                         │
-│                    └───────┬───────┘                         │
-│         ┌──────────────────┼──────────────────┐              │
-│         ▼                  ▼                  ▼              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │ File System  │  │ Compilation  │  │  Project     │       │
-│  │   Service    │  │   Service    │  │  Service     │       │
-│  └──────────────┘  └──────────────┘  └──────────────┘       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Tech Stack:**
-- **Frontend**: React 18 + TypeScript + Vite + Monaco Editor + PDF.js + Zustand + Tailwind CSS
-- **Backend**: Express + TypeScript
-- **Build**: Turborepo + pnpm
-- **Testing**: Vitest + Playwright
-
----
-
-## 💻 System Requirements
-
-### Minimum Requirements
-
-- **OS**: macOS 10.15+, Windows 10+, or Linux (Ubuntu 20.04+)
-- **RAM**: 4 GB
-- **Disk Space**: 
-  - Editor: ~500 MB
-  - LaTeX Distribution: ~4 GB (MacTeX/MiKTeX/TeX Live)
-- **Node.js**: 18.0.0 or higher
-- **Browser**: Chrome 90+, Firefox 88+, Safari 14+, or Edge 90+
-
-### Required Software
-
-1. **Node.js 18+** — JavaScript runtime ([Download](https://nodejs.org/))
-2. **pnpm 8+** — Package manager (`npm install -g pnpm`)
-3. **Git** — Version control ([Download](https://git-scm.com/))
-4. **LaTeX Distribution** — One of:
-   - **macOS**: [MacTeX](https://www.tug.org/mactex/) (~4GB)
-   - **Windows**: [MiKTeX](https://miktex.org/download) or TeX Live
-   - **Linux**: `sudo apt-get install texlive-full`
-
----
-
-## 🚀 Quick Start
-
-Choose your preferred installation method:
-
-### Option 1: Automated Setup Scripts (Recommended)
-
-We've created automated setup scripts that check your system, install missing dependencies, and configure everything for you.
-
-**🍎 macOS / 🐧 Linux:**
-```bash
-# Download and run the setup script
-curl -fsSL https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-macos-linux.sh | bash
-```
-
-Or manually:
-```bash
-# 1. Download the script
-wget https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-macos-linux.sh
-
-# 2. Make it executable
-chmod +x setup-macos-linux.sh
-
-# 3. Run it
-./setup-macos-linux.sh
-```
-
-**🪟 Windows:**
-```powershell
-# Download and run the setup script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/sarmadsoomro/LocalLatexEditor/main/scripts/setup-windows.bat" -OutFile "setup-windows.bat"
-.\setup-windows.bat
-```
-
-**What the script does:**
-1. ✅ Checks for Node.js, pnpm, Git, and LaTeX
-2. ✅ Installs missing tools automatically (when possible)
-3. ✅ Clones the repository
-4. ✅ Installs project dependencies (`pnpm install`)
-5. 🎉 Tells you how to start the editor
-
----
-
-### Option 2: AI Assistant Setup
-
-If you are an AI agent (or prefer a fully scripted path), run these commands in order. Each step must succeed before continuing.
-
-**1. Verify prerequisites:**
-```bash
-git --version          # must be any version
-node --version         # must be v18.x.x or higher
-pnpm --version         # must be 8.x.x or higher
-pdflatex --version     # must be installed — or xelatex / lualatex
-```
-
-**2. Install any missing tools:**
-```bash
-# pnpm (if missing)
-npm install -g pnpm
-
-# Node.js — download LTS from https://nodejs.org if not present
-# LaTeX — see System Requirements section for OS-specific commands
-```
-
-**3. Clone and install:**
-```bash
-git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
-cd LocalLatexEditor
-pnpm install
-```
-
-**4. Start the editor:**
-```bash
-pnpm dev
-```
-
-**5. Verify it works** — both of these should respond:
-- http://localhost:3000 (frontend)
-- http://localhost:3001 (backend API)
-
----
-
-### Option 3: Manual Installation
-
-Prefer to do it yourself? Follow these steps:
-
-#### Step 1: Install Prerequisites
-
-**Install Git:**
-- Download from [git-scm.com](https://git-scm.com/) or use your OS package manager
-- Verify: `git --version`
-
-**Install Node.js 18+:**
-- Download from [nodejs.org](https://nodejs.org/) (LTS version recommended)
-- Verify: `node --version` (should show v18.x.x or higher)
-
-**Install pnpm:**
-```bash
-npm install -g pnpm
-```
-
-**Install LaTeX:**
-
-| OS | Command/Link |
-|----|-------------|
-| macOS | `brew install --cask mactex` or [Download MacTeX](https://www.tug.org/mactex/) |
-| Windows | [Download MiKTeX](https://miktex.org/download) |
-| Ubuntu/Debian | `sudo apt-get install texlive-full` |
-| Fedora | `sudo dnf install texlive-scheme-full` |
-
-#### Step 2: Clone the Repository
+## Run it
 
 ```bash
 git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
 cd LocalLatexEditor
-```
-
-#### Step 3: Install Project Dependencies
-
-```bash
 pnpm install
-```
-
-This downloads all required packages. It may take a few minutes.
-
----
-
-## ▶️ Starting the Editor
-
-### Using Quick Start Scripts (Recommended)
-
-**🍎 macOS / 🐧 Linux:**
-```bash
-./scripts/start.sh
-```
-
-**🪟 Windows:**
-```batch
-scripts\start.bat
-```
-
-### Manual Start
-
-```bash
-# Start both frontend and backend
 pnpm dev
 ```
 
-This will:
-- Start the **frontend** at http://localhost:3000
-- Start the **backend API** at http://localhost:3001
+- Frontend: http://localhost:3000
+- API: http://localhost:3001
 
-**Open your browser** and navigate to: **http://localhost:3000**
+Stop it with Ctrl+C in that terminal.
 
-🎉 **You should see the LaTeX Editor!**
+`scripts/setup-macos-linux.sh`, `scripts/setup-windows.bat`, `scripts/start.sh`, and `scripts/start.bat` are in the repo. Read `scripts/README.md` before piping a setup script into a shell.
 
----
-
-## 🛑 Stopping the Editor
-
-When you're done:
-
-1. Go to your terminal
-2. Press **Ctrl + C**
-3. Type `y` and press Enter to confirm
-
----
-
-## 🔄 Restarting Later
-
-Next time you want to use it:
+## Development
 
 ```bash
-# Navigate to the project (if not already there)
-cd LocalLatexEditor
-
-# Start the editor
 pnpm dev
-```
-
-Or use the quick start scripts (see [Starting the Editor](#️-starting-the-editor)).
-
----
-
-## 🛠️ Development
-
-### Available Commands
-
-```bash
-# Start development servers
-pnpm dev
-
-# Build for production
 pnpm build
-
-# Run linting
 pnpm lint
-
-# Format code
-pnpm format
-
-# Type checking
 pnpm typecheck
-
-# Run tests
-pnpm test
-pnpm test:unit       # Unit tests only
-pnpm test:e2e        # E2E tests only
-
-# Clean build artifacts
-pnpm clean
+pnpm test          # Vitest, where a package defines tests
+pnpm test:unit
 ```
 
-### Project Structure
+`pnpm test:e2e` is wired to Playwright in the frontend package. There are no Playwright specs in the repo.
 
 ```
-local-latex-editor/
-├── apps/
-│   ├── frontend/          # React + Vite frontend (port 3000)
-│   └── backend/           # Express API (port 3001)
-├── packages/
-│   └── shared-types/      # Shared TypeScript definitions
-├── scripts/               # Setup and utility scripts
-├── docs/                  # Documentation
-├── tooling/               # ESLint and TypeScript configs
-├── package.json           # Root monorepo config
-└── turbo.json             # Turborepo pipeline
+LatexEditor/
+├── apps/frontend/          # React + Vite, port 3000
+├── apps/backend/           # Express, port 3001
+├── packages/shared-types/
+├── tooling/
+├── scripts/
+└── docs/                   # current docs vs old plans: docs/README.md
 ```
 
----
+## Security
 
-## ❓ Troubleshooting
+The backend calls `app.listen(PORT)` with no host, so port 3001 is reachable on every interface of the machine, not only localhost. There is no authentication. Do not expose this process to a network you do not trust.
 
-### "command not found: pnpm"
+Compilation uses `spawn` with `shell: false` and does not pass `-shell-escape`. That is not a sandbox. LaTeX still runs as your user and can read files you can read.
 
-**Fix:**
-```bash
-npm install -g pnpm
-```
-Close and reopen your terminal, then try again.
+## Docs
 
-### "command not found: node"
+Current behavior: this file, and [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md).
 
-**Fix:** 
-1. Install Node.js from https://nodejs.org/
-2. Close and reopen your terminal
-3. Verify with `node --version`
+April 2026 plans and the requirements draft are not a description of this build. See [docs/README.md](docs/README.md).
 
-### "Cannot find module"
-
-**Fix:**
-```bash
-pnpm install
-```
-
-### "LaTeX not found" or compilation fails
-
-**Fix:** 
-Install a LaTeX distribution (see [System Requirements](#-system-requirements))
-
-### "Port 3000 already in use"
-
-**Fix:**
-Kill the process using port 3000:
-```bash
-# macOS/Linux
-lsof -ti:3000 | xargs kill -9
-
-# Windows
-netstat -ano | findstr :3000
-taskkill /PID <PID> /F
-```
-
-### The page doesn't load
-
-**Check:**
-1. Is the dev server running? (Look for "Frontend running on port 3000")
-2. Try refreshing the browser (F5)
-3. Check the URL: http://localhost:3000
-
-### Permission denied (macOS/Linux)
-
-**Fix:**
-```bash
-chmod +x scripts/*.sh
-```
-
----
-
-## 🔒 Security
-
-Your **privacy is our priority**:
-
-- ✅ **Local Only** — All processing happens on your machine
-- ✅ **No Cloud** — Documents never leave your computer
-- ✅ **No Tracking** — No analytics or telemetry
-- ✅ **Sandboxed** — LaTeX compilation runs with user-level privileges
-- ✅ **No Shell Escape** — LaTeX shell escape is disabled for security
-
-**Security Best Practices:**
-- Keep your LaTeX distribution updated
-- Don't enable shell escape unless you trust the document source
-- Bind to localhost only (127.0.0.1) — never expose to the internet
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for:
-
-- Development setup instructions
-- Code conventions and style guide
-- How to submit pull requests
-- Project architecture details
-
-### Quick Contributor Setup
-
-```bash
-# Fork and clone your fork
-git clone https://github.com/YOUR_FORK/LocalLatexEditor.git
-cd LocalLatexEditor
-
-# Install dependencies
-pnpm install
-
-# Create a branch
-git checkout -b feature/my-feature
-
-# Make your changes and commit
-git commit -m "feat: add my feature"
-
-# Push and create PR
-git push origin feature/my-feature
-```
-
-## 📦 Releases
-
-See our [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases) for the latest version and changelog.
-
----
-
-## 📚 Resources
-
-- **LaTeX Tutorial**: [Overleaf's 30-minute LaTeX Guide](https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes)
-- **Documentation**: See the `docs/` folder for detailed specs
-- **Issues**: [GitHub Issues](https://github.com/sarmadsoomro/LocalLatexEditor/issues)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [Monaco Editor](https://microsoft.github.io/monaco-editor/) (the editor that powers VS Code)
-- PDF rendering by [PDF.js](https://mozilla.github.io/pdf.js/)
-- LaTeX compilation powered by your system's LaTeX distribution
-
----
-
-**Good luck and happy writing!** 🎓✨
-
-*Made with ❤️ for students, teachers, and anyone who loves beautiful documents!*  
-**TexCraft** — Your Local LaTeX Companion
+There is no `LICENSE` file in the repo.

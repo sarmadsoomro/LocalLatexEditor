@@ -169,7 +169,7 @@ Security considerations from running local LaTeX compilation.
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| If the editor exposes a local HTTP server for preview, it may be accessible to other users on the same network. | Low | Medium | Bind to localhost only (127.0.0.1). Use random high ports. Document that the server is local-only. Consider authentication for sensitive use cases. |
+| The API listens on every interface. `app.listen(PORT)` does not pass a host, and there is no authentication. | High while the process is running | Medium | Not mitigated in code. Do not expose the machine. A fix is to pass `127.0.0.1` to `listen`. |
 
 ---
 

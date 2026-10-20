@@ -1,150 +1,54 @@
-# PROJECT KNOWLEDGE BASE: Local LaTeX Editor
+# TexCraft
 
-**Generated:** April 8, 2026
-**Updated:** April 8, 2026
-**Type:** Full-Stack Application
-**Status:** Phase 2 In Progress (Project Management features)
+**Updated:** 20 October 2026
+**Repo:** LocalLatexEditor
+**Package:** `local-latex-editor`
 
-**Quick Reference:** See `.project-memory.md` for current progress
+Browser UI for local LaTeX editing. React + Vite on port 3000, Express on port 3001, Monaco, PDF.js, Zustand, Turborepo, pnpm.
 
----
+Current behavior is the code, [README.md](README.md), and [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md). Phase docs, the SRS, and `docs/system-architecture.md` are April 2026 plans. Do not implement from them without checking the code.
 
-## OVERVIEW
+## Where to look
 
-Local LaTeX Editor — browser-based LaTeX editing with local PDF compilation. Runs entirely on localhost without cloud dependency.
+| Task | Location |
+| --- | --- |
+| Frontend | `apps/frontend/` |
+| Backend routes | `apps/backend/src/routes/` |
+| Compile spawn | `apps/backend/src/services/compilationService.ts` |
+| Project storage | `apps/backend/src/config/storage.ts` (`~/.latex-editor/projects`) |
+| Shared types | `packages/shared-types/` |
+| API that exists | `docs/api-and-internal-contracts.md` |
 
-**Stack:** React 18 + Vite (frontend), Express + TypeScript (backend), Monaco Editor, PDF.js, Zustand, Turborepo + pnpm.
+## Conventions
 
----
+| Element | Convention | Example |
+| --- | --- | --- |
+| Folders | kebab-case | `project-management/` |
+| React components | PascalCase | `ProjectList.tsx` |
+| Files | camelCase | `useProjects.ts` |
+| Tests | `.test.ts` | `Button.test.tsx` |
 
-## STRUCTURE
+- Do not concatenate paths. Use `path.join()`.
+- Do not pass `shell: true` to `spawn`.
+- Do not pass `-shell-escape` unless the task is explicitly to wire the existing settings toggle, and then keep the default off.
+- New listeners must bind to `127.0.0.1`. `app.listen(PORT)` in `apps/backend/src/index.ts` currently does not. Do not copy that.
 
-```
-LatexEditor/
-├── apps/
-│   ├── frontend/            # React + Vite (port 3000)
-│   └── backend/             # Express API (port 3001)
-├── packages/
-│   └── shared-types/        # Shared TypeScript types
-├── tooling/
-│   ├── eslint-config/       # Shared ESLint configs
-│   └── typescript-config/   # Shared TS configs
-├── docs/                    # 14 documentation files
-├── package.json             # Root monorepo config
-├── turbo.json               # Turborepo pipeline
-└── AGENTS.md                # This file
-```
-
----
-
-## WHERE TO LOOK
-
-| Task              | Location                                      | Notes                                |
-| ----------------- | --------------------------------------------- | ------------------------------------ |
-| Frontend code     | `apps/frontend/`                              | React + Vite + Zustand stores        |
-| Backend API       | `apps/backend/`                               | Express routes, services, middleware |
-| Shared types      | `packages/shared-types/`                      | Project, File, Compilation types     |
-| Requirements      | `docs/software-requirements-specification.md` | 150+ FR/NFR/SEC requirements         |
-| Architecture      | `docs/system-architecture.md`                 | Compilation pipeline diagrams        |
-| API contracts     | `docs/api-and-internal-contracts.md`          | 16 endpoints                         |
-| Progress tracking | `.project-memory.md`                          | Current phase status                 |
-
----
-
-## CONVENTIONS
-
-### Naming
-
-| Element          | Convention | Example               |
-| ---------------- | ---------- | --------------------- |
-| Folders          | kebab-case | `project-management/` |
-| React components | PascalCase | `ProjectList.tsx`     |
-| Files            | camelCase  | `useProjects.ts`      |
-| Tests            | `.test.ts` | `Button.test.tsx`     |
-
-### Module Boundaries
-
-```
-Features → Cannot import from Pages, other Features
-Components → Cannot import from Features, Pages, Services
-Services → Cannot import from Components, Features, Pages
-Utils → Cannot import from Components, Services, Features
-Types → Cannot import from anything
-```
-
-### Security
-
-- Bind to localhost only (127.0.0.1)
-- LaTeX compilation: user-level privileges only
-- User documents never leave local machine
-
----
-
-## ANTI-PATTERNS
-
-1. **No deep imports** — Import from feature root, not internals
-2. **No cross-feature imports** — Features are isolated
-3. **No string path concat** — Use `path.join()` always
-4. **No shell: true** — In child_process spawn calls
-5. **No write18** — LaTeX shell escape disabled
-6. **No Table of Contents** — In documentation files
-
----
-
-## COMMANDS
+## Commands
 
 ```bash
-# Development
-pnpm install          # Install all dependencies
-pnpm dev              # Start frontend (localhost:3000) and backend (localhost:3001)
-
-# Building
-pnpm build            # Build all apps and packages
-
-# Code Quality
-pnpm lint             # Run ESLint on all packages
-pnpm format           # Format code with Prettier
-pnpm typecheck        # Run TypeScript type checking
-
-# Testing (when implemented)
-pnpm test:unit        # Vitest unit tests
-pnpm test:e2e         # Playwright E2E tests
+pnpm install
+pnpm dev          # localhost:3000 and :3001
+pnpm build
+pnpm lint
+pnpm typecheck
+pnpm test:unit    # Vitest
 ```
 
----
+`pnpm test:e2e` runs Playwright. No specs are in the repo.
 
-## NOTES
+## Do not assume
 
-### UI/UX Planning Requirements
-
-**Mandatory:** When adding any new feature or UI component, you MUST use the ui-ux-pro-max skill during planning.
-
-This skill provides design patterns, accessibility guidelines, and UX best practices. Invoke it before implementing any UI changes to ensure consistent, accessible interfaces.
-
-**Process:**
-1. Invoke ui-ux-pro-max skill when planning new features
-2. Apply recommended patterns and guidelines
-3. Verify accessibility compliance
-
-### Critical Context
-
-- **Phase 1 Complete** — Monorepo scaffolded with apps/frontend, apps/backend, packages/shared-types
-- **Source code exists** — React frontend and Express backend implemented
-- **Documentation organized** — All docs now in `docs/` directory per project standards
-- **Ready for Phase 2** — Project Management features
-
-### Project Structure Created
-
-- `apps/frontend/` — React + Vite + TypeScript (port 3000)
-- `apps/backend/` — Express + TypeScript (port 3001)
-- `packages/shared-types/` — Shared TypeScript definitions
-- `tooling/eslint-config/` — Shared ESLint configurations
-- `tooling/typescript-config/` — Shared TS configurations
-- `docs/` — All project documentation
-
-### Next Steps
-
-1. Run `pnpm install` to install dependencies
-2. Run `pnpm dev` to verify both servers start
-3. Begin Phase 2: Project Management features
-4. See `.project-memory.md` for detailed progress tracking
+- WebSockets exist. They do not.
+- Import writes back to the user's original folder. It copies.
+- The settings `shellEscape` flag is honored. The compiler ignores it.
+- `AGENTS.md` status from April 2026. Project management, trash, compile, preview, rename, and zip export are already in the tree.

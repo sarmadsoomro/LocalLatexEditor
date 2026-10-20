@@ -270,12 +270,13 @@ Examples:
 - **Never** enable `write18` in LaTeX compilation
 - Validate all inputs with Zod schemas
 - Use path traversal protection (always use `path.join()`)
-- Bind services to localhost only (127.0.0.1)
-- Run LaTeX compilation with user-level privileges only
+- New listeners must bind to `127.0.0.1`. The current server does not (`app.listen(PORT)` with no host). Do not copy that
+- Do not pass `-shell-escape`. The compiler does not, and the settings toggle is not wired
+- Run LaTeX compilation with user-level privileges only. That is not a sandbox
 
 ### Data Privacy
 
-- User documents never leave the local machine
+- The app does not upload documents. The API has no auth and is not bound to localhost, so another host that can reach the port can read them
 - Don't log sensitive file paths or content
 - No cloud dependencies for document processing
 

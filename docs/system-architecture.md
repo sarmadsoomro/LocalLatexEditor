@@ -1,5 +1,7 @@
 # System Architecture
 
+> April 2026 design draft. Not a description of the running app. WebSocket, alternative stacks, and `-shell-escape` examples below are not implemented. Current shape: [../README.md](../README.md) and [api-and-internal-contracts.md](api-and-internal-contracts.md).
+
 ## Overview
 
 This document describes the system architecture for a local LaTeX editor that runs as a localhost web application. The system consists of a browser-based frontend communicating with a local backend server that handles file operations and LaTeX compilation.

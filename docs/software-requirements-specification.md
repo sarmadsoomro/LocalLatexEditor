@@ -1,10 +1,12 @@
 # Software Requirements Specification
 
+> Draft from 30 March 2026. A "shall" in this file is a target, not a claim that the app does it. WebSocket (EI-12) and bind-to-127.0.0.1 (SEC-1) are not implemented. Current behavior: [../README.md](../README.md) and [api-and-internal-contracts.md](api-and-internal-contracts.md).
+
 ## Local LaTeX Editor
 
 **Version:** 1.0  
 **Date:** March 30, 2026  
-**Status:** Draft  
+**Status:** Draft, not a description of the build  
 
 ---
 

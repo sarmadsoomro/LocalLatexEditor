@@ -92,17 +92,7 @@ router.get(
 
 ## API ROUTES
 
-| Method | Path                        | Description    |
-| ------ | --------------------------- | -------------- |
-| GET    | `/health`                   | Health check   |
-| GET    | `/api/projects`             | List projects  |
-| POST   | `/api/projects`             | Create project |
-| GET    | `/api/projects/:id`         | Get project    |
-| DELETE | `/api/projects/:id`         | Delete project |
-| GET    | `/api/projects/:id/files`   | List files     |
-| POST   | `/api/projects/:id/compile` | Compile LaTeX  |
-| GET    | `/api/projects/:id/pdf`     | Get PDF        |
-| POST   | `/api/import`               | Import project |
+See [docs/api-and-internal-contracts.md](../../docs/api-and-internal-contracts.md). `POST /api/import` is not a route. Zip import is `POST /api/import-zip`. Folder import is `POST /api/projects/import`.
 
 ---
 
@@ -120,7 +110,7 @@ pnpm test:unit     # Vitest tests
 
 ## NOTES
 
-- Projects stored in `~/.local-latex-editor/projects/`
-- Metadata in `~/.local-latex-editor/projects.json`
-- Compilation output to `output/` subdirectory
-- `shell: false` enforced in all child_process calls
+- Projects stored in `~/.latex-editor/projects/` (`LATEX_EDITOR_PROJECTS_DIR` overrides this)
+- `app.listen(PORT)` does not bind to `127.0.0.1`
+- `shell: false` on compile spawn. `-shell-escape` is not passed. The settings toggle is ignored
+- Route list: [docs/api-and-internal-contracts.md](../../docs/api-and-internal-contracts.md)

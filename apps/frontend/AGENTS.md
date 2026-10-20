@@ -92,7 +92,7 @@ cd apps/frontend
 pnpm dev           # Start dev server (port 3000)
 pnpm build         # Build for production
 pnpm test:unit     # Vitest tests
-pnpm test:e2e      # Playwright tests
+pnpm test:e2e      # Playwright is wired. No specs are in the repo
 ```
 
 ---

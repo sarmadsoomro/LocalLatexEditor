@@ -1,6 +1,8 @@
-# Product Overview: Local LaTeX Editor
+# Product Overview: TexCraft
 
-A lightweight, browser-based LaTeX editing environment that runs entirely on your machine.
+> Vision and goals below are intent. Where a use case used to describe behavior the app does not have, that use case has been corrected. Routes and limits: [api-and-internal-contracts.md](api-and-internal-contracts.md).
+
+A local, browser-based LaTeX editor. The running app is TexCraft.
 
 ---
 
@@ -34,7 +36,7 @@ Current LaTeX workflows face several pain points:
 
 2. **Simplified Installation**: One-command setup that handles all dependencies automatically, making LaTeX accessible to non-technical users.
 
-3. **Real-time Preview**: Instant PDF preview that updates as users type, similar to modern markdown editors.
+3. **Preview after compile**: PDF preview that refreshes after a compile. Auto-compile, if enabled, waits 2 seconds and will not start again for 8. It is not keystroke-instant.
 
 4. **Project Management**: Intuitive interface for creating, organizing, and switching between multiple LaTeX projects.
 
@@ -124,12 +126,10 @@ To maintain focus and deliver a quality MVP, the following are explicitly out of
 **Scenario**: A researcher wants to continue work on an existing LaTeX thesis.
 
 **Flow**:
-1. Click "Import Project"
-2. Select the existing LaTeX project folder
-3. Editor loads all `.tex` files and resources
-4. Main document is automatically detected and opened
-5. User edits and compiles as needed
-6. Changes are saved to the original files
+1. Import a folder or a zip
+2. The app copies that tree into `~/.latex-editor/projects`. It does not edit the original folder
+3. Editor loads the copy
+4. User edits and compiles the copy
 
 ### Use Case 3: Offline Editing Session
 
@@ -148,11 +148,9 @@ To maintain focus and deliver a quality MVP, the following are explicitly out of
 **Scenario**: A technical writer is working on a large manual with multiple chapters.
 
 **Flow**:
-1. Import the project containing multiple `.tex` files
-2. Use the file tree sidebar to navigate between chapters
-3. Edit individual files while seeing the compiled full document
-4. Jump between sections using the structure outline
-5. Compile only changed files for speed
+1. Open a copied project that contains multiple `.tex` files
+2. Use the file tree to switch files
+3. Compile the project. There is no outline view, and compile does not skip unchanged files
 
 ---
 
@@ -163,7 +161,7 @@ The Minimum Viable Product focuses on core editing and compilation functionality
 ### Core Features
 
 1. **Browser-Based Editor**
-   - Syntax-highlighted LaTeX code editor (powered by Monaco/CodeMirror)
+   - Syntax-highlighted LaTeX code editor (Monaco, not CodeMirror)
    - Basic editing operations: undo/redo, find/replace, line numbers
    - Multiple file tabs for navigating between `.tex` files
 
