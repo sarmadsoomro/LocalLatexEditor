@@ -24,4 +24,4 @@ Written in March and April 2026 as plans or drafts. The app has moved past them.
 - `superpowers/`
 - `risks-and-assumptions.md`
 
-`design-system/latex-editor/` and `design-system/latexeditor/` are two copies of the same design notes. Neither is wired into the app.
+`design-system/latexeditor/` is the navy and blue notes the UI tokens follow. The app does not import it.
