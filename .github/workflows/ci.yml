@@ -49,6 +49,8 @@ jobs:
         with:
           node-version: 20
       - run: pnpm install --frozen-lockfile
+      # the backend imports shared-types from its dist/ (turbo builds it first in the check job)
+      - run: pnpm --filter @local-latex-editor/shared-types build
       - name: Compile tests (fail, not skip, if TeX is missing)
         working-directory: apps/backend
         env:
