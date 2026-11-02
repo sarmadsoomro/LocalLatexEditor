@@ -13,6 +13,7 @@ import {
   renameProject,
   updateLastOpened,
   updateProjectStatus,
+  setMainFile,
 } from '../services/projectService.js';
 import {
   listTrashedProjects,
@@ -26,8 +27,9 @@ import {
   importProjectSchema,
   renameProjectSchema,
   updateStatusSchema,
+  setMainFileSchema,
 } from '../validators/project.js';
-import type { CreateProjectInput, ProjectIdInput, ImportProjectInput, RenameProjectInput, UpdateStatusInput } from '../validators/project.js';
+import type { CreateProjectInput, ProjectIdInput, ImportProjectInput, RenameProjectInput, UpdateStatusInput, SetMainFileInput } from '../validators/project.js';
 
 const router: RouterType = Router();
 
@@ -165,6 +167,21 @@ router.put(
   async (req, res, next) => {
     try {
       const project = await updateProjectStatus(req.params.id, req.body.status);
+      res.json(createSuccessResponse({ project }));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Choose which .tex file compiles
+router.put(
+  '/:id/main-file',
+  validateParams<ProjectIdInput>(projectIdSchema),
+  validateBody<SetMainFileInput>(setMainFileSchema),
+  async (req, res, next) => {
+    try {
+      const project = await setMainFile(req.params.id, req.body.mainFile);
       res.json(createSuccessResponse({ project }));
     } catch (error) {
       next(error);

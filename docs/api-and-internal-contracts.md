@@ -34,6 +34,7 @@ Project files live in `~/.latex-editor/projects/<id>`, or `LATEX_EDITOR_PROJECTS
 | PUT | `/api/projects/:id` | Rename. Body `{ name }` |
 | PUT | `/api/projects/:id/status` | Body `{ status }` where status is `draft`, `in_progress`, or `published` |
 | PATCH | `/api/projects/:id/last-opened` | Touch last opened |
+| PUT | `/api/projects/:id/main-file` | Body `{ mainFile }`, a path relative to the project. Must be an existing `.tex` file inside the project (400 otherwise, 404 if missing). Saved as `metadata.mainFile`; compiles and `GET .../pdf` use it |
 | DELETE | `/api/projects/:id` | Move to trash |
 | POST | `/api/projects/:id/restore` | Restore from trash |
 | DELETE | `/api/projects/:id/permanent` | Delete the copy on disk |

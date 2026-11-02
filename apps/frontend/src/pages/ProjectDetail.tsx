@@ -1,4 +1,4 @@
-import type { FileNode } from "@local-latex-editor/shared-types";
+import type { CompilationError, FileNode } from "@local-latex-editor/shared-types";
 import { FileSearch } from "lucide-react";
 import { useEffect, useState, useCallback, useRef, lazy, Suspense, startTransition } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -29,6 +29,7 @@ import { useProjectStore } from "../stores/projectStore";
 import { useSettingsStore } from "../stores/settingsStore";
 import { samePath, useSyncStore } from "../stores/syncStore";
 import type { CompilerSettings } from "../types/settings";
+import { pdfNameFor } from "../utils/pdfName";
 
 type CompilerEngine = CompilerSettings["defaultEngine"];
 
@@ -126,6 +127,24 @@ export function ProjectDetail() {
         useSyncStore.getState().requestReveal(file, line);
       } catch (err) {
         addToast(err instanceof Error ? err.message : "Could not find the source for that point", "info");
+      }
+    },
+    [projectId, openFile, addToast],
+  );
+  // Click an error or warning in the log: open its file at that line.
+  // Messages without a file (most warnings) belong to the main file.
+  const handleErrorClick = useCallback(
+    async (error: CompilationError) => {
+      if (!projectId) return;
+      const target = (error.file || useProjectStore.getState().currentProject?.metadata?.mainFile || "").replace(/^\.[\\/]/, "");
+      if (!target) return;
+      const file = useEditorStore.getState().openFiles.find((f) => samePath(f.path, target))?.path ?? target;
+      try {
+        await openFile(projectId, file);
+        if (error.line > 0) useSyncStore.getState().requestReveal(file, error.line);
+      } catch {
+        // e.g. the error is inside a package file from the TeX installation
+        addToast(`${target} is not a file in this project`, "info");
       }
     },
     [projectId, openFile, addToast],
@@ -228,6 +247,19 @@ export function ProjectDetail() {
       setLoading(false);
     }
   };
+
+  const handleSetMainFile = useCallback(
+    async (file: FileNode) => {
+      try {
+        const { project } = await projectApi.setMainFile(projectId, file.path.replace(/\\/g, "/"));
+        setCurrentProject(project);
+        addToast(`${file.name} is now the main file. Compile to see it.`, "success");
+      } catch (err) {
+        addToast(err instanceof Error ? err.message : "Could not set the main file", "error");
+      }
+    },
+    [projectId, setCurrentProject, addToast],
+  );
 
   const handleFileSelect = useCallback((file: FileNode) => {
     setSelectedFileId(file.id);
@@ -640,6 +672,8 @@ export function ProjectDetail() {
                 onFileSelect={handleFileSelect}
                 onFileOpen={handleFileOpen}
                 selectedFileId={selectedFileId || undefined}
+                mainFile={currentProject?.metadata?.mainFile}
+                onSetMainFile={handleSetMainFile}
               />
             )}
           </aside>
@@ -667,6 +701,7 @@ export function ProjectDetail() {
                     refreshKey={pdfRefreshKey}
                     projectId={projectId}
                     onSyncClick={handlePdfSyncClick}
+                    downloadName={pdfNameFor(currentProject?.metadata?.mainFile)}
                   />
                 </Suspense>
               }
@@ -697,6 +732,7 @@ export function ProjectDetail() {
                   logs={result?.logOutput?.split('\n') || []}
                   errors={result?.errors || []}
                   warnings={result?.warnings || []}
+                  onErrorClick={handleErrorClick}
                 />
               }
               defaultSplit={60}

@@ -11,7 +11,7 @@ import type {
 import { nanoid } from 'nanoid';
 
 import { storageConfig, getProjectPath } from '../config/storage.js';
-import { ValidationError, NotFoundError, ConflictError } from '../types/error.js';
+import { AppError, ValidationError, NotFoundError, ConflictError } from '../types/error.js';
 
 import { buildFileTree, getProjectStats } from './fileSystemService.js';
 import { getTemplate } from './templates.js';
@@ -228,6 +228,44 @@ export async function updateProjectStatus(
   return updatedProject;
 }
 
+/**
+ * Make `mainFile` (a path relative to the project) the file that compiles.
+ * It must be an existing .tex file inside the project folder.
+ */
+export async function setMainFile(id: string, mainFile: string): Promise<ProjectWithMetadata> {
+  const projects = await loadProjectsMetadata();
+  const projectIndex = projects.findIndex((p) => p.id === id);
+  if (projectIndex === -1) {
+    throw new NotFoundError('Project', id);
+  }
+  const project = projects[projectIndex];
+
+  const relative = path.normalize(mainFile).replace(/\\/g, '/').replace(/^\.\//, '');
+  const absolute = path.resolve(project.path, relative);
+  const inside = path.relative(project.path, absolute);
+  if (inside === '' || inside.startsWith('..') || path.isAbsolute(inside)) {
+    throw new ValidationError('The main file must be inside the project');
+  }
+  if (path.extname(relative).toLowerCase() !== '.tex') {
+    throw new ValidationError('The main file must be a .tex file');
+  }
+  try {
+    const stats = await fs.stat(absolute);
+    if (!stats.isFile()) throw new Error('not a file');
+  } catch {
+    throw new NotFoundError('File', relative);
+  }
+
+  const updatedProject = {
+    ...project,
+    metadata: { ...project.metadata, mainFile: relative },
+    updatedAt: new Date().toISOString(),
+  };
+  projects[projectIndex] = updatedProject;
+  await saveProjectsMetadata(projects);
+  return updatedProject;
+}
+
 export async function importProject(sourcePath: string, name: string): Promise<ProjectWithMetadata> {
   if (!name || name.trim().length === 0) {
     throw new ValidationError('Project name is required');
@@ -367,7 +405,34 @@ async function detectMainFile(projectPath: string): Promise<string> {
 
 export async function getProjectFiles(id: string): Promise<FileNode[]> {
   const project = await getProject(id);
-  return buildFileTree(project.path);
+  try {
+    return await buildFileTree(project.path);
+  } catch (error) {
+    throw folderError(error, project.path);
+  }
+}
+
+/** Turn a filesystem error on a project folder into a message a person can act on. */
+export function folderError(error: unknown, folder: string): unknown {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  if (code === 'ENOENT' || code === 'ENOTDIR') {
+    return new AppError(
+      'PROJECT_FOLDER_MISSING',
+      `This project's folder is missing: ${folder}. It may have been moved or deleted outside TexCraft.`,
+      404,
+      { path: folder },
+    );
+  }
+  if (code === 'EACCES' || code === 'EPERM') {
+    return new AppError(
+      'PERMISSION_DENIED',
+      `TexCraft is not allowed to read ${folder}. Check the folder's permissions` +
+        (process.platform === 'darwin' ? ' and System Settings → Privacy & Security → Files and Folders.' : '.'),
+      403,
+      { path: folder },
+    );
+  }
+  return error;
 }
 
 export async function updateProjectLastOpened(id: string): Promise<void> {
