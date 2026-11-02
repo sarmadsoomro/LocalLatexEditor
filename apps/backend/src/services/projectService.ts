@@ -11,7 +11,7 @@ import type {
 import { nanoid } from 'nanoid';
 
 import { storageConfig, getProjectPath } from '../config/storage.js';
-import { ValidationError, NotFoundError, ConflictError } from '../types/error.js';
+import { AppError, ValidationError, NotFoundError, ConflictError } from '../types/error.js';
 
 import { buildFileTree, getProjectStats } from './fileSystemService.js';
 import { getTemplate } from './templates.js';
@@ -367,7 +367,34 @@ async function detectMainFile(projectPath: string): Promise<string> {
 
 export async function getProjectFiles(id: string): Promise<FileNode[]> {
   const project = await getProject(id);
-  return buildFileTree(project.path);
+  try {
+    return await buildFileTree(project.path);
+  } catch (error) {
+    throw folderError(error, project.path);
+  }
+}
+
+/** Turn a filesystem error on a project folder into a message a person can act on. */
+export function folderError(error: unknown, folder: string): unknown {
+  const code = (error as NodeJS.ErrnoException | undefined)?.code;
+  if (code === 'ENOENT' || code === 'ENOTDIR') {
+    return new AppError(
+      'PROJECT_FOLDER_MISSING',
+      `This project's folder is missing: ${folder}. It may have been moved or deleted outside TexCraft.`,
+      404,
+      { path: folder },
+    );
+  }
+  if (code === 'EACCES' || code === 'EPERM') {
+    return new AppError(
+      'PERMISSION_DENIED',
+      `TexCraft is not allowed to read ${folder}. Check the folder's permissions` +
+        (process.platform === 'darwin' ? ' and System Settings → Privacy & Security → Files and Folders.' : '.'),
+      403,
+      { path: folder },
+    );
+  }
+  return error;
 }
 
 export async function updateProjectLastOpened(id: string): Promise<void> {

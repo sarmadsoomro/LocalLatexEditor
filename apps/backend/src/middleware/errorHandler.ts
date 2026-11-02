@@ -18,7 +18,9 @@ export function errorHandler(
 
   console.error('Unhandled error:', err);
 
+  // The API only answers this machine, so the real reason is safe to show and
+  // far more useful than a bare "Internal server error"
   res.status(500).json(
-    createErrorResponse('INTERNAL_ERROR', 'Internal server error')
+    createErrorResponse('INTERNAL_ERROR', `Internal server error: ${err.message || err.name}`)
   );
 }
