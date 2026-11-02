@@ -1,6 +1,6 @@
 # Tools and Technology
 
-> Decision record from March 2026. Comparison tables (FastAPI, Go, and so on) are not open choices. The app is React, Vite, Express, Monaco, PDF.js, Zustand, Turborepo, and pnpm. See [../README.md](../README.md).
+> Decision record from March 2026. Comparison tables (FastAPI, Go, and so on) are not open choices. The app is React, Vite, Express, Monaco, PDF.js, Zustand, Turborepo, and pnpm. See [../README.md](../../README.md).
 
 **Project:** Local LaTeX Editor  
 **Document Type:** Technical Decision Documentation  

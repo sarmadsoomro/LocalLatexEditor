@@ -1,6 +1,6 @@
 # Product Overview: TexCraft
 
-> Vision and goals below are intent. Where a use case used to describe behavior the app does not have, that use case has been corrected. Routes and limits: [api-and-internal-contracts.md](api-and-internal-contracts.md).
+> Vision and goals below are intent. Where a use case used to describe behavior the app does not have, that use case has been corrected. Routes and limits: [api-and-internal-contracts.md](../api-and-internal-contracts.md).
 
 A local, browser-based LaTeX editor. The running app is TexCraft.
 
