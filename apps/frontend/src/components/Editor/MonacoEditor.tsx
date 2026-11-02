@@ -2,6 +2,8 @@ import Editor, { OnMount, OnChange } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useRef, useCallback, useEffect } from "react";
 
+// side effect: point @monaco-editor/react at the bundled Monaco (no CDN, works offline)
+import "../../editor/monacoSetup";
 import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokenizer";
 import { registerThemes } from "../../editor/latexThemes";
 import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";

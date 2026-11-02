@@ -2,6 +2,8 @@
 
 A local LaTeX editor. The UI runs in the browser. Compilation uses the LaTeX install on your machine. Documents are copied into app storage under `~/.latex-editor/projects` (override with `LATEX_EDITOR_PROJECTS_DIR`). Nothing in the app uploads them.
 
+It works without internet. The editor (Monaco) and the fonts are bundled with the app, so the page makes no requests to other sites. Your LaTeX distribution may still download missing packages on its own if you configured it to (MiKTeX does by default).
+
 Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/LocalLatexEditor). npm package name: `local-latex-editor`.
 
 ## What it does

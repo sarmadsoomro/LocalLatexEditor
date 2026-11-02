@@ -65,13 +65,15 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          monaco: ['monaco-editor'],
+        // keep Monaco in its own cached chunk
+        manualChunks(id) {
+          if (id.includes('/node_modules/monaco-editor/')) return 'monaco';
+          return undefined;
         },
       },
     },
   },
   optimizeDeps: {
-    include: ['monaco-editor'],
+    include: ['monaco-editor/esm/vs/editor/edcore.main', 'monaco-editor/esm/vs/editor/editor.api'],
   },
 });
