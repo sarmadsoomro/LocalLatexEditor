@@ -16,7 +16,8 @@ Current behavior is the code, [README.md](README.md), and [docs/api-and-internal
 | Backend routes | `apps/backend/src/routes/` |
 | Compile spawn | `apps/backend/src/services/compilationService.ts` |
 | Project storage | `apps/backend/src/config/storage.ts` (`~/.latex-editor/projects`) |
-| Shared types | `packages/shared-types/` |
+| Shared types | `packages/shared-types/` (ESM: relative imports need `.js`) |
+| Desktop app (Electron) | `apps/desktop/`, `docs/desktop-app.md` |
 | API that exists | `docs/api-and-internal-contracts.md` |
 
 ## Conventions
