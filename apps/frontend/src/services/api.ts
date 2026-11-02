@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@local-latex-editor/shared-types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001';
+// Same-origin relative URLs: Vite proxies /api in dev, the backend serves the app in production.
+const API_BASE = '';
 
 declare global {
   interface Window {
