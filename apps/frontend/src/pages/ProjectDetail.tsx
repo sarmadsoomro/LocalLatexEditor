@@ -6,7 +6,7 @@ import { shallow } from "zustand/shallow";
 
 import { AutoCompileToggle } from "../components/AutoCompileToggle";
 import { CompileButton } from "../components/CompileButton";
-import { UnsavedChangesDialog } from "../components/Dialogs";
+import { ConfirmDialog, UnsavedChangesDialog } from "../components/Dialogs";
 import { EditableProjectName } from "../components/EditableProjectName";
 import { EditorArea } from "../components/Editor";
 import { FileTree } from "../components/FileTree";
@@ -21,6 +21,7 @@ import { useUnsavedChangesWarning } from "../hooks/useBeforeUnload";
 import { useCompilation } from "../hooks/useCompilation";
 import { useFileOperations } from "../hooks/useFileOperations";
 import { useEditorShortcuts } from "../hooks/useKeyboardShortcuts";
+import { ApiError } from "../services/api";
 import { compilationApi } from "../services/compilationApi";
 import { projectApi } from "../services/projectApi";
 import { syncApi } from "../services/syncApi";
@@ -240,9 +241,28 @@ export function ProjectDetail() {
     }
   }, [projectId]);
 
+  // Set when the project's folder is gone, so the error page can offer to remove the entry.
+  const [folderMissing, setFolderMissing] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+
+  const handleRemoveFromList = async () => {
+    setConfirmRemove(false);
+    if (!projectId) return;
+    try {
+      await projectApi.deleteProject(projectId);
+      await projectApi.permanentlyDeleteProject(projectId);
+      addToast("Removed the project from the list", "success");
+      setError(null);
+      navigate("/");
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : "Could not remove the project", "error");
+    }
+  };
+
   const loadProject = async (pid: string) => {
     setLoading(true);
     setError(null);
+    setFolderMissing(false);
     try {
       const [projectData, filesData] = await Promise.all([
         projectApi.getProject(pid),
@@ -251,6 +271,7 @@ export function ProjectDetail() {
       setCurrentProject(projectData.project);
       setFileTree(filesData.files);
     } catch (err) {
+      setFolderMissing(err instanceof ApiError && err.code === "PROJECT_FOLDER_MISSING");
       setError(err instanceof Error ? err.message : "Failed to load project");
     } finally {
       setLoading(false);
@@ -502,12 +523,31 @@ export function ProjectDetail() {
             </svg>
           </div>
           <p className="text-error mb-4">{error}</p>
-          <button
-            onClick={handleBack}
-            className="px-4 py-2 text-sm font-medium text-primary hover:text-primary-dark hover:bg-primary-50 rounded-lg transition-colors cursor-pointer"
-          >
-            Back to Projects
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              onClick={handleBack}
+              className="px-4 py-2 text-sm font-medium text-primary hover:text-primary-dark hover:bg-primary-50 rounded-lg transition-colors cursor-pointer"
+            >
+              Back to Projects
+            </button>
+            {folderMissing && (
+              <button
+                onClick={() => setConfirmRemove(true)}
+                className="px-4 py-2 text-sm font-medium text-error border border-error/30 hover:bg-error/5 rounded-lg transition-colors cursor-pointer"
+              >
+                Remove from list
+              </button>
+            )}
+          </div>
+          <ConfirmDialog
+            isOpen={confirmRemove}
+            title="Remove from list?"
+            message="TexCraft forgets this project. Its folder is already gone, so no files are deleted. If you moved the folder and plan to put it back, keep the project instead."
+            confirmLabel="Remove from list"
+            variant="warning"
+            onConfirm={() => void handleRemoveFromList()}
+            onCancel={() => setConfirmRemove(false)}
+          />
         </div>
       </div>
     );

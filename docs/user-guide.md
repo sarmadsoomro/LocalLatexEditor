@@ -62,7 +62,8 @@ Zip limits: at most 5,000 files and 500 MB unpacked. Zips containing links or pa
 - **Rename**: click the project name at the top of the editor.
 - **Status**: mark a project **Draft**, **In Progress** or **Published** from its card, then filter the list by status.
 - **Search**: the search box filters by name.
-- **Delete**: the trash icon on a card moves the project to the **Trash**. Open the Trash to restore it or delete it permanently.
+- **Delete**: the trash icon on a card moves the project to the **Trash**. Its files stay on disk. Open the Trash to **Restore** it, or **Delete Forever**, which asks first and then deletes the project's folder and every file in it.
+- **A project whose folder is missing** (moved or deleted outside TexCraft) shows "This project's folder is missing" when you open it. Put the folder back, or click **Remove from list**; that deletes nothing, because the folder is already gone.
 
 ## Editing
 
@@ -205,7 +206,7 @@ All projects, from the desktop app and the browser version alike, are in one fol
 
 The folder starts with a dot, so it is hidden. On a Mac, press Cmd+Shift+. in Finder to show hidden files. On Windows, File Explorer → View → Show → Hidden items.
 
-Each project is a folder named `proj_` and 12 letters and digits. The project card does not show this name yet; sort the folders by date modified to find the one you just worked on. The PDF and intermediate files are in its `output/` folder. Deleted projects move to `~/.latex-editor/trash` until you empty them from the Trash.
+Each project is a folder named `proj_` and 12 letters and digits. The project card does not show this name yet; sort the folders by date modified to find the one you just worked on. The PDF and intermediate files are in its `output/` folder. A project in the Trash keeps its folder where it is; **Delete Forever** deletes the folder.
 
 **Back up** that folder, or export projects as zips, the same way you back up anything else. TexCraft has no cloud copy.
 

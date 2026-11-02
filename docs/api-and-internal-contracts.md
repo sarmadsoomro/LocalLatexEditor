@@ -39,7 +39,7 @@ Project files live in `~/.latex-editor/projects/<id>`, or `LATEX_EDITOR_PROJECTS
 | PUT | `/api/projects/:id/main-file` | Body `{ mainFile }`, a path relative to the project. Must be an existing `.tex` file inside the project (400 otherwise, 404 if missing). Saved as `metadata.mainFile`; compiles and `GET .../pdf` use it |
 | DELETE | `/api/projects/:id` | Move to trash |
 | POST | `/api/projects/:id/restore` | Restore from trash |
-| DELETE | `/api/projects/:id/permanent` | Delete the copy on disk |
+| DELETE | `/api/projects/:id/permanent` | Only for a project in the trash (409 `NOT_IN_TRASH` otherwise). Deletes its folder, then its entry. A folder that is already gone is fine. Only a `proj_<id>` folder directly inside the projects directory is ever deleted; any other path only loses its entry. 403 `DELETE_FAILED` if the folder cannot be deleted, and the entry stays |
 | POST | `/api/projects/import` | Body `{ sourcePath, name }`. Copies a directory. 201 |
 | GET | `/api/projects/:id/export` | Zip download |
 | GET | `/api/projects/:id/files` | File tree |
