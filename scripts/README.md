@@ -89,7 +89,7 @@ cd Downloads
 
 ### Windows says "Windows protected your PC"
 
-Windows SmartScreen may warn about unrecognised `.bat` files downloaded from the internet. Before clicking "Run anyway", verify the file came from the [official repository](https://github.com/sarmadsoomro/LocalLatexEditor) and matches the source on GitHub.
+Windows SmartScreen may warn about unrecognised `.bat` files downloaded from the internet. Before clicking "Run anyway", verify the file came from the [official repository](https://github.com/sarmadsoomro/TexCraft) and matches the source on GitHub.
 
 ### Setup fails partway through
 

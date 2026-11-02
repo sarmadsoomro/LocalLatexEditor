@@ -61,16 +61,17 @@ Installers land in `apps/desktop/release/`. Each OS builds its own installers: a
 
 To publish a release:
 
-1. Merge to `main`.
-2. Tag the version and push the tag:
+1. In a pull request, set `"version"` in every `package.json` (root, `apps/*`, `packages/*`) to the new version, and move the **Unreleased** notes in `CHANGELOG.md` under a heading for it. Settings → About shows the `package.json` version.
+2. Merge to `main`.
+3. Tag the merge commit and push the tag:
 
    ```bash
    git tag v0.4.0
    git push origin v0.4.0
    ```
 
-3. The workflow builds every installer, sets the app version from the tag, and creates a **draft** release with the installers and generated notes.
-4. Review the draft on the Releases page and click **Publish**.
+4. The workflow checks that the tag matches every `package.json` version (it stops if not), builds every installer, and creates a **draft** release with the installers and generated notes.
+5. Review the draft on the Releases page, paste the version's `CHANGELOG.md` notes at the top, and click **Publish**.
 
 ## Code signing (optional)
 

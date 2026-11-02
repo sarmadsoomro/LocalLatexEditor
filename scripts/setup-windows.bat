@@ -8,8 +8,8 @@ setlocal EnableDelayedExpansion
 :: =============================================================================
 
 :: Configuration
-set "REPO_URL=https://github.com/sarmadsoomro/LocalLatexEditor.git"
-set "PROJECT_NAME=LocalLatexEditor"
+set "REPO_URL=https://github.com/sarmadsoomro/TexCraft.git"
+set "PROJECT_NAME=TexCraft"
 
 :: Colors (Windows 10+)
 set "RED=[31m"

@@ -5,6 +5,9 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
+// The app version, shown in Settings → About. All workspace packages share it.
+const appVersion: string = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version;
+
 const sessionTokenFile = path.join(os.homedir(), '.latex-editor', '.session-token');
 
 function sessionTokenPlugin(): Plugin {
@@ -47,6 +50,9 @@ function waitForSessionToken(file: string): Promise<string> {
 
 export default defineConfig({
   plugins: [react(), sessionTokenPlugin()],
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

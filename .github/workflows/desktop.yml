@@ -36,6 +36,20 @@ jobs:
             app: release/linux-unpacked/texcraft
     steps:
       - uses: actions/checkout@v5
+      - name: Tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        # The version in Settings → About comes from package.json, so a tag
+        # must not ship a build that reports another version.
+        run: |
+          want="${GITHUB_REF_NAME#v}"
+          for f in package.json apps/*/package.json packages/*/package.json; do
+            have=$(node -p "require('./$f').version")
+            if [[ "$have" != "$want" ]]; then
+              echo "::error file=$f::version is $have but the tag is $GITHUB_REF_NAME. Bump every package.json to $want first."
+              exit 1
+            fi
+          done
       - name: pnpm version from packageManager
         id: pnpm
         shell: bash

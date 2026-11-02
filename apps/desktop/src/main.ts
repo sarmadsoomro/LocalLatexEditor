@@ -20,7 +20,7 @@ import {
 import { findFreePort } from "./port.js";
 import { pathWithTex } from "./texPath.js";
 
-const REPO_URL = "https://github.com/sarmadsoomro/LocalLatexEditor";
+const REPO_URL = "https://github.com/sarmadsoomro/TexCraft";
 const HOST = "127.0.0.1";
 
 let backend: UtilityProcess | null = null;

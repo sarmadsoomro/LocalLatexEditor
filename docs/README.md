@@ -1,6 +1,6 @@
 # Docs
 
-TexCraft is the product name. The repository is LocalLatexEditor; the npm workspace is `local-latex-editor`.
+TexCraft is the product name. The repository is TexCraft (formerly LocalLatexEditor); the npm workspace is `local-latex-editor`.
 
 ## For students and users
 

@@ -101,7 +101,7 @@ Click an error in the log to jump to its line. The [user guide](user-guide.md#fi
 
 ## Reporting a problem
 
-[Open an issue](https://github.com/sarmadsoomro/LocalLatexEditor/issues/new/choose) (**Help → Report a Problem** in the app) and include:
+[Open an issue](https://github.com/sarmadsoomro/TexCraft/issues/new/choose) (**Help → Report a Problem** in the app) and include:
 
 - What you did, what you expected, and what happened.
 - Your OS, the TexCraft version (in the installer's file name, for example `TexCraft-0.3.0-mac-arm64.dmg`), and your LaTeX distribution (`pdflatex --version`, first line).

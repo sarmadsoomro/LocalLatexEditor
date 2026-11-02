@@ -23,15 +23,15 @@ if [ ! -f "package.json" ] || [ ! -d "apps" ]; then
     echo -e "${YELLOW}Not in project directory. Looking for it...${NC}"
     
     # Try to find the project
-    if [ -d "LocalLatexEditor" ]; then
-        cd LocalLatexEditor
-        echo -e "${GREEN}Found and entered LocalLatexEditor/${NC}"
-    elif [ -d "../LocalLatexEditor" ]; then
-        cd ../LocalLatexEditor
-        echo -e "${GREEN}Found and entered LocalLatexEditor/${NC}"
+    if [ -d "TexCraft" ]; then
+        cd TexCraft
+        echo -e "${GREEN}Found and entered TexCraft/${NC}"
+    elif [ -d "../TexCraft" ]; then
+        cd ../TexCraft
+        echo -e "${GREEN}Found and entered TexCraft/${NC}"
     else
         echo -e "${YELLOW}Please run this script from the project directory${NC}"
-        echo "Or make sure LocalLatexEditor/ exists"
+        echo "Or make sure TexCraft/ exists"
         exit 1
     fi
 fi
