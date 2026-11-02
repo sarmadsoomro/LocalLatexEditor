@@ -26,3 +26,31 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+
+  # Real LaTeX compiles (latexmk, biber, timeouts, the long-document timing check).
+  # The check job above skips these tests because its runners have no TeX.
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install TeX Live, latexmk and biber
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-bibtex-extra latexmk biber
+      - name: pnpm version from packageManager
+        id: pnpm
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').packageManager.replace(/^pnpm@/, '')")" >> "$GITHUB_OUTPUT"
+      - uses: pnpm/action-setup@v6
+        with:
+          version: ${{ steps.pnpm.outputs.version }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+      - run: pnpm install --frozen-lockfile
+      - name: Compile tests (fail, not skip, if TeX is missing)
+        working-directory: apps/backend
+        env:
+          TEXCRAFT_REQUIRE_TEX: "1"
+        run: pnpm exec vitest run src/__tests__/compile.test.ts
