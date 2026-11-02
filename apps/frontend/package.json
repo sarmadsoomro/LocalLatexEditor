@@ -36,7 +36,6 @@
     "@local-latex-editor/eslint-config": "workspace:*",
     "@local-latex-editor/typescript-config": "workspace:*",
     "@playwright/test": "^1.41.0",
-    "@testing-library/react": "^14.2.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
