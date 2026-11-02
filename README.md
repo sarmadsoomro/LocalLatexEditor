@@ -11,6 +11,11 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - Create a project from a template, or import by copying a folder or a zip into app storage
 - File tree: create, upload, rename, move, and delete files inside a project
 - Compile with `pdflatex`, `xelatex`, or `lualatex`. Optional auto-compile waits 2 seconds after a change and will not start again for 8 seconds
+- Incremental builds: when `latexmk` is installed (it ships with TeX Live, MacTeX and MiKTeX), auxiliary files are kept between compiles and LaTeX, BibTeX and Biber only rerun when needed, so a one-line change in a long document recompiles quickly. Without `latexmk`, TexCraft runs the engine, then BibTeX/Biber if the document uses a bibliography, then the engine again
+- **Compile ▾ → Clean build** deletes the auxiliary files and rebuilds from scratch. A compile that fails inside a stale `.aux` file is rebuilt from scratch automatically, once
+- Compile timeout is a setting (default 300 s, up to 30 min) and covers the whole compile. On timeout, LaTeX and everything it started are stopped
+- One compile per project at a time; changes made during a compile trigger one follow-up compile
+- SyncTeX data (`output/<main>.synctex.gz`) is generated on every compile
 - Project status is `draft`, `in_progress`, or `published`. Trash, restore, and permanent delete
 - Zip export of a project
 
@@ -19,8 +24,9 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - No autocomplete provider
 - No WebSocket. Compile status is ordinary HTTP polling
 - Import does not edit the original folder. It copies
-- No outline view, and no "compile only the files that changed"
-- The compiler never passes `-shell-escape`. The settings toggle for shell escape does not reach the compiler
+- No outline view
+- No click-to-jump between PDF and source yet (the SyncTeX data is generated, the UI does not use it)
+- Shell escape is off by default. Settings → Compiler → Shell escape passes `-shell-escape` (needed by `minted`); only enable it for documents you trust
 - No accounts or multi-user access. The API trusts one per-launch token, and only the page the server hands to your browser has it
 
 ## Requirements
@@ -80,7 +86,7 @@ The backend listens on `127.0.0.1` only, so other machines on the same Wi-Fi can
 - **`HOST` override.** Setting `HOST` (for example `HOST=0.0.0.0`) makes the backend listen on that address instead of `127.0.0.1`. It logs a loud warning. The token and Host check still apply, so other machines get `401`/`403`, but the port is then open to the network and you lose the network-level protection. Do not set it on shared Wi-Fi.
 - **Windows.** The token file is created with mode `0600`, which Windows does not enforce. The file is in your user profile folder, which by default only your user can read.
 
-Compilation uses `spawn` with `shell: false` and does not pass `-shell-escape`. That is not a sandbox. LaTeX still runs as your user and can read files you can read.
+Compilation uses `spawn` with `shell: false` and does not pass `-shell-escape` unless you turn on the Shell escape setting. That is not a sandbox. LaTeX still runs as your user and can read files you can read.
 
 ## Docs
 

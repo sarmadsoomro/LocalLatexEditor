@@ -112,5 +112,6 @@ pnpm test:unit     # Vitest tests
 
 - Projects stored in `~/.latex-editor/projects/` (`LATEX_EDITOR_PROJECTS_DIR` overrides this)
 - `app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` logs an error
-- `shell: false` on compile spawn. `-shell-escape` is not passed. The settings toggle is ignored
+- `shell: false` on compile spawn. `-shell-escape` is passed only when the request sets `shellEscape: true` (settings toggle, default off)
+- Compiles use latexmk when installed, else manual passes. Real-TeX tests: `src/__tests__/compile.test.ts` (skipped without TeX; CI's `compile` job sets `TEXCRAFT_REQUIRE_TEX=1`)
 - Route list: [docs/api-and-internal-contracts.md](../../docs/api-and-internal-contracts.md)

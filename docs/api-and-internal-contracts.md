@@ -63,12 +63,14 @@ Mounted at `/api/projects/:id/files`. Paths are relative to the project director
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| POST | `/api/projects/:id/compile` | Body `{ engine?, mainFile? }`. Engine is `pdflatex` (default), `xelatex`, or `lualatex`. Returns 202 `{ jobId, status }`. The job runs after the response |
+| POST | `/api/projects/:id/compile` | Body `{ engine?, mainFile?, clean?, shellEscape?, timeoutSeconds? }`. Engine is `pdflatex` (default), `xelatex`, or `lualatex`. `clean` (default false) deletes `output/` first. `shellEscape` (default false) passes `-shell-escape`. `timeoutSeconds` is 30–1800, default 300, for the whole compile. Returns 202 `{ jobId, status }`. One compile runs per project; while it runs, the first new request is queued (`status: "pending"`) and later requests get the same queued `jobId` |
 | GET | `/api/compile/:jobId/status` | `pending`, `compiling`, `complete`, `failed`, or `cancelled`, plus `result` when finished |
 | POST | `/api/compile/:jobId/cancel` | Marks the job cancelled. It does not kill the LaTeX process |
 | GET | `/api/projects/:id/pdf` | The compiled PDF |
 
-`spawn` is called with `shell: false`. The argument list is `-interaction=nonstopmode`, `-halt-on-error`, `-output-directory=...`, and the main file. `-shell-escape` is never passed. A `shellEscape` flag in the settings UI is not read here.
+`spawn` is called with `shell: false`. With `latexmk` on PATH the command is `latexmk -pdf|-xelatex|-lualatex -interaction=nonstopmode -synctex=1 -outdir=<project>/output [-shell-escape] <main>`, and auxiliary files are kept between compiles. Without it, the engine runs with `-interaction=nonstopmode -synctex=1 -output-directory=...`, then `biber` or `bibtex` if the main file uses a bibliography, then the engine twice more (once if there is no bibliography). `TEXCRAFT_DISABLE_LATEXMK=1` forces the fallback. Errors are parsed from `output/<main>.log`; each error has the file TeX was reading and the line number. On timeout the whole process tree is killed.
+
+`GET /api/system/latex-check` returns `engines` (pdflatex, xelatex, lualatex), `tools` (latexmk, biber, bibtex, synctex) and `incrementalBuilds` (true when latexmk is used).
 
 Rate limits: 1000 requests per 15 minutes on `/api`, and 10 compile requests per minute on `/api/projects/:id/compile`.
 
