@@ -63,6 +63,6 @@ export interface CompilationState {
   currentJobId?: string;
 }
 
-export * from "./api";
-export * from "./project";
-export * from "./file";
+export * from "./api.js";
+export * from "./project.js";
+export * from "./file.js";

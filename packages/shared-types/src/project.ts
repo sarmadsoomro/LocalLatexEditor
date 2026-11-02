@@ -1,4 +1,4 @@
-import type { Project } from './index';
+import type { Project } from './index.js';
 
 export type Template = 'article' | 'report' | 'book' | 'beamer' | 'letter' | 'empty';
 
