@@ -12,7 +12,8 @@ export interface UseCompilationReturn {
   logs: string[];
   result: ReturnType<typeof useCompilationStore.getState>["result"];
   progress: number;
-  compile: () => Promise<void>;
+  /** Compile the current project; { clean: true } rebuilds from scratch. */
+  compile: (options?: { clean?: boolean }) => Promise<void>;
   cancel: () => Promise<void>;
   reset: () => void;
 }
@@ -44,15 +45,16 @@ export function useCompilation(): UseCompilationReturn {
   );
 
   const currentProject = useProjectStore((state) => state.currentProject);
-  const compilerSettings = useSettingsStore((state) => ({
-    engine: state.compiler.defaultEngine,
-    synctex: state.compiler.synctex,
-    draftMode: state.compiler.draftMode,
-    shellEscape: state.compiler.shellEscape,
-    additionalArgs: state.compiler.additionalArgs,
-  }));
+  const compilerSettings = useSettingsStore(
+    (state) => ({
+      engine: state.compiler.defaultEngine,
+      shellEscape: state.compiler.shellEscape,
+      timeoutSeconds: state.compiler.compileTimeoutSeconds,
+    }),
+    shallow,
+  );
 
-  const compile = useCallback(async () => {
+  const compile = useCallback(async (options?: { clean?: boolean }) => {
     if (!currentProject) {
       console.error("No project selected for compilation");
       return;
@@ -64,10 +66,9 @@ export function useCompilation(): UseCompilationReturn {
         compilerSettings.engine,
         currentProject.metadata?.mainFile,
         {
-          synctex: compilerSettings.synctex,
-          draftMode: compilerSettings.draftMode,
+          clean: options?.clean === true,
           shellEscape: compilerSettings.shellEscape,
-          additionalArgs: compilerSettings.additionalArgs,
+          timeoutSeconds: compilerSettings.timeoutSeconds,
         },
       );
       startCompilation(response.jobId);

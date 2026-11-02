@@ -5,6 +5,8 @@ interface CompileButtonProps {
   isCompiling: boolean;
   engine: string;
   onEngineChange: (engine: string) => void;
+  /** Delete auxiliary files and rebuild everything. */
+  onCleanBuild?: () => void;
 }
 
 const ENGINES = [
@@ -18,6 +20,7 @@ export function CompileButton({
   isCompiling,
   engine,
   onEngineChange,
+  onCleanBuild,
 }: CompileButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -63,7 +66,7 @@ export function CompileButton({
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="px-2 py-1.5 text-sm font-bold text-white bg-cta hover:bg-cta-dark border-l border-white/10 rounded-r-xl transition-all shadow-soft-md cursor-pointer"
-          aria-label="Select engine"
+          aria-label="Compile options"
           aria-expanded={isOpen}
         >
           <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +74,8 @@ export function CompileButton({
           </svg>
         </button>
         {isOpen && (
-          <div className="absolute top-full right-0 mt-2 bg-surface border border-border rounded-xl shadow-soft-xl py-1.5 min-w-[140px] z-50 animate-fade-in">
+          <div className="absolute top-full right-0 mt-2 bg-surface border border-border rounded-xl shadow-soft-xl py-1.5 min-w-[180px] z-50 animate-fade-in">
+            <div className="px-4 pt-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">Engine</div>
             {ENGINES.map((e) => (
               <button
                 key={e.value}
@@ -86,6 +90,22 @@ export function CompileButton({
                 {e.label}
               </button>
             ))}
+            {onCleanBuild && (
+              <>
+                <div className="my-1.5 border-t border-border" />
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onCleanBuild();
+                  }}
+                  disabled={isCompiling}
+                  className="w-full px-4 py-2 text-sm text-left text-secondary hover:bg-cta/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Delete auxiliary files (.aux, .toc, .bbl, ...) and compile from scratch. Use this if errors persist after you fixed them."
+                >
+                  Clean build
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

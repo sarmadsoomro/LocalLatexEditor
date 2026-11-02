@@ -25,11 +25,8 @@ export interface EditorSettings {
 
 export interface CompilerSettings {
   defaultEngine: 'pdflatex' | 'xelatex' | 'lualatex';
-  outputDirectory: string;    // Default: 'output'
-  shellEscape: boolean;       // Enable \write18, default false (security)
-  synctex: boolean;           // Generate SyncTeX, default true
-  draftMode: boolean;         // Draft mode for faster compiles, default false
-  additionalArgs: string[];   // Extra compiler arguments
+  shellEscape: boolean;       // Pass -shell-escape, default false (security)
+  compileTimeoutSeconds: number; // Whole-compile time budget, 30-1800, default 300
 }
 
 export interface UISettings {
@@ -70,11 +67,8 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   compiler: {
     defaultEngine: 'pdflatex',
-    outputDirectory: 'output',
     shellEscape: false,
-    synctex: true,
-    draftMode: false,
-    additionalArgs: [],
+    compileTimeoutSeconds: 300,
   },
   ui: {
     theme: 'system',

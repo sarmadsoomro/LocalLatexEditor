@@ -24,6 +24,10 @@ import { compilationApi } from "../services/compilationApi";
 import { projectApi } from "../services/projectApi";
 import { useEditorStore } from "../stores/editorStore";
 import { useProjectStore } from "../stores/projectStore";
+import { useSettingsStore } from "../stores/settingsStore";
+import type { CompilerSettings } from "../types/settings";
+
+type CompilerEngine = CompilerSettings["defaultEngine"];
 
 
 const PDFPreview = lazy(() =>
@@ -95,7 +99,8 @@ export function ProjectDetail() {
 
   const { isCompiling, status, result, compile } = useCompilation();
   const { triggerAutoCompile } = useAutoCompile();
-  const [compiler, setCompiler] = useState("pdflatex");
+  const compiler = useSettingsStore((state) => state.compiler.defaultEngine);
+  const updateCompilerSettings = useSettingsStore((state) => state.updateCompilerSettings);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [pdfRefreshKey, setPdfRefreshKey] = useState(0);
   const [autoCompileEnabled, setAutoCompileEnabled] = useState(() => {
@@ -286,6 +291,18 @@ export function ProjectDetail() {
     await compile();
   }, [activeFileId, activeFile, saveFile, projectId, compile, addToast]);
 
+  const handleCleanBuild = useCallback(async () => {
+    if (activeFileId && activeFile?.isDirty) {
+      try {
+        await saveFile(activeFileId, projectId);
+      } catch (err) {
+        addToast("Failed to save file", "error");
+        return;
+      }
+    }
+    await compile({ clean: true });
+  }, [activeFileId, activeFile, saveFile, projectId, compile, addToast]);
+
   const handleSave = useCallback(async () => {
     if (activeFileId && projectId) {
       try {
@@ -300,9 +317,12 @@ export function ProjectDetail() {
     }
   }, [activeFileId, projectId, saveFile, addToast, autoCompileEnabled, triggerAutoCompile]);
 
-  const handleEngineChange = useCallback((engine: string) => {
-    setCompiler(engine);
-  }, []);
+  const handleEngineChange = useCallback(
+    (engine: string) => {
+      updateCompilerSettings({ defaultEngine: engine as CompilerEngine });
+    },
+    [updateCompilerSettings],
+  );
 
   useEditorShortcuts(
     handleSave,
@@ -494,6 +514,7 @@ export function ProjectDetail() {
               isCompiling={isCompiling}
               engine={compiler}
               onEngineChange={handleEngineChange}
+              onCleanBuild={handleCleanBuild}
             />
 
             <div className="w-px h-4 bg-border mx-1" />

@@ -6,6 +6,7 @@ import {
   ToggleSetting,
   SelectSetting,
   SettingItem,
+  SliderSetting,
 } from './SettingsComponents';
 
 const ENGINE_OPTIONS = [
@@ -35,72 +36,41 @@ export function CompilerSettings() {
             description="The LaTeX engine used for compiling documents"
           />
         </SettingItem>
-        <SettingItem>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-heading">Output Directory</label>
-            <input
-              type="text"
-              value={compiler.outputDirectory}
-              onChange={(e) => updateCompilerSettings({ outputDirectory: e.target.value })}
-              placeholder="output"
-              className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-150 bg-surface dark:bg-gray-800 text-heading border-border dark:border-gray-600 hover:border-primary-light"
-            />
-            <p className="text-xs text-muted">Directory where compiled PDF files are saved</p>
-          </div>
-        </SettingItem>
       </SettingsSection>
 
       <SettingsSection
         title="Compilation Options"
-        description="Configure compilation behavior"
+        description="TexCraft keeps auxiliary files between compiles and only reruns LaTeX and BibTeX/Biber when needed (via latexmk, if installed). Use Compile ▾ → Clean build to rebuild from scratch."
       >
         <SettingItem>
-          <ToggleSetting
-            label="SyncTeX"
-            description="Generate SyncTeX file for PDF-to-source navigation"
-            checked={compiler.synctex}
-            onChange={(synctex) => updateCompilerSettings({ synctex })}
+          <SliderSetting
+            label="Compile timeout"
+            value={compiler.compileTimeoutSeconds}
+            min={30}
+            max={1800}
+            step={30}
+            unit=" s"
+            onChange={(compileTimeoutSeconds) => updateCompilerSettings({ compileTimeoutSeconds })}
+            description="Maximum time for one whole compile, all passes included. Raise it for very long theses or heavy TikZ."
           />
         </SettingItem>
         <SettingItem>
           <ToggleSetting
-            label="Draft Mode"
-            description="Enable draft mode for faster compilation (lower quality output)"
-            checked={compiler.draftMode}
-            onChange={(draftMode) => updateCompilerSettings({ draftMode })}
-          />
-        </SettingItem>
-        <SettingItem>
-          <ToggleSetting
-            label="Shell Escape"
-            description="Enable shell escape (security risk: allows arbitrary code execution)"
+            label="Shell escape"
+            description="Lets the document run programs on your computer. Needed for minted and some SVG/gnuplot packages. Only enable it for documents you trust."
             checked={compiler.shellEscape}
             onChange={(shellEscape) => updateCompilerSettings({ shellEscape })}
           />
         </SettingItem>
-      </SettingsSection>
-
-      <SettingsSection
-        title="Additional Arguments"
-        description="Pass extra command-line arguments to the compiler"
-      >
-        <SettingItem>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-heading">Additional Arguments</label>
-            <input
-              type="text"
-              value={compiler.additionalArgs.join(' ')}
-              onChange={(e) => {
-                const value = e.target.value.trim();
-                const args = value ? value.split(/\s+/) : [];
-                updateCompilerSettings({ additionalArgs: args });
-              }}
-              placeholder="Enter space-separated arguments"
-              className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-150 bg-surface dark:bg-gray-800 text-heading border-border dark:border-gray-600 hover:border-primary-light"
-            />
-            <p className="text-xs text-muted">Space-separated compiler arguments (e.g., &quot;-halt-on-error&quot;)</p>
-          </div>
-        </SettingItem>
+        {compiler.shellEscape && (
+          <p
+            role="alert"
+            className="text-xs rounded-lg border px-3 py-2"
+            style={{ color: 'var(--color-warning)', borderColor: 'var(--color-warning)' }}
+          >
+            Shell escape is on. A document you did not write can now run any command as you. Turn it off when you no longer need it.
+          </p>
+        )}
       </SettingsSection>
     </div>
   );
