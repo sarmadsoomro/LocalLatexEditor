@@ -8,7 +8,8 @@ import { z } from "zod";
 
 import { getProjectPath } from "../config/storage.js";
 import { validateBody, validateParams } from "../middleware/validate.js";
-import { compileProject } from "../services/compilationService.js";
+import { compileProject, hasLatexmk, type CompileOptions } from "../services/compilationService.js";
+import { CompileQueue, type QueuedCompile } from "../services/compileQueue.js";
 import { jobStore, JobStatus } from "../services/jobStore.js";
 import { getProject } from "../services/projectService.js";
 import { NotFoundError } from "../types/error.js";
@@ -16,6 +17,7 @@ import { createSuccessResponse } from "../types/response.js";
 import {
   compileBodySchema,
   compileParamsSchema,
+  type CompileBody,
 } from "../validators/compile.js";
 
 const jobIdParamsSchema = z.object({
@@ -24,6 +26,58 @@ const jobIdParamsSchema = z.object({
 
 const router: Router = Router({ mergeParams: true });
 
+type CompileJobOptions = CompileOptions & { engine: CompileOptions["engine"] };
+
+async function runCompileJob(projectId: string, job: QueuedCompile<CompileJobOptions>): Promise<void> {
+  const { jobId, options } = job;
+  const base: JobStatus = {
+    jobId,
+    projectId,
+    status: "compiling",
+    progress: 10,
+    createdAt: (await jobStore.get(jobId))?.createdAt ?? new Date(),
+  };
+  await jobStore.set(jobId, base);
+
+  try {
+    const result = await compileProject(projectId, options);
+    await jobStore.set(jobId, {
+      ...base,
+      status: result.success ? "complete" : "failed",
+      progress: 100,
+      result: {
+        success: result.success,
+        outputPath: result.outputPath,
+        logOutput: result.logOutput,
+        errors: result.errors,
+        warnings: result.warnings.map((w) => ({
+          line: w.line,
+          column: 0,
+          message: w.message,
+          type: "warning" as const,
+        })),
+        duration: result.duration,
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Compilation failed";
+    await jobStore.set(jobId, {
+      ...base,
+      status: "failed",
+      progress: 100,
+      result: {
+        success: false,
+        logOutput: message,
+        errors: [{ line: 0, column: 0, message, type: "error" }],
+        warnings: [],
+        duration: 0,
+      },
+    });
+  }
+}
+
+export const compileQueue = new CompileQueue<CompileJobOptions>(runCompileJob);
+
 router.post(
   "/compile",
   validateParams(compileParamsSchema),
@@ -31,90 +85,35 @@ router.post(
   async (req, res, next) => {
     try {
       const { id: projectId } = req.params;
-      const { engine, mainFile } = req.body;
+      const body = req.body as CompileBody;
 
       await getProject(projectId);
 
-      const jobId = nanoid();
-
-      const job: JobStatus = {
-        jobId,
-        projectId,
-        status: "pending",
-        progress: 0,
-        createdAt: new Date(),
+      const options: CompileJobOptions = {
+        engine: body.engine,
+        mainFile: body.mainFile,
+        clean: body.clean,
+        shellEscape: body.shellEscape,
+        timeoutMs: body.timeoutSeconds * 1000,
       };
-      await jobStore.set(jobId, job);
 
-      (async (): Promise<void> => {
-        try {
-          await jobStore.set(jobId, { ...job, status: "compiling", progress: 10 });
-
-          const result = await compileProject(projectId, { engine, mainFile });
-
-          await jobStore.set(jobId, {
-            ...job,
-            status: result.success ? "complete" : "failed",
-            progress: 100,
-            result: {
-              success: result.success,
-              outputPath: result.outputPath,
-              logOutput: result.logOutput,
-              errors: result.errors,
-              warnings: result.warnings.map((w) => ({
-                line: w.line,
-                column: 0,
-                message: w.message,
-                type: "warning" as const,
-              })),
-              duration: result.duration,
-            },
-          });
-        } catch (error) {
-          // Attempt to extract properties safely if they exist on the error object
-          const errObj = error as {
-            logOutput?: string;
-            errors?: NonNullable<JobStatus["result"]>["errors"];
-            warnings?: Array<{
-              line?: number;
-              column?: number;
-              message?: string;
-              type?: "error" | "warning";
-            }>;
-          };
-          const originalLogOutput = errObj.logOutput || "Compilation failed";
-          const originalErrors = errObj.errors || [
-            {
-              line: 0,
-              column: 0,
-              message: (error as Error).message,
-              type: "error",
-            },
-          ];
-
-          await jobStore.set(jobId, {
-            ...job,
-            status: "failed",
-            progress: 100,
-            result: {
-              success: false,
-              logOutput: originalLogOutput,
-              errors: originalErrors,
-              warnings: (errObj.warnings || []).map((w) => ({
-                line: w.line ?? 0,
-                column: w.column ?? 0,
-                message: w.message ?? "",
-                type: w.type ?? "warning",
-              })),
-              duration: 0,
-            },
-          });
-        }
-      })();
+      const newJobId = nanoid();
+      const queued = compileQueue.enqueue(projectId, newJobId, options);
+      if (queued.state !== "joined") {
+        // "started" jobs are overwritten by runCompileJob almost immediately;
+        // "queued" ones stay pending until the running compile finishes.
+        await jobStore.set(queued.jobId, {
+          jobId: queued.jobId,
+          projectId,
+          status: queued.state === "queued" ? "pending" : "compiling",
+          progress: 0,
+          createdAt: new Date(),
+        });
+      }
 
       res
         .status(202)
-        .json(createSuccessResponse({ jobId, status: "compiling" }));
+        .json(createSuccessResponse({ jobId: queued.jobId, status: queued.state === "started" ? "compiling" : "pending" }));
     } catch (error) {
       next(error);
     }
@@ -269,11 +268,15 @@ systemCheckRouter.get("/system/latex-check", async (_req, res) => {
   const results = await Promise.all(engines.map(checkEngine));
 
   const anyInstalled = results.some((r) => r.installed);
+  const tools = await Promise.all(["latexmk", "biber", "bibtex", "synctex"].map(checkEngine));
 
   res.json(
     createSuccessResponse({
       latexInstalled: anyInstalled,
       engines: results,
+      tools,
+      // latexmk = incremental builds; without it TexCraft runs a fixed number of passes
+      incrementalBuilds: await hasLatexmk(),
       message: anyInstalled
         ? "LaTeX is installed and ready"
         : "No LaTeX engine found. Please install TeX Live, MiKTeX, or MacTeX.",

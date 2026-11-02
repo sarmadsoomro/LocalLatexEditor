@@ -50,5 +50,5 @@ pnpm test:unit    # Vitest
 
 - WebSockets exist. They do not.
 - Import writes back to the user's original folder. It copies.
-- The settings `shellEscape` flag is honored. The compiler ignores it.
+- The compiler always uses latexmk. It falls back to manual passes when latexmk is missing (`TEXCRAFT_DISABLE_LATEXMK=1` forces this in tests).
 - `AGENTS.md` status from April 2026. Project management, trash, compile, preview, rename, and zip export are already in the tree.

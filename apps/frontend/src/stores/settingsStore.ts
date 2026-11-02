@@ -19,6 +19,18 @@ interface SettingsState extends Settings {
 
 const STORAGE_KEY = 'latex-editor-settings';
 
+/** Saved compiler settings minus keys that no longer exist (synctex, draftMode, ...). */
+function pickKnown(defaults: CompilerSettings, saved: Partial<CompilerSettings> | undefined): CompilerSettings {
+  const merged = { ...defaults };
+  if (!saved) return merged;
+  for (const key of Object.keys(defaults) as Array<keyof CompilerSettings>) {
+    if (saved[key] !== undefined) {
+      (merged as Record<string, unknown>)[key] = saved[key];
+    }
+  }
+  return merged;
+}
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
@@ -86,6 +98,17 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorage),
+      // Deep-merge each section so settings added in a new version get their
+      // defaults instead of being undefined for people with saved settings.
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<Settings>;
+        return {
+          ...current,
+          editor: { ...current.editor, ...saved.editor },
+          compiler: pickKnown(current.compiler, saved.compiler),
+          ui: { ...current.ui, ...saved.ui },
+        };
+      },
       partialize: (state) => ({
         editor: state.editor,
         compiler: state.compiler,

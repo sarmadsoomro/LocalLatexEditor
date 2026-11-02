@@ -9,14 +9,16 @@ import { api } from "./api";
 interface LatexCheckResponse {
   latexInstalled: boolean;
   engines: Array<{ engine: string; installed: boolean; version?: string }>;
+  tools: Array<{ engine: string; installed: boolean; version?: string }>;
+  incrementalBuilds: boolean;
   message: string;
 }
 
-interface CompileOptions {
-  synctex?: boolean;
-  draftMode?: boolean;
+export interface CompileOptions {
+  /** Delete auxiliary files first and rebuild everything. */
+  clean?: boolean;
   shellEscape?: boolean;
-  additionalArgs?: string[];
+  timeoutSeconds?: number;
 }
 
 export const compilationApi = {
@@ -27,7 +29,6 @@ export const compilationApi = {
     options?: CompileOptions,
   ): Promise<CompileResponse> {
     return api.post<CompileResponse>(`/api/projects/${projectId}/compile`, {
-      projectId,
       engine,
       mainFile,
       ...options,

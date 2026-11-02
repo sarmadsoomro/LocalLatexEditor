@@ -9,16 +9,206 @@ import { ValidationError, InternalError } from "../types/error.js";
 import { parseLaTeXLog } from "./logParser.js";
 import { getProject } from "./projectService.js";
 
+export type LatexEngine = "pdflatex" | "xelatex" | "lualatex";
+
 export interface CompileOptions {
-  engine?: "pdflatex" | "xelatex" | "lualatex";
+  engine?: LatexEngine;
   mainFile?: string;
+  /** Delete everything in output/ first (a full rebuild). */
+  clean?: boolean;
+  /** Pass -shell-escape. Off by default; only for documents the user trusts. */
+  shellEscape?: boolean;
+  /** Total time budget for the whole compile, all passes included. */
+  timeoutMs?: number;
 }
 
-const DEFAULT_TIMEOUT_MS = 120000;
+export const DEFAULT_TIMEOUT_MS = 300_000;
+export const MIN_TIMEOUT_MS = 30_000;
+export const MAX_TIMEOUT_MS = 1_800_000;
+
+const LATEXMK_ENGINE_FLAG: Record<LatexEngine, string> = {
+  pdflatex: "-pdf",
+  xelatex: "-xelatex",
+  lualatex: "-lualatex",
+};
+
+let latexmkAvailable: Promise<boolean> | null = null;
+
+/** Whether latexmk is on PATH. Checked once per process. TEXCRAFT_DISABLE_LATEXMK=1 forces the fallback. */
+export function hasLatexmk(): Promise<boolean> {
+  if (process.env.TEXCRAFT_DISABLE_LATEXMK === "1") return Promise.resolve(false);
+  if (!latexmkAvailable) {
+    latexmkAvailable = new Promise((resolve) => {
+      const child = spawn("latexmk", ["-v"], { shell: false, stdio: "ignore" });
+      const timer = setTimeout(() => {
+        child.kill();
+        resolve(false);
+      }, 5000);
+      child.on("error", () => {
+        clearTimeout(timer);
+        resolve(false);
+      });
+      child.on("close", (code) => {
+        clearTimeout(timer);
+        resolve(code === 0);
+      });
+    });
+  }
+  return latexmkAvailable;
+}
+
+/** Test hook: forget the cached latexmk check. */
+export function resetLatexmkCheck(): void {
+  latexmkAvailable = null;
+}
+
+interface ProcessResult {
+  output: string;
+  exitCode: number;
+}
+
+class Deadline {
+  private readonly endsAt: number;
+  constructor(readonly totalMs: number) {
+    this.endsAt = Date.now() + totalMs;
+  }
+  remaining(): number {
+    return this.endsAt - Date.now();
+  }
+  timeoutError(): InternalError {
+    return new InternalError(
+      `Compilation timed out after ${Math.round(this.totalMs / 1000)} seconds. ` +
+        "Increase the compile timeout in Settings → Compiler for very long documents.",
+    );
+  }
+}
+
+/** Kill a process and everything it started (latexmk spawns pdflatex, biber, ...). */
+function killTree(pid: number | undefined): void {
+  if (!pid) return;
+  if (process.platform === "win32") {
+    spawn("taskkill", ["/pid", String(pid), "/T", "/F"], { shell: false, stdio: "ignore" }).on(
+      "error",
+      () => undefined,
+    );
+    return;
+  }
+  try {
+    // negative pid = the whole process group (the child was spawned detached)
+    process.kill(-pid, "SIGKILL");
+  } catch {
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      /* already gone */
+    }
+  }
+}
+
+function runProcess(
+  command: string,
+  args: string[],
+  cwd: string,
+  deadline: Deadline,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<ProcessResult> {
+  return new Promise((resolve, reject) => {
+    const remaining = deadline.remaining();
+    if (remaining <= 0) {
+      reject(deadline.timeoutError());
+      return;
+    }
+
+    const child = spawn(command, args, {
+      cwd,
+      env,
+      shell: false,
+      // own process group on POSIX so a timeout can kill grandchildren too
+      detached: process.platform !== "win32",
+    });
+
+    let output = "";
+    child.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+    child.stderr.on("data", (data) => {
+      output += data.toString();
+    });
+
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      killTree(child.pid);
+    }, remaining);
+
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (timedOut) {
+        reject(deadline.timeoutError());
+        return;
+      }
+      resolve({ output, exitCode: code ?? 1 });
+    });
+
+    child.on("error", (err) => {
+      clearTimeout(timer);
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        reject(
+          new InternalError(
+            `"${command}" was not found. Install a LaTeX distribution (TeX Live, MacTeX or MiKTeX) and make sure ${command} is on PATH.`,
+          ),
+        );
+      } else {
+        reject(new InternalError(`Failed to run ${command}: ${err.message}`));
+      }
+    });
+  });
+}
+
+/**
+ * pdflatex cannot write output/chapters/ch1.aux for \include{chapters/ch1}
+ * unless output/chapters exists. Mirror the project's folders into output/.
+ */
+async function mirrorSubdirectories(projectPath: string, outputDir: string, rel = ""): Promise<void> {
+  let entries;
+  try {
+    entries = await fs.readdir(path.join(projectPath, rel), { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+    if (rel === "" && entry.name === "output") continue;
+    const sub = path.join(rel, entry.name);
+    await fs.mkdir(path.join(outputDir, sub), { recursive: true });
+    await mirrorSubdirectories(projectPath, outputDir, sub);
+  }
+}
+
+async function readIfExists(file: string): Promise<string | null> {
+  try {
+    return await fs.readFile(file, "utf-8");
+  } catch {
+    return null;
+  }
+}
+
+async function exists(file: string): Promise<boolean> {
+  try {
+    await fs.access(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Compiles a LaTeX project to PDF.
- * Runs two passes for cross-references and optionally runs BibTeX.
+ *
+ * Uses latexmk when it is installed: it keeps auxiliary files between runs and
+ * only reruns LaTeX/BibTeX/Biber as often as needed, so a one-line change in a
+ * long document does not trigger a full rebuild. Without latexmk it falls back
+ * to running the engine (and BibTeX/Biber) a fixed number of times.
  */
 export async function compileProject(
   projectId: string,
@@ -31,332 +221,240 @@ export async function compileProject(
 
   const mainFile = options.mainFile || project.metadata?.mainFile || "main.tex";
   const mainFilePath = path.join(projectPath, mainFile);
-
-  try {
-    await fs.access(mainFilePath);
-  } catch {
+  if (!(await exists(mainFilePath))) {
     throw new ValidationError(`Main file "${mainFile}" not found in project`);
   }
 
-  const engine = options.engine || project.settings?.compiler || "pdflatex";
+  const engine: LatexEngine = options.engine || (project.settings?.compiler as LatexEngine) || "pdflatex";
+  const timeoutMs = Math.min(
+    Math.max(options.timeoutMs ?? DEFAULT_TIMEOUT_MS, 1000),
+    MAX_TIMEOUT_MS,
+  );
   const outputDir = path.join(projectPath, "output");
+  const mainBase = path.basename(mainFile, ".tex");
+
+  if (options.clean) {
+    await fs.rm(outputDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+  }
   await fs.mkdir(outputDir, { recursive: true });
-  const mainFileBasename = path.basename(mainFile, ".tex");
+  await mirrorSubdirectories(projectPath, outputDir);
 
-  // Clean LaTeX intermediate files to avoid stale file issues
-  const intermediateExtensions = [".aux", ".log", ".toc", ".bbl", ".blg", ".out", ".nav", ".snm"];
-  try {
-    const existingFiles = await fs.readdir(outputDir);
-    for (const file of existingFiles) {
-      if (intermediateExtensions.some(ext => file.endsWith(ext))) {
-        await fs.unlink(path.join(outputDir, file));
-      }
-    }
-  } catch {
-    // Directory might not exist, that's fine
+  const shellEscape = options.shellEscape === true;
+  const run = async (): Promise<{ logOutput: string; exitCode: number }> => {
+    // one budget for the whole compile, including an automatic rebuild
+    const deadline = new Deadline(timeoutMs - (Date.now() - startTime));
+    return (await hasLatexmk())
+      ? runLatexmk(projectPath, mainFile, engine, outputDir, shellEscape, deadline)
+      : runManualPasses(projectPath, mainFile, engine, outputDir, shellEscape, deadline);
+  };
+
+  let { logOutput, exitCode } = await run();
+  let result = await collectResult(outputDir, mainBase, logOutput, exitCode);
+
+  // A broken .aux from an earlier failed run can make every later run fail,
+  // even after the source is fixed. Rebuild once from scratch.
+  if (!result.success && !options.clean && (await staleAuxSuspected(outputDir, mainBase, result))) {
+    await fs.rm(outputDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    await fs.mkdir(outputDir, { recursive: true });
+    await mirrorSubdirectories(projectPath, outputDir);
+    ({ logOutput, exitCode } = await run());
+    logOutput = "TexCraft: stale auxiliary files detected, rebuilt from scratch.\n\n" + logOutput;
+    result = await collectResult(outputDir, mainBase, logOutput, exitCode);
   }
 
-  let logOutput = "";
+  return { ...result, duration: Date.now() - startTime };
+}
 
-  const result1 = await runLatexPass(projectPath, mainFile, engine, outputDir);
-  logOutput += result1.output;
+/**
+ * True when the first error was raised while reading an .aux file. TeX
+ * usually closes the .aux before reporting, so the error follows directly
+ * after "(output/main.aux)" in the log.
+ */
+async function staleAuxSuspected(
+  outputDir: string,
+  mainBase: string,
+  result: Omit<CompilationResult, "duration">,
+): Promise<boolean> {
+  if (result.errors.some((e) => e.file?.endsWith(".aux"))) return true;
+  const log = await readIfExists(path.join(outputDir, `${mainBase}.log`));
+  if (!log) return false;
+  const lines = log.split("\n");
+  const firstError = lines.findIndex((line) => line.startsWith("! "));
+  if (firstError < 0) return false;
+  return lines.slice(Math.max(0, firstError - 4), firstError).some((line) => /\.aux\)?\s*$/.test(line));
+}
 
-  const needsBibTeX = await detectBibTeX(projectPath, mainFile);
-  
-  // Recursively find all .bib files in project directory
-  async function findBibFilesRecursive(dir: string): Promise<string[]> {
-    const bibFiles: string[] = [];
-    const entries = await fs.readdir(dir, { withFileTypes: true });
-    
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory() && entry.name !== 'output') {
-        // Recursively search subdirectories (skip output dir)
-        const subDirFiles = await findBibFilesRecursive(fullPath);
-        bibFiles.push(...subDirFiles);
-      } else if (entry.name.endsWith('.bib')) {
-        bibFiles.push(fullPath);
-      }
-    }
-    
-    return bibFiles;
-  }
-  
-  let allBibFiles: string[] = [];
-  try {
-    allBibFiles = await findBibFilesRecursive(projectPath);
-  } catch {
-    // Ignore errors searching for bib files
-  }
-  
-  let bblCreated = false;
-  if (needsBibTeX && result1.exitCode === 0) {
-    // Copy .bib files to output directory so biber can find them
-    try {
-      for (const bibFilePath of allBibFiles) {
-        const fileName = path.basename(bibFilePath);
-        const destPath = path.join(outputDir, fileName);
-        await fs.copyFile(bibFilePath, destPath);
-      }
-    } catch {
-      // Ignore errors copying .bib files
-    }
-    
-    const bibResult = await runBibTeX(projectPath, mainFile, engine);
-    logOutput += "\n=== BIBLIOGRAPHY PROCESSING ===\n" + bibResult.output;
-    
-    // Check if .bbl file was created and its size
-    const bblPath = path.join(outputDir, `${mainFileBasename}.bbl`);
-    try {
-      await fs.access(bblPath);
-      const bblStats = await fs.stat(bblPath);
-      bblCreated = true;
-      logOutput += `\n=== BBL FILE CREATED SUCCESSFULLY (size: ${bblStats.size} bytes) ===\n`;
-      
-      // If bbl is very small, it might be empty
-      if (bblStats.size < 100) {
-        const bblContent = await fs.readFile(bblPath, 'utf-8');
-        logOutput += `\n=== BBL CONTENT (first 500 chars): ===\n${bblContent.substring(0, 500)}\n`;
-      }
-    } catch {
-      logOutput += "\n=== WARNING: BBL FILE NOT CREATED ===\n";
-    }
-    
-    // List all .bib files in output directory
-    try {
-      const outputFiles = await fs.readdir(outputDir);
-      const bibFilesInOutput = outputFiles.filter(f => f.endsWith('.bib'));
-      logOutput += `\n=== BIB FILES IN OUTPUT DIR: ${bibFilesInOutput.join(', ') || 'NONE'} ===\n`;
-    } catch {
-      logOutput += "\n=== COULD NOT LIST OUTPUT DIRECTORY ===\n";
-    }
+async function collectResult(
+  outputDir: string,
+  mainBase: string,
+  logOutput: string,
+  exitCode: number,
+): Promise<Omit<CompilationResult, "duration">> {
+  // The engine's own .log for the last pass is the most reliable source of
+  // errors: latexmk's console output repeats them once per pass.
+  const engineLog = await readIfExists(path.join(outputDir, `${mainBase}.log`));
+  const parsed = parseLaTeXLog(engineLog ?? logOutput);
+
+  // "Fatal error occurred" with no line is a consequence of an earlier error.
+  parsed.errors = parsed.errors.filter(
+    (e) => !(e.message.includes("Fatal error occurred") && e.line === 0),
+  );
+
+  const outputPath = path.join(outputDir, `${mainBase}.pdf`);
+  const pdfExists = await exists(outputPath);
+
+  // Show LaTeX's own log first (what students search for), then latexmk's summary.
+  if (engineLog && engineLog !== logOutput) {
+    logOutput = `${engineLog.trimEnd()}\n\n=== Build tool output ===\n${logOutput}`;
   }
 
-  let result2;
-  if (
-    result1.exitCode === 0 ||
-    logOutput.includes("Warning: Label(s) may have changed")
-  ) {
-    result2 = await runLatexPass(projectPath, mainFile, engine, outputDir);
-    logOutput += "\n" + result2.output;
-  }
-
-  if (needsBibTeX && result2 && result2.exitCode === 0) {
-    if (!bblCreated) {
-      logOutput += "\n=== WARNING: Running LaTeX pass without .bbl file - citations may not appear ===\n";
-    }
-    const result3 = await runLatexPass(projectPath, mainFile, engine, outputDir);
-    logOutput += "\n" + result3.output;
-  }
-
-  const parsed = parseLaTeXLog(logOutput);
-
-  const outputPath = path.join(outputDir, `${mainFileBasename}.pdf`);
-
-  let pdfExists = false;
-  try {
-    await fs.access(outputPath);
-    pdfExists = true;
-  } catch {
-    pdfExists = false;
-  }
-
-  const failed =
-    (result1.exitCode !== 0 || (result2 && result2.exitCode !== 0)) &&
-    !pdfExists;
+  const failed = exitCode !== 0 || !pdfExists;
   if (failed && parsed.errors.length === 0) {
     parsed.errors.push({
       line: 1,
       column: 1,
-      message:
-        "Compilation failed, but no specific LaTeX error was found in the logs.",
+      message: pdfExists
+        ? "Compilation reported a problem, but no specific LaTeX error was found in the log. See the full log for details."
+        : "Compilation failed and no PDF was produced. See the full log for details.",
       type: "error",
     });
   }
 
-  // Filter out "Fatal error occurred" errors that don't have a line number
-  // as they're a consequence of earlier errors, not independent issues
-  parsed.errors = parsed.errors.filter(e => {
-    if (e.message.includes("Fatal error occurred") && e.line === 0) {
-      return false;
-    }
-    return true;
-  });
-
-  const duration = Date.now() - startTime;
-
   return {
-    success: pdfExists && parsed.errors.length === 0 && !failed,
+    success: pdfExists && !failed && parsed.errors.length === 0,
     outputPath: pdfExists ? outputPath : undefined,
     logOutput,
     errors: parsed.errors,
     warnings: parsed.warnings,
-    duration,
   };
 }
 
-async function runLatexPass(
+async function runLatexmk(
   projectPath: string,
   mainFile: string,
-  engine: string,
+  engine: LatexEngine,
   outputDir: string,
-): Promise<{ output: string; exitCode: number }> {
-  return new Promise((resolve, reject) => {
-    const args = [
-      "-interaction=nonstopmode",
-      "-halt-on-error",
-      `-output-directory=${outputDir}`,
-      mainFile,
-    ];
+  shellEscape: boolean,
+  deadline: Deadline,
+): Promise<{ logOutput: string; exitCode: number }> {
+  const args = [
+    LATEXMK_ENGINE_FLAG[engine],
+    "-interaction=nonstopmode",
+    "-synctex=1",
+    `-outdir=${outputDir}`,
+  ];
+  if (shellEscape) args.push("-shell-escape");
+  args.push(mainFile);
 
-    const childProcess = spawn(engine, args, {
-      cwd: projectPath,
-      shell: false,
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    childProcess.stdout.on("data", (data) => {
-      stdout += data.toString();
-    });
-
-    childProcess.stderr.on("data", (data) => {
-      stderr += data.toString();
-    });
-
-    const timeout = setTimeout(() => {
-      childProcess.kill();
-      reject(
-        new InternalError(
-          `Compilation timed out after ${DEFAULT_TIMEOUT_MS / 1000} seconds`,
-        ),
-      );
-    }, DEFAULT_TIMEOUT_MS);
-
-    childProcess.on("close", (code) => {
-      clearTimeout(timeout);
-      const output = stdout + "\n" + stderr;
-      resolve({ output, exitCode: code ?? 1 });
-    });
-
-    childProcess.on("error", (err) => {
-      clearTimeout(timeout);
-      if (err.message.includes("ENOENT")) {
-        reject(
-          new InternalError(
-            `LaTeX engine "${engine}" not found. Please ensure ${engine} is installed and in PATH.`,
-          ),
-        );
-      } else {
-        reject(new InternalError(`Failed to run ${engine}: ${err.message}`));
-      }
-    });
-  });
+  const result = await runProcess("latexmk", args, projectPath, deadline);
+  return { logOutput: result.output, exitCode: result.exitCode };
 }
 
-/**
- * Detects if a LaTeX project requires BibTeX/Biber processing.
- */
-export async function detectBibTeX(
+/** Fallback when latexmk is not installed: engine, BibTeX/Biber if needed, then engine again. */
+async function runManualPasses(
   projectPath: string,
   mainFile: string,
-): Promise<boolean> {
-  const mainFilePath = path.join(projectPath, mainFile);
+  engine: LatexEngine,
+  outputDir: string,
+  shellEscape: boolean,
+  deadline: Deadline,
+): Promise<{ logOutput: string; exitCode: number }> {
+  const mainBase = path.basename(mainFile, ".tex");
+  const engineArgs = [
+    "-interaction=nonstopmode",
+    "-synctex=1",
+    `-output-directory=${outputDir}`,
+  ];
+  if (shellEscape) engineArgs.push("-shell-escape");
+  engineArgs.push(mainFile);
 
+  const pass = (): Promise<ProcessResult> => runProcess(engine, engineArgs, projectPath, deadline);
+
+  let logOutput = "";
+  const first = await pass();
+  logOutput += first.output;
+  if (first.exitCode !== 0) {
+    return { logOutput, exitCode: first.exitCode };
+  }
+
+  const bib = await detectBibliography(projectPath, mainFile);
+  if (bib) {
+    const bibResult = await runBibliography(bib, projectPath, outputDir, mainBase, deadline);
+    logOutput += `\n=== ${bib.toUpperCase()} ===\n` + bibResult.output;
+  }
+
+  // Two more passes resolve citations, references and the table of contents.
+  const passes = bib ? 2 : 1;
+  let last = first;
+  for (let i = 0; i < passes; i++) {
+    last = await pass();
+    logOutput += "\n" + last.output;
+    if (last.exitCode !== 0) break;
+  }
+  return { logOutput, exitCode: last.exitCode };
+}
+
+/** Returns which bibliography tool the main file needs, if any. */
+export async function detectBibliography(
+  projectPath: string,
+  mainFile: string,
+): Promise<"biber" | "bibtex" | null> {
+  const content = await readIfExists(path.join(projectPath, mainFile));
+  if (!content) return null;
+  const uncommented = content
+    .split("\n")
+    .map((line) => line.replace(/(^|[^\\])%.*$/, "$1"))
+    .join("\n");
+  if (/\\usepackage(\[[^\]]*\])?\{[^}]*\bbiblatex\b[^}]*\}/.test(uncommented)) {
+    return /backend\s*=\s*bibtex/.test(uncommented) ? "bibtex" : "biber";
+  }
+  if (/\\bibliography\{/.test(uncommented)) return "bibtex";
+  return null;
+}
+
+async function runBibliography(
+  tool: "biber" | "bibtex",
+  projectPath: string,
+  outputDir: string,
+  mainBase: string,
+  deadline: Deadline,
+): Promise<ProcessResult> {
+  // Both tools run inside output/ (where the .aux/.bcf live) and find .bib
+  // files in the project folder through BIBINPUTS. Copy .bib files as well:
+  // some Biber builds ignore BIBINPUTS for relative \addbibresource paths.
+  await copyBibFiles(projectPath, outputDir);
+  const env = {
+    ...process.env,
+    BIBINPUTS: [projectPath, outputDir, process.env.BIBINPUTS ?? ""].join(path.delimiter),
+  };
   try {
-    const content = await fs.readFile(mainFilePath, "utf-8");
-
-    const hasBiblatex =
-      content.includes("\\usepackage{biblatex}") ||
-      (content.includes("\\usepackage[") && content.includes("biblatex"));
-    const hasCite = content.includes("\\cite{");
-    const hasBibliography = content.includes("\\bibliography{");
-    const hasAddBibresource = content.includes("\\addbibresource{");
-
-    return hasBiblatex || hasCite || hasBibliography || hasAddBibresource;
-  } catch {
-    return false;
+    return await runProcess(tool, [mainBase], outputDir, deadline, env);
+  } catch (error) {
+    // A missing bibliography tool should not hide the PDF; report it in the log.
+    if (error instanceof InternalError && error.message.includes("was not found")) {
+      return { output: `Warning: ${error.message}`, exitCode: 1 };
+    }
+    throw error;
   }
 }
 
-/**
- * Runs BibTeX or Biber for bibliography processing.
- */
-export async function runBibTeX(
-  projectPath: string,
-  mainFile: string,
-  _engine: string,
-): Promise<{ output: string; success: boolean }> {
-  const mainFileBasename = path.basename(mainFile, ".tex");
-  const outputDir = path.join(projectPath, "output");
-  const mainFilePath = path.join(projectPath, mainFile);
-
-  let useBiber = false;
-
+async function copyBibFiles(projectPath: string, outputDir: string, rel = ""): Promise<void> {
+  let entries;
   try {
-    const content = await fs.readFile(mainFilePath, "utf-8");
-    useBiber =
-      content.includes("\\usepackage{biblatex}") ||
-      (content.includes("\\usepackage[") && content.includes("biblatex"));
+    entries = await fs.readdir(path.join(projectPath, rel), { withFileTypes: true });
   } catch {
-    useBiber = false;
+    return;
   }
-
-  const bibtexEngine = useBiber ? "biber" : "bibtex";
-  const args = [mainFileBasename];
-
-  return new Promise((resolve, reject) => {
-    const childProcess = spawn(bibtexEngine, args, {
-      cwd: outputDir,
-      shell: false,
-      env: {
-        ...process.env,
-        // Add project path to BIBINPUTS so BibTeX can find .bib files in subdirectories
-        BIBINPUTS: projectPath + path.delimiter + (process.env.BIBINPUTS || ''),
-      },
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    childProcess.stdout.on("data", (data) => {
-      stdout += data.toString();
-    });
-
-    childProcess.stderr.on("data", (data) => {
-      stderr += data.toString();
-    });
-
-    const timeout = setTimeout(() => {
-      childProcess.kill();
-      reject(
-        new InternalError(
-          `BibTeX timed out after ${DEFAULT_TIMEOUT_MS / 1000} seconds`,
-        ),
-      );
-    }, DEFAULT_TIMEOUT_MS);
-
-    childProcess.on("close", (code) => {
-      clearTimeout(timeout);
-      const output = stdout + "\n" + stderr;
-      resolve({ output, success: code === 0 });
-    });
-
-    childProcess.on("error", (err) => {
-      clearTimeout(timeout);
-      if (err.message.includes("ENOENT")) {
-        console.warn(
-          `BibTeX engine "${bibtexEngine}" not found, skipping bibliography processing`,
-        );
-        resolve({ output: `Warning: ${bibtexEngine} not found`, success: false });
-      } else {
-        reject(
-          new InternalError(`Failed to run ${bibtexEngine}: ${err.message}`),
-        );
-      }
-    });
-  });
+  for (const entry of entries) {
+    const sub = path.join(rel, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name.startsWith(".") || (rel === "" && entry.name === "output")) continue;
+      await copyBibFiles(projectPath, outputDir, sub);
+    } else if (entry.name.endsWith(".bib")) {
+      await fs.mkdir(path.join(outputDir, rel), { recursive: true });
+      await fs.copyFile(path.join(projectPath, sub), path.join(outputDir, sub));
+    }
+  }
 }
 
 export default compileProject;

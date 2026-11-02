@@ -271,7 +271,7 @@ Examples:
 - Validate all inputs with Zod schemas
 - Use path traversal protection (always use `path.join()`)
 - Listeners bind to `127.0.0.1`. Do not call `listen` without that host
-- Do not pass `-shell-escape`. The compiler does not, and the settings toggle is not wired
+- Do not pass `-shell-escape` by default. It is only passed when the user turns on the Shell escape setting
 - Run LaTeX compilation with user-level privileges only. That is not a sandbox
 
 ### Data Privacy

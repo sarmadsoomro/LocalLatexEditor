@@ -5,6 +5,12 @@ const engines = ['pdflatex', 'xelatex', 'lualatex'] as const;
 export const compileBodySchema = z.object({
   engine: z.enum(engines).optional().default('pdflatex'),
   mainFile: z.string().optional(),
+  /** Delete auxiliary files first and rebuild everything. */
+  clean: z.boolean().optional().default(false),
+  /** Pass -shell-escape (needed by minted and a few other packages). */
+  shellEscape: z.boolean().optional().default(false),
+  /** Total compile time budget in seconds. */
+  timeoutSeconds: z.number().int().min(30).max(1800).optional().default(300),
 });
 
 export const compileParamsSchema = z.object({
