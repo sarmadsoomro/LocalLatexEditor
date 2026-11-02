@@ -10,6 +10,7 @@ import { createSessionToken, injectSessionToken } from "./config/sessionToken.js
 import { ensureStorageDirectories } from "./config/storage.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requireApiToken } from "./middleware/requireApiToken.js";
+import { requireLoopbackHost } from "./middleware/requireLoopbackHost.js";
 import compilationRoutes, {
   compilationJobRouter,
   projectPdfRouter,
@@ -31,7 +32,7 @@ const logger = pino({
 const PORT = Number(process.env.PORT) || 3001;
 const HOST = process.env.HOST || "127.0.0.1";
 
-export function createApp(token: string): Express {
+export function createApp(token: string, port: number = PORT): Express {
   const app = express();
 
   const apiLimiter = rateLimit({
@@ -55,6 +56,7 @@ export function createApp(token: string): Express {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'X-TexCraft-Token', 'Cache-Control', 'Pragma', 'Expires'],
   }));
+  app.use(requireLoopbackHost(port));
   app.use(express.json());
 
   app.use("/api", requireApiToken(token));
@@ -106,7 +108,7 @@ async function startServer(): Promise<void> {
       );
     }
 
-    const app = createApp(token);
+    const app = createApp(token, PORT);
     app.listen(PORT, HOST, () => {
       logger.info(`Backend server running on http://${HOST}:${PORT}`);
     });
