@@ -17,6 +17,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "5",
+    "@fontsource/crimson-pro": "5",
+    "@fontsource/jetbrains-mono": "5",
     "@local-latex-editor/shared-types": "workspace:*",
     "@monaco-editor/react": "^4.6.0",
     "clsx": "^2.1.1",
