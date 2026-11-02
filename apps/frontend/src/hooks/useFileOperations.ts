@@ -1,9 +1,10 @@
-import { startTransition, useCallback, useRef } from 'react';
-import { useEditorStore, type OpenFile } from '../stores/editorStore';
-import { fileApi } from '../services/fileApi';
 import type { FileType } from '@local-latex-editor/shared-types';
 import { getFileTypeFromExtension } from '@local-latex-editor/shared-types';
+import { startTransition, useCallback, useRef } from 'react';
 import { shallow } from 'zustand/shallow';
+
+import { fileApi } from '../services/fileApi';
+import { useEditorStore, type OpenFile } from '../stores/editorStore';
 
 function generateFileId(): string {
   return `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

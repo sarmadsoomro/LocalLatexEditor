@@ -1,10 +1,12 @@
-import { memo, useState, useRef, useEffect, useCallback, useMemo } from "react";
 import type { FileNode } from "@local-latex-editor/shared-types";
-import { FileIcon, FolderIcon } from "./icons/FileIcon";
 import { isEditableFile } from "@local-latex-editor/shared-types";
+import { memo, useState, useRef, useEffect, useCallback, useMemo } from "react";
+
 import { projectApi } from "../services/projectApi";
-import { useToast } from "./Toast";
 import { useSettingsStore } from "../stores/settingsStore";
+
+import { FileIcon, FolderIcon } from "./icons/FileIcon";
+import { useToast } from "./Toast";
 
 interface FileTreeProps {
   projectId: string;
@@ -677,7 +679,7 @@ export const FileTree = memo(function FileTree({
               Delete File?
             </h3>
             <p className="text-sm text-muted mb-4">
-              Are you sure you want to delete "{deleting.name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deleting.name}&quot;? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button

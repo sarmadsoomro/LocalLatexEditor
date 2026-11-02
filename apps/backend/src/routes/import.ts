@@ -1,14 +1,16 @@
+import fs from 'fs';
+import path from 'path';
+
 import { Router, type Router as RouterType } from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import unzipper from 'unzipper';
 import { nanoid } from 'nanoid';
+import unzipper from 'unzipper';
 import { z } from 'zod';
-import { createSuccessResponse } from '../types/response.js';
+
 import { validateBody } from '../middleware/validate.js';
 import { importProject } from '../services/projectService.js';
 import { ValidationError } from '../types/error.js';
+import { createSuccessResponse } from '../types/response.js';
 
 const router: RouterType = Router();
 
@@ -109,12 +111,16 @@ router.post(
         try {
           fs.rmSync(zipFilePath, { force: true });
           fs.rmSync(extractDir, { recursive: true, force: true });
-        } catch {}
+        } catch {
+          /* cleanup is best-effort */
+        }
       }
     } catch (error) {
       try {
         fs.rmSync(zipFilePath, { force: true });
-      } catch {}
+      } catch {
+        /* cleanup is best-effort */
+      }
       next(error);
     }
   }

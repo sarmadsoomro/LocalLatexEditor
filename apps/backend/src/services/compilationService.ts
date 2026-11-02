@@ -1,10 +1,13 @@
 import { spawn } from "child_process";
 import { promises as fs } from "fs";
 import path from "path";
+
 import type { CompilationResult } from "@local-latex-editor/shared-types";
-import { getProject } from "./projectService.js";
-import { parseLaTeXLog } from "./logParser.js";
+
 import { ValidationError, InternalError } from "../types/error.js";
+
+import { parseLaTeXLog } from "./logParser.js";
+import { getProject } from "./projectService.js";
 
 export interface CompileOptions {
   engine?: "pdflatex" | "xelatex" | "lualatex";

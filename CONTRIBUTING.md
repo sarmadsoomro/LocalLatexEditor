@@ -1,6 +1,6 @@
-# Contributing to Local LaTeX Editor
+# Contributing to TexCraft
 
-Thank you for your interest in contributing to Local LaTeX Editor! This document provides guidelines and workflows for contributing to the project.
+Thank you for your interest in contributing to TexCraft! This document provides guidelines and workflows for contributing to the project.
 
 ## Table of Contents
 
@@ -298,4 +298,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-Thank you for helping make Local LaTeX Editor better!
+Thank you for helping make TexCraft better!

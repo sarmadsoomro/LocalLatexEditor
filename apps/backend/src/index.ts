@@ -1,17 +1,18 @@
+import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
-import cors from "cors";
 import pino from "pino";
-import projectRoutes from "./routes/projects.js";
-import importRoutes from "./routes/import.js";
-import { jobStore } from "./services/jobStore.js";
+
+import { ensureStorageDirectories } from "./config/storage.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 import compilationRoutes, {
   compilationJobRouter,
   projectPdfRouter,
   systemCheckRouter,
 } from "./routes/compilation.js";
-import { errorHandler } from "./middleware/errorHandler.js";
-import { ensureStorageDirectories } from "./config/storage.js";
+import importRoutes from "./routes/import.js";
+import projectRoutes from "./routes/projects.js";
+import { jobStore } from "./services/jobStore.js";
 
 const logger = pino({
   transport: {
@@ -64,7 +65,7 @@ app.use("/api", importRoutes);
 
 app.use(errorHandler);
 
-async function startServer() {
+async function startServer(): Promise<void> {
   try {
     await jobStore.initialize();
     logger.info("Job store initialized");

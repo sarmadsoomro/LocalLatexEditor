@@ -1,28 +1,30 @@
+import type { FileNode } from "@local-latex-editor/shared-types";
 import { useEffect, useState, useCallback, useRef, lazy, Suspense, startTransition } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FileTree } from "../components/FileTree";
-import { EditorArea } from "../components/Editor";
-import { ResizableSplitPane } from "../components/ResizableSplitPane";
+import { shallow } from "zustand/shallow";
+
+import { AutoCompileToggle } from "../components/AutoCompileToggle";
+import { CompileButton } from "../components/CompileButton";
 import { UnsavedChangesDialog } from "../components/Dialogs";
+import { EditableProjectName } from "../components/EditableProjectName";
+import { EditorArea } from "../components/Editor";
+import { FileTree } from "../components/FileTree";
+import LogViewer from "../components/LogViewer";
+import { ResizableSplitPane } from "../components/ResizableSplitPane";
+import { SettingsModal } from "../components/Settings/SettingsModal";
+import { SettingsDropdown } from "../components/SettingsDropdown";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
-import { CompileButton } from "../components/CompileButton";
-import { AutoCompileToggle } from "../components/AutoCompileToggle";
-import { SettingsDropdown } from "../components/SettingsDropdown";
-import LogViewer from "../components/LogViewer";
-import { EditableProjectName } from "../components/EditableProjectName";
-import { SettingsModal } from "../components/Settings/SettingsModal";
-import { useProjectStore } from "../stores/projectStore";
-import { useEditorStore } from "../stores/editorStore";
-import { useFileOperations } from "../hooks/useFileOperations";
-import { useEditorShortcuts } from "../hooks/useKeyboardShortcuts";
+import { useAutoCompile } from "../hooks/useAutoCompile";
 import { useUnsavedChangesWarning } from "../hooks/useBeforeUnload";
 import { useCompilation } from "../hooks/useCompilation";
-import { useAutoCompile } from "../hooks/useAutoCompile";
-import { projectApi } from "../services/projectApi";
+import { useFileOperations } from "../hooks/useFileOperations";
+import { useEditorShortcuts } from "../hooks/useKeyboardShortcuts";
 import { compilationApi } from "../services/compilationApi";
-import type { FileNode } from "@local-latex-editor/shared-types";
-import { shallow } from "zustand/shallow";
+import { projectApi } from "../services/projectApi";
+import { useEditorStore } from "../stores/editorStore";
+import { useProjectStore } from "../stores/projectStore";
+
 
 const PDFPreview = lazy(() =>
   import("../components/PDFPreview").then((m) => ({ default: m.PDFPreview })),
@@ -128,6 +130,7 @@ export function ProjectDetail() {
     return () => {
       closeAllFiles();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when the project id changes
   }, [projectId]);
 
   // Auto-open main file when project is loaded.

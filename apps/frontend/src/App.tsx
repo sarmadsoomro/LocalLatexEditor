@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastProvider } from "./components/Toast";
 import { ProjectDetail } from "./pages/ProjectDetail";

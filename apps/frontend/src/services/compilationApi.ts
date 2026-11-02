@@ -1,9 +1,10 @@
-import { api } from "./api";
 import type {
   CompileRequest,
   CompileResponse,
   GetCompileStatusResponse,
 } from "@local-latex-editor/shared-types";
+
+import { api } from "./api";
 
 interface LatexCheckResponse {
   latexInstalled: boolean;

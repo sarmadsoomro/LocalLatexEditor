@@ -1,6 +1,6 @@
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type React from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
 
 export interface ResizableSplitPaneProps {
   /** Content for the left panel (typically editor) */

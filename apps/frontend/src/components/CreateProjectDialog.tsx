@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
 import type { Template } from "@local-latex-editor/shared-types";
+import { useState, useEffect, useRef } from "react";
 
 interface CreateProjectDialogProps {
   isOpen: boolean;

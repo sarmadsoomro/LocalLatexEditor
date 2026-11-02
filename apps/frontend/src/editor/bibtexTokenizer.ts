@@ -63,7 +63,7 @@ export const bibtexTokenizer: monaco.languages.IMonarchLanguage = {
       [/@/, 'operator'],
 
       // Citation key: @article{key123,
-      [/{([a-zA-Z0-9_:.+\/-]+)/, 'tag'],
+      [/{([a-zA-Z0-9_:./+-]+)/, 'tag'],
 
       // Common BibTeX fields (case-insensitive)
       [/author/i, 'variable.parameter'],
@@ -132,7 +132,7 @@ export const bibtexTokenizer: monaco.languages.IMonarchLanguage = {
     stringBraced: [
       // Match LaTeX commands with their brace arguments as a unit FIRST
       // This handles \"{a}, \'{e}, \^{o}, etc.
-      [/\\["'\^`~=.][ \t]*\{[^}]*\}/, 'string.escape'],
+      [/\\["'^`~=.][ \t]*\{[^}]*\}/, 'string.escape'],
       // Match escaped characters: \", \{, \}, etc.
       [/\\./, 'string.escape'],
       // Closing brace - pops back to root (must come before generic [])

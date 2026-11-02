@@ -1,9 +1,10 @@
 import { useCallback } from "react";
+import { shallow } from "zustand/shallow";
+
+import { compilationApi } from "../services/compilationApi";
 import { useCompilationStore } from "../stores/compilationStore";
 import { useProjectStore } from "../stores/projectStore";
 import { useSettingsStore } from "../stores/settingsStore";
-import { compilationApi } from "../services/compilationApi";
-import { shallow } from "zustand/shallow";
 
 export interface UseCompilationReturn {
   isCompiling: boolean;

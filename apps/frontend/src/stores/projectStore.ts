@@ -1,5 +1,6 @@
-import { create } from 'zustand';
 import type { ProjectWithMetadata, FileNode, ProjectFilter, ProjectStatus } from '@local-latex-editor/shared-types';
+import { create } from 'zustand';
+
 import { projectApi } from '../services/projectApi';
 
 interface ProjectState {

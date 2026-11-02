@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import type { CompilationError, CompilationWarning } from '@local-latex-editor/shared-types';
+import { useEffect, useRef, useState } from 'react';
 
 interface LogViewerProps {
   logs: string[];

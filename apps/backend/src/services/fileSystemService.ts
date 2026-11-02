@@ -1,5 +1,6 @@
-import path from 'path';
 import { promises as fs } from 'fs';
+import path from 'path';
+
 import type { FileNode } from '@local-latex-editor/shared-types';
 import { getFileTypeFromExtension } from '@local-latex-editor/shared-types';
 

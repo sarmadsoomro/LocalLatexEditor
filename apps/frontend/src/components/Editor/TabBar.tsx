@@ -26,6 +26,7 @@ export function TabBar({
 }: TabBarProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const activeTabRef = useRef<HTMLDivElement>(null);
+  const activeTabId = tabs.find((t) => t.isActive)?.id;
 
   useEffect(() => {
     if (activeTabRef.current && scrollContainerRef.current) {
@@ -35,7 +36,7 @@ export function TabBar({
         inline: "center",
       });
     }
-  }, [tabs.find((t) => t.isActive)?.id]);
+  }, [activeTabId]);
 
   const handleCloseClick = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();

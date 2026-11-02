@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { Template } from '@local-latex-editor/shared-types';
+import { z } from 'zod';
 
 const templates: Template[] = ['article', 'report', 'book', 'beamer', 'letter', 'empty'];
 
