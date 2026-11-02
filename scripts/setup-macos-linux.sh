@@ -72,11 +72,11 @@ check_prerequisites() {
     # Check Node.js
     if command_exists node; then
         NODE_VERSION=$(node --version)
-        NODE_MAJOR=$(echo $NODE_VERSION | cut -d'v' -f2 | cut -d'.' -f1)
-        if [ "$NODE_MAJOR" -ge 18 ]; then
+        # TexCraft needs 20.19+ (require() of ES modules)
+        if node -e 'const [a,b]=process.versions.node.split(".").map(Number);process.exit(a>20||(a===20&&b>=19)?0:1)'; then
             print_success "Node.js installed: $NODE_VERSION"
         else
-            print_warning "Node.js $NODE_VERSION found, but version 18+ is recommended"
+            print_warning "Node.js $NODE_VERSION found, but TexCraft needs 20.19 or later"
             missing_deps+=("nodejs-upgrade")
         fi
     else
@@ -156,11 +156,11 @@ install_dependencies() {
         if command_exists brew; then
             $install_cmd node
         elif command_exists apt-get; then
-            # Node.js 18+ from NodeSource
+            # Node.js 20 (latest 20.x is 20.19+) from NodeSource
             curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
             $install_cmd nodejs
         else
-            print_warning "Please install Node.js 18+ manually from https://nodejs.org"
+            print_warning "Please install Node.js 20.19+ (LTS) manually from https://nodejs.org"
             return 1
         fi
         print_success "Node.js installed!"

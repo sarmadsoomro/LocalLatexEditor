@@ -53,7 +53,11 @@ if %errorlevel% == 0 (
     for /f "tokens=*" %%a in ('node --version') do set "NODE_VERSION=%%a"
     echo [OK] Node.js installed: !NODE_VERSION!
     
-    :: Check version (simplified - just check if it exists)
+    :: TexCraft needs 20.19+ (require() of ES modules)
+    node -e "const [a,b]=process.versions.node.split('.').map(Number);process.exit(a>20||(a===20&&b>=19)?0:1)"
+    if !errorlevel! neq 0 (
+        echo [WARNING] TexCraft needs Node.js 20.19 or later. Install the LTS from https://nodejs.org
+    )
 ) else (
     echo [MISSING] Node.js not found
     set "MISSING_DEPS=!MISSING_DEPS! nodejs"

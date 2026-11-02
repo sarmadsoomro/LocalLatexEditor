@@ -53,7 +53,7 @@ The project starts with `main.tex`. Compile it right away to check that LaTeX wo
 - **From ZIP file**: pick or drop a `.zip`. This is the way to bring in a project downloaded from Overleaf (Menu → Download → Source) or sent by a supervisor.
 - **From directory**: type the full path of a folder on your computer, for example `/Users/you/Documents/thesis` or `C:\Users\you\Documents\thesis`.
 
-TexCraft picks the main file automatically: `main.tex`, `document.tex`, `thesis.tex` or `paper.tex` if there is one, otherwise the `.tex` file closest to the top of the project. If the zip holds a single folder, its contents become the project. The project card shows which file it chose ("Main: …"). There is no way to change it in the app yet, so for a template with several documents (Elsevier's `cas-dc-sample.tex` and `cas-sc-sample.tex`, for example) check the card after importing.
+TexCraft picks the main file automatically: `main.tex`, `document.tex`, `thesis.tex` or `paper.tex` if there is one, otherwise the `.tex` file closest to the top of the project. If the zip holds a single folder, its contents become the project. The project card shows which file it chose ("Main: …"), and the file tree marks it **MAIN**. Templates often ship several documents (Elsevier's bundle has `cas-dc-sample.tex`, `cas-sc-sample.tex` and two blank templates), so check it after importing and [change it](#the-main-file) if needed.
 
 Zip limits: at most 5,000 files and 500 MB unpacked. Zips containing links or paths that point outside the zip are refused.
 
@@ -72,6 +72,7 @@ The editor is Monaco, the editor inside VS Code, with LaTeX and BibTeX highlight
 - **Save**: Ctrl+S (Cmd+S on a Mac). A dot next to a tab name means unsaved changes. TexCraft asks before closing a tab or leaving with unsaved changes.
 - **New file or folder, upload**: buttons at the top of the file tree. Upload adds images, `.bib` files and anything else from your computer.
 - **Rename or delete a file**: right-click it in the file tree.
+- **Change the main file**: right-click a `.tex` file → **Set as main file**. See [the main file](#the-main-file).
 - **Search and replace in a file**: Ctrl+F and Ctrl+H (Cmd+F, Cmd+Option+F on a Mac).
 
 Monaco's usual editing keys work: Ctrl+/ toggles a `%` comment, Alt+↑/↓ moves lines, Ctrl+D selects the next match.
@@ -81,6 +82,14 @@ Files you edit in TexCraft live in its own storage, not in the folder you import
 ## Compiling
 
 Click **Compile** or press **Ctrl+B** (Cmd+B). The PDF appears on the right when it is done.
+
+### The main file
+
+TexCraft always compiles the project's **main file**, the one with `\documentclass` that pulls in everything else. It does not matter which file is open in the editor. The file tree marks the main file **MAIN**.
+
+To compile a different document, right-click it in the file tree and choose **Set as main file**, then compile. The choice is saved with the project. Use this when a template has several documents, or for a thesis whose main file is not `main.tex`.
+
+### Options
 
 **Engine.** The arrow next to Compile chooses the engine:
 
@@ -122,7 +131,7 @@ Compile once before using it. If it jumps to the wrong place after big edits, co
 
 ## Fixing errors
 
-When a compile fails, the log panel under the PDF lists the errors and warnings first, each with its file and line number, then the full LaTeX log. Click an error to see its details. Go to that line in the editor (Ctrl+G jumps to a line number).
+When a compile fails, the log panel under the PDF lists the errors first, each with its file and line number, then the full LaTeX log. **Click an error** (or select it and press Enter) to open its file with the cursor on that line. An error inside a file that is not part of your project, such as a package from your LaTeX installation, cannot be opened; look at the line in your own file that uses that package instead.
 
 Common errors:
 
@@ -138,7 +147,7 @@ Common errors:
 ## Getting your files out
 
 - **The whole project**: **Export** in the editor toolbar, or the download icon on a project card, saves a `.zip` of your sources. It leaves out the PDF and intermediate files. The zip imports into Overleaf (New Project → Upload Project) or back into TexCraft.
-- **The PDF**: there is no Save PDF button yet. The compiled PDF is in the project's folder under `output/`, named after the main file (`output/main.pdf`). See [where your files are](#where-your-files-are).
+- **The PDF**: **Save PDF** in the PDF toolbar saves the last compiled PDF, named after the main file (`main.pdf`). It is also in the project's folder under `output/`; see [where your files are](#where-your-files-are).
 
 ## Settings
 
@@ -162,6 +171,7 @@ Ctrl on Windows and Linux, Cmd on a Mac.
 | Ctrl+B | Compile |
 | Alt+J | Show the cursor's line in the PDF |
 | Double-click the PDF | Go to the source line |
+| Click an error in the log | Go to its file and line |
 | Ctrl+W | Close the current tab |
 | Ctrl+Tab / Ctrl+Shift+Tab | Next / previous tab |
 | Ctrl+F / Ctrl+H | Find / replace in the file |
