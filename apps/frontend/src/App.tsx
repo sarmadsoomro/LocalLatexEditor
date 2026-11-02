@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -6,6 +6,34 @@ import { ToastProvider } from "./components/Toast";
 import { ProjectDetail } from "./pages/ProjectDetail";
 import { ProjectList } from "./pages/ProjectList";
 import { useSettingsStore } from "./stores/settingsStore";
+
+function SessionExpiredNotice() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const show = () => setVisible(true);
+    window.addEventListener("texcraft-session-expired", show);
+    return () => window.removeEventListener("texcraft-session-expired", show);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      role="alert"
+      className="fixed inset-x-0 top-0 z-[100] bg-error px-4 py-3 text-center text-sm text-white"
+    >
+      Server restarted — reload the page
+      <button
+        type="button"
+        className="ml-3 underline"
+        onClick={() => window.location.reload()}
+      >
+        Reload
+      </button>
+    </div>
+  );
+}
 
 function App() {
   const theme = useSettingsStore((state) => state.ui.theme);
@@ -24,6 +52,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <SessionExpiredNotice />
       <ToastProvider>
         <BrowserRouter>
           <Routes>

@@ -53,7 +53,7 @@ pnpm dev
 
 This starts:
 - Frontend at http://localhost:3000
-- Backend at http://localhost:3001
+- Backend at http://127.0.0.1:3001
 
 ### Verify Setup
 
@@ -270,7 +270,7 @@ Examples:
 - **Never** enable `write18` in LaTeX compilation
 - Validate all inputs with Zod schemas
 - Use path traversal protection (always use `path.join()`)
-- New listeners must bind to `127.0.0.1`. The current server does not (`app.listen(PORT)` with no host). Do not copy that
+- Listeners bind to `127.0.0.1`. Do not call `listen` without that host
 - Do not pass `-shell-escape`. The compiler does not, and the settings toggle is not wired
 - Run LaTeX compilation with user-level privileges only. That is not a sandbox
 

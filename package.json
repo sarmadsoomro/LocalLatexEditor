@@ -6,7 +6,7 @@
   "description": "A lightweight local LaTeX editor that runs entirely on your machine",
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "node scripts/clear-session-token.mjs && turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "test": "turbo run test",

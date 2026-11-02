@@ -1,12 +1,14 @@
 # API
 
-What the backend actually serves. Base URL is `http://localhost:3001`. There is no `/api/v1` prefix and no WebSocket.
+What the backend actually serves. Base URL is `http://127.0.0.1:3001`. There is no `/api/v1` prefix and no WebSocket.
 
 The frontend dev server is on port 3000 and proxies `/api` to port 3001.
 
 Success responses use `{ success: true, data }`, except `PUT /api/projects/:id/files/:path`, which returns 204 with an empty body. Errors go through the shared error handler.
 
-There is no authentication. `app.listen(PORT)` does not pass a host, so the process accepts connections on every interface.
+`app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` is logged as an error. `localhost` may resolve to IPv6 and miss the IPv4 socket; use `127.0.0.1`.
+
+Every `/api` route requires `X-TexCraft-Token`. The token is 32 random bytes, hex, generated at process start and written to `~/.latex-editor/.session-token` (mode `0600`). It is not logged. A missing or wrong token is `401` with code `UNAUTHORIZED`. `GET /health` does not require it. The `Host` header must be `127.0.0.1:<port>` or `localhost:<port>`; anything else is `403`. CORS still allows only `http://localhost:3000`, and allows the `X-TexCraft-Token` header.
 
 Project ids look like `proj_` plus letters, digits, `_`, or `-`.
 
@@ -55,7 +57,7 @@ Mounted at `/api/projects/:id/files`. Paths are relative to the project director
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| POST | `/api/import-zip` | Multipart field `file` (`.zip`, `.tex`, `.bib`, `.cls`, `.sty`), body field `name`. 100 MB limit |
+| POST | `/api/import-zip` | Multipart field `file` (`.zip`, `.tex`, `.bib`, `.cls`, `.sty`), body field `name`. 100 MB upload limit. Extraction rejects absolute paths, `..` escapes, and symlinks. At most 5,000 entries and 500 MB uncompressed, counted from bytes written. Temp files live under the app storage dir and are deleted on success and failure |
 
 ## Compile
 

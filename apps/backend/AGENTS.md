@@ -111,6 +111,6 @@ pnpm test:unit     # Vitest tests
 ## NOTES
 
 - Projects stored in `~/.latex-editor/projects/` (`LATEX_EDITOR_PROJECTS_DIR` overrides this)
-- `app.listen(PORT)` does not bind to `127.0.0.1`
+- `app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` logs an error
 - `shell: false` on compile spawn. `-shell-escape` is not passed. The settings toggle is ignored
 - Route list: [docs/api-and-internal-contracts.md](../../docs/api-and-internal-contracts.md)

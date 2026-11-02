@@ -1,5 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+
+import { apiAuthHeaders, notifySessionExpired } from "../services/api";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
@@ -84,6 +86,37 @@ export const PDFPreview = memo(function PDFPreview({
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
   const [pageInputValue, setPageInputValue] = useState<string>("1");
   const [zoomInputValue, setZoomInputValue] = useState<string>("");
+
+  const openedUrlsRef = useRef<string[]>([]);
+  useEffect(() => {
+    const urls = openedUrlsRef.current;
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, []);
+
+  // Open the tab synchronously so the popup blocker allows it, then point it at the blob.
+  const openInNewTab = useCallback(() => {
+    const w = window.open("", "_blank");
+    void fetch(pdfUrl, { headers: apiAuthHeaders() })
+      .then((response) => {
+        if (response.status === 401) notifySessionExpired();
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.blob();
+      })
+      .then((blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        openedUrlsRef.current.push(objectUrl);
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+        if (w) {
+          w.location.href = objectUrl;
+        } else {
+          const a = document.createElement("a");
+          a.href = objectUrl;
+          a.download = "document.pdf";
+          a.click();
+        }
+      })
+      .catch(() => w?.close());
+  }, [pdfUrl]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [pageWidth, setPageWidth] = useState<number>(0);
@@ -231,7 +264,8 @@ export const PDFPreview = memo(function PDFPreview({
       }, 30000); // 30 second timeout
 
       try {
-        const response = await fetch(pdfUrl);
+        const response = await fetch(pdfUrl, { headers: apiAuthHeaders() });
+        if (response.status === 401) notifySessionExpired();
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -557,7 +591,7 @@ export const PDFPreview = memo(function PDFPreview({
           <p className="font-semibold text-heading">Failed to load PDF</p>
           <p className="text-sm text-error/70 mt-1 max-w-xs mx-auto">{error}</p>
           <button
-            onClick={() => window.open(pdfUrl, "_blank")}
+            onClick={openInNewTab}
             className="mt-4 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-all active:scale-[0.98] cursor-pointer"
           >
             Open in New Tab

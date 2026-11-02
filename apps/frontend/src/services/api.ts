@@ -1,6 +1,32 @@
 import type { ApiResponse } from '@local-latex-editor/shared-types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Same-origin relative URLs: Vite proxies /api in dev, the backend serves the app in production.
+const API_BASE = '';
+
+declare global {
+  interface Window {
+    __TEXCRAFT_TOKEN__?: string;
+  }
+}
+
+export function apiToken(): string {
+  const fromWindow = typeof window !== 'undefined' ? window.__TEXCRAFT_TOKEN__ : undefined;
+  if (fromWindow && fromWindow !== '__TEXCRAFT_SESSION_TOKEN__') return fromWindow;
+  return import.meta.env.VITE_API_TOKEN || '';
+}
+
+export function apiAuthHeaders(extra?: Record<string, string>): Record<string, string> {
+  const token = apiToken();
+  return {
+    ...(token ? { 'X-TexCraft-Token': token } : {}),
+    ...extra,
+  };
+}
+
+export function notifySessionExpired(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event('texcraft-session-expired'));
+}
 
 export class ApiError extends Error {
   public readonly code: string;
@@ -61,17 +87,16 @@ export async function apiClient<T>(
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
     'Expires': '0',
+    ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     ...config.headers,
+    ...apiAuthHeaders(),
   };
 
-  if (hasBody) {
-    config.headers = {
-      'Content-Type': 'application/json',
-      ...config.headers,
-    };
-  }
-
   const response = await fetch(url, config);
+
+  if (response.status === 401) {
+    notifySessionExpired();
+  }
 
   if (!response.ok) {
     try {

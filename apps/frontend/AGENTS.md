@@ -99,7 +99,7 @@ pnpm test:e2e      # Playwright is wired. No specs are in the repo
 
 ## NOTES
 
-- Vite proxy: `/api` → `http://localhost:3001`
+- Vite proxy: `/api` → `http://127.0.0.1:3001`
 - StrictMode enabled
 - Tailwind CSS for styling
 - `cn()` utility from `tailwind-merge` + `clsx`
