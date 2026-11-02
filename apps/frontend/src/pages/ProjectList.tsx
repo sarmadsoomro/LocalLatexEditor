@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { CreateProjectDialog } from "../components/CreateProjectDialog";
+import { ConfirmDialog } from "../components/Dialogs";
 import { ImportProjectDialog } from "../components/ImportProjectDialog";
 import { ProjectCard } from "../components/ProjectCard";
 import { RecentProjects } from "../components/RecentProjects";
@@ -30,6 +31,7 @@ export function ProjectList() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [permanentDeleteTarget, setPermanentDeleteTarget] = useState<ProjectWithMetadata | null>(null);
   const [exportingProjectId, setExportingProjectId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isTrashView, setIsTrashView] = useState(false);
@@ -162,6 +164,7 @@ export function ProjectList() {
   };
 
   const handlePermanentDelete = async (id: string) => {
+    setPermanentDeleteTarget(null);
     try {
       await projectApi.permanentlyDeleteProject(id);
       setTrashedProjects(trashedProjects.filter((p) => p.id !== id));
@@ -528,7 +531,7 @@ export function ProjectList() {
                                   Restore
                                 </button>
                                 <button
-                                  onClick={() => handlePermanentDelete(project.id)}
+                                  onClick={() => setPermanentDeleteTarget(project)}
                                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-error bg-error/5 border border-error/10 rounded-xl hover:bg-error/10 transition-all"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -579,6 +582,16 @@ export function ProjectList() {
           </div>
         </div>
       </main>
+
+      <ConfirmDialog
+        isOpen={permanentDeleteTarget !== null}
+        title="Delete forever?"
+        message={`"${permanentDeleteTarget?.name ?? ""}" and all its files will be deleted from your computer. This cannot be undone.`}
+        confirmLabel="Delete forever"
+        variant="danger"
+        onConfirm={() => permanentDeleteTarget && void handlePermanentDelete(permanentDeleteTarget.id)}
+        onCancel={() => setPermanentDeleteTarget(null)}
+      />
 
       <CreateProjectDialog
         isOpen={isCreateDialogOpen}

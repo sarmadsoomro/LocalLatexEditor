@@ -27,6 +27,7 @@ The first release with desktop installers. The package version is `0.3.0`, but n
 
 ### Fixed
 
+- **Delete Forever** in the Trash now asks first and deletes the project's folder. Before, it ran without asking, and the files stayed on disk. A project whose folder is missing can be removed with **Remove from list** on its error page.
 - A compile that produced warnings (common with journal templates such as Elsevier's `cas-dc`) showed the log instead of the PDF. The right pane now has **PDF** and **Log** tabs with error and warning counts; after a failed compile the last good PDF stays available. Errors without a line number no longer show "Line ?".
 - A project with an unreadable file (for example a broken link) failed to open with "Internal server error". Such files are now skipped, and a missing or unreadable project folder gets a clear message. ([#9](https://github.com/sarmadsoomro/LocalLatexEditor/pull/9))
 - The engine menu (pdflatex, xelatex, lualatex) now changes the engine used. LaTeX errors report the right file and line. ([#5](https://github.com/sarmadsoomro/LocalLatexEditor/pull/5))

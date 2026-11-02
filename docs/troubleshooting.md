@@ -77,7 +77,7 @@ Click an error in the log to jump to its line. The [user guide](user-guide.md#fi
 
 ## Projects
 
-**A project shows "This project's folder is missing".** The folder in `~/.latex-editor/projects` was moved or deleted outside TexCraft. Put it back, or delete the project.
+**A project shows "This project's folder is missing".** The folder in `~/.latex-editor/projects` was moved or deleted outside TexCraft. Put it back, or click **Remove from list** on that page.
 
 **"TexCraft is not allowed to read …".** Your user account cannot read the project folder. On a Mac, check System Settings → Privacy & Security → Files and Folders. Elsewhere, check the folder's permissions.
 
