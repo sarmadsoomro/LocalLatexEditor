@@ -23,7 +23,7 @@ How to write, compile and manage LaTeX documents in TexCraft. To install it firs
 
 - **Files**: the project's files and folders.
 - **Editor**: one tab per open file.
-- **PDF**: the compiled document, with the compile log below it.
+- **PDF** and **Log**: two tabs. **PDF** shows the compiled document; **Log** shows the errors, warnings and full LaTeX output. The **Log** tab shows a red count for errors and an orange count for warnings.
 
 Drag the dividers to resize the panes.
 
@@ -120,6 +120,8 @@ The choice is remembered (Settings → Compiler → Default engine).
 
 The preview keeps your page and zoom when it reloads after a compile.
 
+A compile with only warnings (overfull boxes, font substitutions and the like) still shows the PDF. Open the **Log** tab to read the warnings. If a compile fails, TexCraft switches to the **Log** tab; the **PDF** tab still has the last good PDF, marked "Last compile failed".
+
 ## Jumping between source and PDF
 
 This is SyncTeX. It works with every engine and across files included with `\input` and `\include`.
@@ -131,7 +133,7 @@ Compile once before using it. If it jumps to the wrong place after big edits, co
 
 ## Fixing errors
 
-When a compile fails, the log panel under the PDF lists the errors first, each with its file and line number, then the full LaTeX log. **Click an error** (or select it and press Enter) to open its file with the cursor on that line. An error inside a file that is not part of your project, such as a package from your LaTeX installation, cannot be opened; look at the line in your own file that uses that package instead.
+When a compile fails, TexCraft opens the **Log** tab. It lists the errors first, each with its file and line number when LaTeX reports one, then the full LaTeX log. **Click an error** (or select it and press Enter) to open its file with the cursor on that line. An error inside a file that is not part of your project, such as a package from your LaTeX installation, cannot be opened; look at the line in your own file that uses that package instead.
 
 Common errors:
 

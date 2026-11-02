@@ -60,9 +60,11 @@ export default function LogViewer({
                 `}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold uppercase tracking-wider bg-error text-white">
-                    Line {error.line || '?'}
-                  </span>
+                  {error.line > 0 && (
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-bold uppercase tracking-wider bg-error text-white">
+                      Line {error.line}
+                    </span>
+                  )}
                   {error.file && (
                     <span className="text-sm font-medium text-error/80 truncate">
                       {error.file}

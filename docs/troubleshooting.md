@@ -67,7 +67,9 @@ Click an error in the log to jump to its line. The [user guide](user-guide.md#fi
 
 **The fonts differ from the journal's sample PDF.** Some classes quietly fall back to the default font when the font they want is not installed. Elsevier's `cas-dc` class, for example, uses STIX and switches to Computer Modern without an error if STIX is missing. Search the log for "not available" or "font", then install the font package (on Linux, `texlive-fonts-extra`; on MiKTeX it installs on the fly; MacTeX has it).
 
-**The PDF does not update.** Look at the log for an error: after a failed compile the preview can still show the last good PDF. Then try Clean build.
+**The PDF does not update.** Open the **Log** tab and look for an error. After a failed compile the **PDF** tab still shows the last good PDF, marked "Last compile failed". Then try Clean build.
+
+**Compile shows the log instead of the PDF.** The compile failed: the **Log** tab has a red error count. If the count is orange, there are only warnings; click **PDF** to see the document.
 
 **Double-click on the PDF jumps to the wrong line, or does nothing.** Compile again. The jump uses data from the last successful compile, so it drifts after big edits.
 
