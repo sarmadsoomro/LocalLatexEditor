@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import type { Server } from "node:http";
 import path from "node:path";
 
 import cors from "cors";
@@ -21,14 +22,19 @@ import projectRoutes from "./routes/projects.js";
 import synctexRoutes from "./routes/synctex.js";
 import { jobStore } from "./services/jobStore.js";
 
-const logger = pino({
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-    },
-  },
-});
+// pino-pretty runs in a worker thread loaded by name, which a bundled build
+// (the desktop app) cannot resolve, so the desktop app asks for plain JSON logs.
+const logger =
+  process.env.TEXCRAFT_PLAIN_LOGS === "1"
+    ? pino()
+    : pino({
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+          },
+        },
+      });
 
 const PORT = Number(process.env.PORT) || 3001;
 const HOST = process.env.HOST || "127.0.0.1";
@@ -76,7 +82,8 @@ export function createApp(token: string, port: number = PORT): Express {
   app.use("/api", systemCheckRouter);
   app.use("/api", importRoutes);
 
-  const frontendDist = path.resolve(__dirname, "../../frontend/dist");
+  // TEXCRAFT_FRONTEND_DIST: where the desktop app ships the built frontend
+  const frontendDist = process.env.TEXCRAFT_FRONTEND_DIST || path.resolve(__dirname, "../../frontend/dist");
   const indexPath = path.join(frontendDist, "index.html");
   if (fs.existsSync(indexPath)) {
     app.use(express.static(frontendDist, { index: false }));
@@ -93,36 +100,41 @@ export function createApp(token: string, port: number = PORT): Express {
   return app;
 }
 
-async function startServer(): Promise<void> {
-  try {
-    await jobStore.initialize();
-    logger.info("Job store initialized");
+/** Starts the API (and the built frontend, when present). Rejects if the port is taken. */
+export async function startServer(port: number = PORT, host: string = HOST): Promise<Server> {
+  await jobStore.initialize();
+  logger.info("Job store initialized");
 
-    await ensureStorageDirectories();
-    logger.info("Storage directories initialized");
+  await ensureStorageDirectories();
+  logger.info("Storage directories initialized");
 
-    const token = createSessionToken();
-    logger.info("Session token written for this launch");
+  const token = createSessionToken();
+  logger.info("Session token written for this launch");
 
-    if (!isLoopbackHost(HOST)) {
-      logger.error(
-        `WARNING: HOST=${HOST} is not a loopback address. Other machines can reach this API.`,
-      );
-    }
-
-    const app = createApp(token, PORT);
-    app.listen(PORT, HOST, () => {
-      logger.info(`Backend server running on http://${HOST}:${PORT}`);
-    });
-  } catch (error) {
-    logger.error("Failed to start server:", error);
-    process.exit(1);
+  if (!isLoopbackHost(host)) {
+    logger.error(
+      `WARNING: HOST=${host} is not a loopback address. Other machines can reach this API.`,
+    );
   }
+
+  const app = createApp(token, port);
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, host);
+    server.once("error", reject);
+    server.once("listening", () => {
+      server.off("error", reject);
+      logger.info(`Backend server running on http://${host}:${port}`);
+      resolve(server);
+    });
+  });
 }
 
 const startedAsMain = process.argv[1]?.endsWith("index.ts") || process.argv[1]?.endsWith("index.js");
 if (startedAsMain) {
-  startServer();
+  startServer().catch((error: unknown) => {
+    logger.error(error, "Failed to start server");
+    process.exit(1);
+  });
 }
 
 function isLoopbackHost(host: string): boolean {
