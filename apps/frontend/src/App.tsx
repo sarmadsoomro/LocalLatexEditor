@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { LatexMissingBanner } from "./components/LatexMissingBanner";
 import { ToastProvider } from "./components/Toast";
 import { ProjectDetail } from "./pages/ProjectDetail";
 import { ProjectList } from "./pages/ProjectList";
@@ -53,6 +54,7 @@ function App() {
   return (
     <ErrorBoundary>
       <SessionExpiredNotice />
+      <LatexMissingBanner />
       <ToastProvider>
         <BrowserRouter>
           <Routes>
