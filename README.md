@@ -21,7 +21,7 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - Import does not edit the original folder. It copies
 - No outline view, and no "compile only the files that changed"
 - The compiler never passes `-shell-escape`. The settings toggle for shell escape does not reach the compiler
-- The API is not authenticated, and it is not bound to `127.0.0.1`
+- The API is not authenticated. It listens only on `127.0.0.1`
 
 ## Requirements
 
@@ -41,7 +41,7 @@ pnpm dev
 ```
 
 - Frontend: http://localhost:3000
-- API: http://localhost:3001
+- API: http://127.0.0.1:3001
 
 Stop it with Ctrl+C in that terminal.
 

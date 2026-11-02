@@ -169,7 +169,7 @@ Security considerations from running local LaTeX compilation.
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
-| The API listens on every interface. `app.listen(PORT)` does not pass a host, and there is no authentication. | High while the process is running | Medium | Not mitigated in code. Do not expose the machine. A fix is to pass `127.0.0.1` to `listen`. |
+| The API has no authentication. It listens on `127.0.0.1` only, so other machines cannot connect, but other local programs still can. | Medium while the process is running | Medium | Bind is in place. Do not expose the port. A local token is the remaining gap. |
 
 ---
 

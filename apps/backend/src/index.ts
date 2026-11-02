@@ -24,7 +24,8 @@ const logger = pino({
 });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
+const HOST = process.env.HOST || "127.0.0.1";
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -73,8 +74,14 @@ async function startServer(): Promise<void> {
     await ensureStorageDirectories();
     logger.info("Storage directories initialized");
 
-    app.listen(PORT, () => {
-      logger.info(`Backend server running on port ${PORT}`);
+    if (!isLoopbackHost(HOST)) {
+      logger.error(
+        `WARNING: HOST=${HOST} is not a loopback address. Other machines can reach this API.`,
+      );
+    }
+
+    app.listen(PORT, HOST, () => {
+      logger.info(`Backend server running on http://${HOST}:${PORT}`);
     });
   } catch (error) {
     logger.error("Failed to start server:", error);
@@ -83,3 +90,7 @@ async function startServer(): Promise<void> {
 }
 
 startServer();
+
+function isLoopbackHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "localhost" || host === "::1" || host === "[::1]";
+}

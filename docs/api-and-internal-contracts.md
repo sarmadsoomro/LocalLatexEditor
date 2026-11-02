@@ -1,12 +1,12 @@
 # API
 
-What the backend actually serves. Base URL is `http://localhost:3001`. There is no `/api/v1` prefix and no WebSocket.
+What the backend actually serves. Base URL is `http://127.0.0.1:3001`. There is no `/api/v1` prefix and no WebSocket.
 
 The frontend dev server is on port 3000 and proxies `/api` to port 3001.
 
 Success responses use `{ success: true, data }`, except `PUT /api/projects/:id/files/:path`, which returns 204 with an empty body. Errors go through the shared error handler.
 
-There is no authentication. `app.listen(PORT)` does not pass a host, so the process accepts connections on every interface.
+There is no authentication. `app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` is logged as an error. `localhost` may resolve to IPv6 and miss the IPv4 socket; use `127.0.0.1`.
 
 Project ids look like `proj_` plus letters, digits, `_`, or `-`.
 

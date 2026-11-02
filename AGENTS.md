@@ -31,7 +31,7 @@ Current behavior is the code, [README.md](README.md), and [docs/api-and-internal
 - Do not concatenate paths. Use `path.join()`.
 - Do not pass `shell: true` to `spawn`.
 - Do not pass `-shell-escape` unless the task is explicitly to wire the existing settings toggle, and then keep the default off.
-- New listeners must bind to `127.0.0.1`. `app.listen(PORT)` in `apps/backend/src/index.ts` currently does not. Do not copy that.
+- Listeners bind to `127.0.0.1`. Do not call `listen` without that host.
 
 ## Commands
 

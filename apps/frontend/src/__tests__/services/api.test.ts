@@ -22,7 +22,7 @@ describe('apiClient', () => {
     const result = await apiClient<{ id: string; name: string }>('/api/projects');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects',
+      'http://127.0.0.1:3001/api/projects',
       expect.objectContaining({ method: 'GET' })
     );
     expect(result).toEqual({ id: '1', name: 'Test' });
@@ -46,7 +46,7 @@ describe('apiClient', () => {
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects',
+      'http://127.0.0.1:3001/api/projects',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(requestBody),
@@ -158,7 +158,7 @@ describe('api convenience methods', () => {
     await api.get('/api/projects');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects',
+      'http://127.0.0.1:3001/api/projects',
       expect.objectContaining({ method: 'GET' })
     );
   });
@@ -178,7 +178,7 @@ describe('api convenience methods', () => {
     await api.post('/api/projects', body);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects',
+      'http://127.0.0.1:3001/api/projects',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(body),
@@ -201,7 +201,7 @@ describe('api convenience methods', () => {
     await api.put('/api/projects/1', body);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects/1',
+      'http://127.0.0.1:3001/api/projects/1',
       expect.objectContaining({
         method: 'PUT',
         body: JSON.stringify(body),
@@ -223,7 +223,7 @@ describe('api convenience methods', () => {
     await api.delete('/api/projects/1');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/projects/1',
+      'http://127.0.0.1:3001/api/projects/1',
       expect.objectContaining({ method: 'DELETE' })
     );
   });
