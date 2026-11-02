@@ -1,0 +1,53 @@
+# Packaging for the TexCraft desktop app. Run `pnpm --filter texcraft-desktop dist`
+# after `pnpm build`. Output goes to apps/desktop/release/.
+appId: io.github.sarmadsoomro.texcraft
+productName: TexCraft
+copyright: Copyright © 2026 Sarmad Soomro
+directories:
+  output: release
+  buildResources: resources
+# main and backend are bundled by scripts/build.mjs; nothing else is needed at runtime
+files:
+  - dist/**
+  - "!dist/**/*.map"
+  - package.json
+extraResources:
+  - from: ../frontend/dist
+    to: frontend
+asar: true
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+# Releases are uploaded by .github/workflows/desktop.yml; this only names the target.
+publish:
+  provider: github
+  owner: sarmadsoomro
+  repo: LocalLatexEditor
+  releaseType: draft
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  # Unsigned builds pass `-c.mac.identity=-` (ad-hoc signature, required on Apple silicon).
+  # See docs/desktop-app.md for signing and notarizing with an Apple Developer ID.
+  hardenedRuntime: true
+dmg:
+  writeUpdateInfo: false
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  differentialPackage: false
+
+linux:
+  category: Office
+  syncDesktopName: true
+  executableName: texcraft
+  target:
+    - target: AppImage
+      arch: [x64]
