@@ -18,6 +18,7 @@ import compilationRoutes, {
 } from "./routes/compilation.js";
 import importRoutes from "./routes/import.js";
 import projectRoutes from "./routes/projects.js";
+import synctexRoutes from "./routes/synctex.js";
 import { jobStore } from "./services/jobStore.js";
 
 const logger = pino({
@@ -70,6 +71,7 @@ export function createApp(token: string, port: number = PORT): Express {
   app.use("/api/projects", projectRoutes);
   app.use("/api/projects/:id", compilationRoutes);
   app.use("/api/projects/:id", projectPdfRouter);
+  app.use("/api/projects/:id", synctexRoutes);
   app.use("/api/compile", compilationJobRouter);
   app.use("/api", systemCheckRouter);
   app.use("/api", importRoutes);

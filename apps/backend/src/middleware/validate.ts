@@ -38,3 +38,22 @@ export function validateParams<T>(schema: ZodSchema<T>) {
     next();
   };
 }
+
+/** Validates req.query. Parsed values (e.g. coerced numbers) are stored on res.locals.query. */
+export function validateQuery<T>(schema: ZodSchema<T>) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query);
+
+    if (!result.success) {
+      const errors = result.error.errors.map((e) => ({
+        path: e.path.join('.'),
+        message: e.message,
+      }));
+
+      throw new ValidationError('Validation failed', { errors });
+    }
+
+    res.locals.query = result.data;
+    next();
+  };
+}
