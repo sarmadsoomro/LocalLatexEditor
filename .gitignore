@@ -42,4 +42,6 @@ coverage/
 *.temp
 .cache/
 .project-memory.md
-.project-memory.md
+
+# Release artifacts
+release/
