@@ -10,6 +10,8 @@ const sessionTokenFile = path.join(os.homedir(), '.latex-editor', '.session-toke
 function sessionTokenPlugin(): Plugin {
   return {
     name: 'texcraft-session-token',
+    // dev server only: a build must keep the placeholder so the backend injects the live token
+    apply: 'serve',
     async transformIndexHtml(html) {
       const token = await waitForSessionToken(sessionTokenFile);
       if (!token) return html;
