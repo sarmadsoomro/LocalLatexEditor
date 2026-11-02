@@ -38,7 +38,7 @@ It should print a version line. Then restart TexCraft, or click **Check again** 
 
 ## 2. Install the desktop app
 
-Download the file for your computer from the [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases) under **Assets**:
+Download the file for your computer from the [Releases page](https://github.com/sarmadsoomro/TexCraft/releases) under **Assets**:
 
 | Computer | File |
 | --- | --- |
@@ -102,8 +102,8 @@ You need:
 - A LaTeX distribution ([step 1](#1-install-a-latex-distribution))
 
 ```bash
-git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
-cd LocalLatexEditor
+git clone https://github.com/sarmadsoomro/TexCraft.git
+cd TexCraft
 pnpm install
 pnpm dev
 ```

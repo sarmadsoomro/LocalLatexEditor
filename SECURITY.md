@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security problems privately, not in a public issue: use **Report a vulnerability** on the repository's [Security tab](https://github.com/sarmadsoomro/LocalLatexEditor/security/advisories/new). Include the steps to reproduce, the version, and the OS.
+Please report security problems privately, not in a public issue: use **Report a vulnerability** on the repository's [Security tab](https://github.com/sarmadsoomro/TexCraft/security/advisories/new). Include the steps to reproduce, the version, and the OS.
 
 TexCraft is maintained by one person, so replies can take a few days. Fixes go into the next release, and the advisory is published with it.
 
@@ -40,7 +40,7 @@ TexCraft is a single-user app. Its backend runs on your computer and should be r
 - The window cannot navigate away from the app. Links to other sites open in your normal browser (`http`, `https` and `mailto` only).
 - The page has no Node.js access (`contextIsolation`, `sandbox`, no `nodeIntegration`).
 - Permission requests (camera, microphone, location, notifications) are denied.
-- The installers are not code-signed yet. Download them only from the [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases).
+- The installers are not code-signed yet. Download them only from the [Releases page](https://github.com/sarmadsoomro/TexCraft/releases).
 
 ### Privacy
 

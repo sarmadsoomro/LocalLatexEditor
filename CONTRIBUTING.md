@@ -13,7 +13,7 @@ Thanks for helping. Bug reports, fixes, templates, docs and features are all wel
 
 ## Reporting bugs and ideas
 
-[Open an issue](https://github.com/sarmadsoomro/LocalLatexEditor/issues/new/choose) and pick **Bug report** or **Feature request**. For a bug, the backend log (**Help → Show Log File** in the desktop app) and your OS and LaTeX version save a lot of back-and-forth.
+[Open an issue](https://github.com/sarmadsoomro/TexCraft/issues/new/choose) and pick **Bug report** or **Feature request**. For a bug, the backend log (**Help → Show Log File** in the desktop app) and your OS and LaTeX version save a lot of back-and-forth.
 
 Security problems: see [SECURITY.md](SECURITY.md). Please do not open a public issue.
 
@@ -29,9 +29,9 @@ You need:
 - A LaTeX distribution with `pdflatex` and `latexmk`, to compile anything and to run the compile tests
 
 ```bash
-git clone https://github.com/<you>/LocalLatexEditor.git
-cd LocalLatexEditor
-git remote add upstream https://github.com/sarmadsoomro/LocalLatexEditor.git
+git clone https://github.com/<you>/TexCraft.git
+cd TexCraft
+git remote add upstream https://github.com/sarmadsoomro/TexCraft.git
 pnpm install
 pnpm dev
 ```

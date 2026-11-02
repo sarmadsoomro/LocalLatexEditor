@@ -1,15 +1,7 @@
-import { useState, useEffect } from 'react';
+const REPO_URL = 'https://github.com/sarmadsoomro/TexCraft';
 
 export function AboutSection() {
-  const [version, setVersion] = useState('1.0.0');
-
-  useEffect(() => {
-    // Try to get version from package.json
-    fetch('/package.json')
-      .then(res => res.json())
-      .then(data => setVersion(data.version || '1.0.0'))
-      .catch(() => setVersion('1.0.0'));
-  }, []);
+  const version = __APP_VERSION__;
 
   return (
     <div className="space-y-6 p-2">
@@ -31,7 +23,7 @@ export function AboutSection() {
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted">Version</dt>
-            <dd className="text-heading font-medium">{version}</dd>
+            <dd className="text-heading font-medium" data-testid="app-version">{version}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-muted">License</dt>
@@ -46,21 +38,21 @@ export function AboutSection() {
 
       {/* Description */}
       <p className="text-sm text-secondary leading-relaxed">
-        TexCraft is a lightweight, browser-based LaTeX editing environment that runs entirely on your local machine. 
-        Edit LaTeX documents with a professional editor, compile locally to PDF, and preview results instantly.
+        TexCraft is a LaTeX editor that runs entirely on your computer. Edit your documents, compile them to PDF
+        with your own LaTeX installation, and preview the result side by side. Nothing is uploaded.
       </p>
 
       {/* Copyright */}
       <div className="text-center py-4 border-t border-border">
         <p className="text-sm text-muted">
-          Copyright (c) 2026 Sarmad Soomro. All rights reserved.
+          Copyright (c) 2026 Sarmad Soomro. Released under the MIT License.
         </p>
       </div>
 
       {/* Links */}
       <div className="flex justify-center gap-4">
         <a
-          href="https://github.com/sarmadsoomro/LocalLatexEditor"
+          href={REPO_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-primary hover:text-primary-dark text-sm transition-colors"
@@ -72,7 +64,9 @@ export function AboutSection() {
         </a>
         <span className="text-border">|</span>
         <a
-          href="#"
+          href={`${REPO_URL}/blob/main/docs/user-guide.md`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-primary hover:text-primary-dark text-sm transition-colors"
         >
           Documentation

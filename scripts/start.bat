@@ -13,15 +13,15 @@ echo.
 if not exist "package.json" (
     echo Not in project directory. Looking for it...
     
-    if exist "LocalLatexEditor" (
-        cd LocalLatexEditor
-        echo Found and entered LocalLatexEditor\
-    ) else if exist "..\LocalLatexEditor" (
-        cd ..\LocalLatexEditor
-        echo Found and entered LocalLatexEditor\
+    if exist "TexCraft" (
+        cd TexCraft
+        echo Found and entered TexCraft\
+    ) else if exist "..\TexCraft" (
+        cd ..\TexCraft
+        echo Found and entered TexCraft\
     ) else (
         echo Please run this script from the project directory
-        echo Or make sure LocalLatexEditor\ exists
+        echo Or make sure TexCraft\ exists
         pause
         exit /b 1
     )

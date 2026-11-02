@@ -16,8 +16,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/sarmadsoomro/LocalLatexEditor.git"
-PROJECT_NAME="LocalLatexEditor"
+REPO_URL="https://github.com/sarmadsoomro/TexCraft.git"
+PROJECT_NAME="TexCraft"
 
 # =============================================================================
 # Helper Functions

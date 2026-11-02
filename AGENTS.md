@@ -1,7 +1,7 @@
 # TexCraft
 
 **Updated:** 2 November 2026
-**Repo:** LocalLatexEditor
+**Repo:** TexCraft (renamed from LocalLatexEditor)
 **Package:** `local-latex-editor`
 
 Local LaTeX editor: a browser UI (React + Vite on port 3000, Express on port 3001) and an Electron desktop app around the same backend. Monaco, PDF.js, Zustand, Turborepo, pnpm.

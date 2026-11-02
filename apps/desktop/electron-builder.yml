@@ -20,7 +20,7 @@ artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 publish:
   provider: github
   owner: sarmadsoomro
-  repo: LocalLatexEditor
+  repo: TexCraft
   releaseType: draft
 
 mac:

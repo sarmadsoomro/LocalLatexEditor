@@ -4,7 +4,7 @@ A LaTeX editor that runs on your own computer. Write in a code editor, compile w
 
 Made for students writing assignments, papers and theses, including journal templates such as IEEE and Elsevier.
 
-**[Download](https://github.com/sarmadsoomro/LocalLatexEditor/releases)** · [Installation](docs/installation.md) · [User guide](docs/user-guide.md) · [Troubleshooting](docs/troubleshooting.md) · [Contributing](CONTRIBUTING.md)
+**[Download](https://github.com/sarmadsoomro/TexCraft/releases)** · [Installation](docs/installation.md) · [User guide](docs/user-guide.md) · [Troubleshooting](docs/troubleshooting.md) · [Contributing](CONTRIBUTING.md)
 
 ## Features
 
@@ -22,7 +22,7 @@ Made for students writing assignments, papers and theses, including journal temp
 ## Get started
 
 1. Install a LaTeX distribution: [MacTeX](https://www.tug.org/mactex/) (macOS), [MiKTeX](https://miktex.org/download) (Windows) or TeX Live (Linux).
-2. Download TexCraft from the [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases): `.dmg` for macOS, `.exe` for Windows, `.AppImage` for Linux.
+2. Download TexCraft from the [Releases page](https://github.com/sarmadsoomro/TexCraft/releases): `.dmg` for macOS, `.exe` for Windows, `.AppImage` for Linux.
 3. Open it, create a project, press **Compile**.
 
 The installers are not code-signed yet, so the first launch needs one extra step. The [installation guide](docs/installation.md) covers it for each OS, along with picking the right download and installing LaTeX.
@@ -32,8 +32,8 @@ The installers are not code-signed yet, so the first launch needs one extra step
 Needs Node.js 20.19+, pnpm 8+, Git and a LaTeX distribution.
 
 ```bash
-git clone https://github.com/sarmadsoomro/LocalLatexEditor.git
-cd LocalLatexEditor
+git clone https://github.com/sarmadsoomro/TexCraft.git
+cd TexCraft
 pnpm install
 pnpm dev
 ```
@@ -69,4 +69,4 @@ TexCraft listens only on `127.0.0.1`, so other computers cannot reach it, and ev
 
 ## License
 
-[MIT](LICENSE). The repository is [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/LocalLatexEditor); the npm workspace name is `local-latex-editor`.
+[MIT](LICENSE). The repository is [sarmadsoomro/TexCraft](https://github.com/sarmadsoomro/TexCraft); the npm workspace name is `local-latex-editor`.
