@@ -53,7 +53,7 @@ The project starts with `main.tex`. Compile it right away to check that LaTeX wo
 - **From ZIP file**: pick or drop a `.zip`. This is the way to bring in a project downloaded from Overleaf (Menu → Download → Source) or sent by a supervisor.
 - **From directory**: type the full path of a folder on your computer, for example `/Users/you/Documents/thesis` or `C:\Users\you\Documents\thesis`.
 
-TexCraft picks the main file automatically: `main.tex`, `document.tex`, `thesis.tex` or `paper.tex` if one exists at the top level, otherwise a `.tex` file containing `\documentclass`. The project card shows which file it chose ("Main: …").
+TexCraft picks the main file automatically: `main.tex`, `document.tex`, `thesis.tex` or `paper.tex` if there is one, otherwise the `.tex` file closest to the top of the project. If the zip holds a single folder, its contents become the project. The project card shows which file it chose ("Main: …"). There is no way to change it in the app yet, so for a template with several documents (Elsevier's `cas-dc-sample.tex` and `cas-sc-sample.tex`, for example) check the card after importing.
 
 Zip limits: at most 5,000 files and 500 MB unpacked. Zips containing links or paths that point outside the zip are refused.
 
