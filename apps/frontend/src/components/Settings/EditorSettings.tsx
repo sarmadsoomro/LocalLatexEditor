@@ -1,4 +1,7 @@
+import { SYNTAX_THEMES } from '@/editor/latexThemes';
+import { useSettingsStore } from '@/stores';
 import type { EditorSettings as EditorSettingsType, SyntaxThemeId } from '@/types/settings';
+
 import {
   SettingsSection,
   SliderSetting,
@@ -6,8 +9,6 @@ import {
   SelectSetting,
   SettingItem,
 } from './SettingsComponents';
-import { useSettingsStore } from '@/stores';
-import { SYNTAX_THEMES } from '@/editor/latexThemes';
 
 const FONT_FAMILIES = [
   { value: 'JetBrains Mono', label: 'JetBrains Mono' },

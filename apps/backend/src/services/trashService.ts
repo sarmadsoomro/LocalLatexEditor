@@ -1,5 +1,7 @@
 import type { ProjectWithMetadata } from '@local-latex-editor/shared-types';
+
 import { NotFoundError } from '../types/error.js';
+
 import { loadProjectsMetadata, saveProjectsMetadata } from './projectService.js';
 
 export async function listTrashedProjects(): Promise<ProjectWithMetadata[]> {

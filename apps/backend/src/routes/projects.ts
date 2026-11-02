@@ -1,5 +1,7 @@
 import { Router, type Router as RouterType } from 'express';
-import { createSuccessResponse } from '../types/response.js';
+
+import { validateBody, validateParams } from '../middleware/validate.js';
+import { exportProjectAsZip } from '../services/exportService.js';
 import {
   listProjects,
   getProject,
@@ -17,8 +19,7 @@ import {
   restoreProject,
   permanentlyDeleteProject,
 } from '../services/trashService.js';
-import { exportProjectAsZip } from '../services/exportService.js';
-import { validateBody, validateParams } from '../middleware/validate.js';
+import { createSuccessResponse } from '../types/response.js';
 import {
   createProjectSchema,
   projectIdSchema,

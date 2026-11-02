@@ -9,15 +9,17 @@ interface ImportProjectDialogProps {
 
 type ImportMode = "path" | "zip";
 
-export function ImportProjectDialog({
+export function ImportProjectDialog(props: ImportProjectDialogProps) {
+  if (!props.isOpen) return null;
+  return <ImportProjectDialogBody {...props} />;
+}
+
+function ImportProjectDialogBody({
   isOpen,
   onClose,
   onImport,
   onImportZip,
 }: ImportProjectDialogProps) {
-  // Early return BEFORE hooks to prevent hooks count mismatch
-  if (!isOpen) return null;
-
   const [mode, setMode] = useState<ImportMode>("path");
   const [sourcePath, setSourcePath] = useState("");
   const [name, setName] = useState("");
@@ -145,6 +147,8 @@ export function ImportProjectDialog({
     if (files.length > 0) {
       handleFileSelect(files[0]);
     }
+    // empty deps keep the first-render name check
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {

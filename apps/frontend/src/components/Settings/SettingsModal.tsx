@@ -1,10 +1,11 @@
-import { useState } from 'react';
 import { X, RotateCcw } from 'lucide-react';
-import { SettingsTabs, type TabId } from './SettingsTabs';
-import { EditorSettings } from './EditorSettings';
-import { CompilerSettings } from './CompilerSettings';
-import { UISettings } from './UISettings';
+import { useState } from 'react';
+
 import { AboutSection } from './AboutSection';
+import { CompilerSettings } from './CompilerSettings';
+import { EditorSettings } from './EditorSettings';
+import { SettingsTabs, type TabId } from './SettingsTabs';
+import { UISettings } from './UISettings';
 
 interface SettingsModalProps {
   isOpen: boolean;

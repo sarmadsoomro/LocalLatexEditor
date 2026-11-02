@@ -1,21 +1,22 @@
-import { Router } from "express";
-import path from "path";
-import { promises as fs, createReadStream } from "fs";
 import { spawn } from "child_process";
+import { promises as fs, createReadStream } from "fs";
+import path from "path";
+
+import { Router } from "express";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
+import { getProjectPath } from "../config/storage.js";
 import { validateBody, validateParams } from "../middleware/validate.js";
+import { compileProject } from "../services/compilationService.js";
+import { jobStore, JobStatus } from "../services/jobStore.js";
+import { getProject } from "../services/projectService.js";
+import { NotFoundError } from "../types/error.js";
+import { createSuccessResponse } from "../types/response.js";
 import {
   compileBodySchema,
   compileParamsSchema,
 } from "../validators/compile.js";
-import { compileProject } from "../services/compilationService.js";
-import { createSuccessResponse } from "../types/response.js";
-import { NotFoundError } from "../types/error.js";
-import { getProject } from "../services/projectService.js";
-import { getProjectPath } from "../config/storage.js";
-import { jobStore, JobStatus } from "../services/jobStore.js";
 
 const jobIdParamsSchema = z.object({
   jobId: z.string().min(1, "Job ID is required"),
@@ -45,7 +46,7 @@ router.post(
       };
       await jobStore.set(jobId, job);
 
-      (async () => {
+      (async (): Promise<void> => {
         try {
           await jobStore.set(jobId, { ...job, status: "compiling", progress: 10 });
 
@@ -71,7 +72,16 @@ router.post(
           });
         } catch (error) {
           // Attempt to extract properties safely if they exist on the error object
-          const errObj = error as any;
+          const errObj = error as {
+            logOutput?: string;
+            errors?: NonNullable<JobStatus["result"]>["errors"];
+            warnings?: Array<{
+              line?: number;
+              column?: number;
+              message?: string;
+              type?: "error" | "warning";
+            }>;
+          };
           const originalLogOutput = errObj.logOutput || "Compilation failed";
           const originalErrors = errObj.errors || [
             {
@@ -90,7 +100,7 @@ router.post(
               success: false,
               logOutput: originalLogOutput,
               errors: originalErrors,
-              warnings: (errObj.warnings || []).map((w: any) => ({
+              warnings: (errObj.warnings || []).map((w) => ({
                 line: w.line ?? 0,
                 column: w.column ?? 0,
                 message: w.message ?? "",

@@ -1,5 +1,6 @@
-import { create } from "zustand";
 import type { CompilationResult } from "@local-latex-editor/shared-types";
+import { create } from "zustand";
+
 import { compilationApi } from "../services/compilationApi";
 
 type CompilationStatus = "idle" | "compiling" | "success" | "error";

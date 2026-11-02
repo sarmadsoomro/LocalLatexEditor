@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+
 import { TabBar, type Tab } from "./TabBar";
 
 const MonacoEditor = lazy(() =>

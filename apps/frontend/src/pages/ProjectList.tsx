@@ -1,15 +1,16 @@
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { ProjectCard } from "../components/ProjectCard";
-import { CreateProjectDialog } from "../components/CreateProjectDialog";
-import { ImportProjectDialog } from "../components/ImportProjectDialog";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { useToast } from "../components/Toast";
-import { useProjectStore, selectSortedProjects } from "../stores/projectStore";
-import { projectApi } from "../services/projectApi";
-import { RecentProjects } from "../components/RecentProjects";
 import type { Template, ProjectWithMetadata, ProjectFilter } from "@local-latex-editor/shared-types";
 import { Search, AlertCircle, X, FilePlus, Trash2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { CreateProjectDialog } from "../components/CreateProjectDialog";
+import { ImportProjectDialog } from "../components/ImportProjectDialog";
+import { ProjectCard } from "../components/ProjectCard";
+import { RecentProjects } from "../components/RecentProjects";
+import { ThemeToggle } from "../components/ThemeToggle";
+import { useToast } from "../components/Toast";
+import { projectApi } from "../services/projectApi";
+import { useProjectStore, selectSortedProjects } from "../stores/projectStore";
 
 export function ProjectList() {
   const navigate = useNavigate();
@@ -36,6 +37,7 @@ export function ProjectList() {
 
   useEffect(() => {
     loadProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount
   }, []);
 
   const loadProjects = async (filter?: ProjectFilter) => {
@@ -547,7 +549,7 @@ export function ProjectList() {
                                 <div className="absolute inset-0 bg-surface/98 backdrop-blur-xl rounded-2xl flex flex-col items-center justify-center p-8 animate-fade-in z-20 shadow-soft-xl border border-error/20">
                                   <AlertCircle className="w-8 h-8 text-error mb-4" />
                                   <p className="text-lg font-black text-heading mb-6 text-center">
-                                    Delete "{project.name}"?
+                                    Delete &quot;{project.name}&quot;?
                                   </p>
                                   <div className="flex gap-3 w-full">
                                     <button

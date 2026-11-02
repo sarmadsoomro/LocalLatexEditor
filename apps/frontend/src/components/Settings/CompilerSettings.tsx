@@ -1,11 +1,12 @@
+import { useSettingsStore } from '@/stores';
 import type { CompilerSettings as CompilerSettingsType } from '@/types/settings';
+
 import {
   SettingsSection,
   ToggleSetting,
   SelectSetting,
   SettingItem,
 } from './SettingsComponents';
-import { useSettingsStore } from '@/stores';
 
 const ENGINE_OPTIONS = [
   { value: 'pdflatex', label: 'PDFLaTeX' },

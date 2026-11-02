@@ -1,10 +1,11 @@
+import { useSettingsStore } from '@/stores';
+
 import {
   SettingsSection,
   ToggleSetting,
   SelectSetting,
   SettingItem,
 } from './SettingsComponents';
-import { useSettingsStore } from '@/stores';
 
 const THEME_OPTIONS = [
   { value: 'light', label: 'Light' },

@@ -1,10 +1,11 @@
-import { useRef, useCallback, useEffect } from "react";
 import Editor, { OnMount, OnChange } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
-import { useSettingsStore } from "../../stores/settingsStore";
-import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
+import { useRef, useCallback, useEffect } from "react";
+
 import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokenizer";
 import { registerThemes } from "../../editor/latexThemes";
+import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
+import { useSettingsStore } from "../../stores/settingsStore";
 
 export interface MonacoEditorProps {
   content: string;
@@ -24,7 +25,7 @@ export function MonacoEditor({
   className = "",
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const monacoRef = useRef<any>(null);
+  const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
 
   const getMonacoOptions = useSettingsStore((state) => state.getMonacoOptions);
   const settingsOptions = useSettingsStore((state) => state.getMonacoOptions());

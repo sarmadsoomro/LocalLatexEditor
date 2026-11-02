@@ -1,5 +1,6 @@
-import path from 'path';
 import { promises as fs } from 'fs';
+import path from 'path';
+
 import { getProjectPath } from '../config/storage.js';
 
 const AUXILIARY_EXTENSIONS = [

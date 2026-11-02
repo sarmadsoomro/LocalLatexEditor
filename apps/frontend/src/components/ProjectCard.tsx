@@ -1,8 +1,12 @@
-import { useState } from "react";
 import type { ProjectWithMetadata, ProjectStatus } from "@local-latex-editor/shared-types";
-import { EditableProjectName } from "./EditableProjectName";
-import { useProjectStore } from "../stores/projectStore";
 import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+
+import { useProjectStore } from "../stores/projectStore";
+
+import { EditableProjectName } from "./EditableProjectName";
+
+
 
 interface ProjectCardProps {
   project: ProjectWithMetadata;

@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { nanoid } from 'nanoid';
+
 import type {
   ProjectWithMetadata,
   CreateProjectRequest,
@@ -8,10 +8,13 @@ import type {
   Template,
   ProjectStatus,
 } from '@local-latex-editor/shared-types';
+import { nanoid } from 'nanoid';
+
 import { storageConfig, getProjectPath } from '../config/storage.js';
+import { ValidationError, NotFoundError, ConflictError } from '../types/error.js';
+
 import { buildFileTree, getProjectStats } from './fileSystemService.js';
 import { getTemplate } from './templates.js';
-import { ValidationError, NotFoundError, ConflictError } from '../types/error.js';
 
 const PROJECTS_METADATA_FILE = path.join(storageConfig.projectsDir, '..', 'projects.json');
 const PROJECTS_CACHE_TTL_MS = 3000;
@@ -59,7 +62,9 @@ export async function saveProjectsMetadata(projects: StoredProject[]): Promise<v
   } catch (error) {
     try {
       await fs.unlink(tempFile);
-    } catch {}
+    } catch {
+      /* temp file may already be gone */
+    }
     throw error;
   }
 }
@@ -115,7 +120,7 @@ export async function createProject(request: CreateProjectRequest): Promise<Proj
     throw new ValidationError('Project name must be less than 100 characters');
   }
   
-  const invalidChars = /[<>:"\/\\|?*]/;
+  const invalidChars = /[<>:"/\\|?*]/;
   if (invalidChars.test(name)) {
     throw new ValidationError('Project name contains invalid characters');
   }
@@ -400,7 +405,7 @@ export async function renameProject(id: string, newName: string): Promise<Projec
     throw new ValidationError('Project name must be less than 100 characters');
   }
   
-  const invalidChars = /[<>:"\/\\|?*]/;
+  const invalidChars = /[<>:"/\\|?*]/;
   if (invalidChars.test(newName)) {
     throw new ValidationError('Project name contains invalid characters');
   }

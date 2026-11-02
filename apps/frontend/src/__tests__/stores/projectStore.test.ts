@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useProjectStore } from '../../stores/projectStore';
 import type { ProjectWithMetadata, FileNode } from '@local-latex-editor/shared-types';
+import { describe, it, expect, beforeEach } from 'vitest';
+
+import { useProjectStore } from '../../stores/projectStore';
 
 const createMockProject = (id: string, name: string): ProjectWithMetadata => ({
   id,

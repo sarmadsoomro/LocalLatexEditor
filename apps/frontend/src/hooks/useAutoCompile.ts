@@ -1,8 +1,10 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useCompilationStore } from "../stores/compilationStore";
-import { compilationApi } from "../services/compilationApi";
-import { useProjectStore } from "../stores/projectStore";
 import { shallow } from "zustand/shallow";
+
+import { compilationApi } from "../services/compilationApi";
+import { useCompilationStore } from "../stores/compilationStore";
+import { useProjectStore } from "../stores/projectStore";
+
 
 const AUTO_COMPILE_DELAY_MS = 2000;
 const AUTO_COMPILE_MIN_INTERVAL_MS = 8000;
@@ -84,6 +86,7 @@ export function useAutoCompile() {
     } finally {
       queueSizeRef.current = Math.max(0, queueSizeRef.current - 1);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- clearAutoCompileTimeout is a stable helper in this hook
   }, [currentProject, isCompiling, startCompilation, setError]);
 
   const triggerAutoCompile = useCallback(() => {

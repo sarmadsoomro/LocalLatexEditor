@@ -1,4 +1,3 @@
-import { api } from "./api";
 import type {
   CreateProjectResponse,
   ListProjectsResponse,
@@ -9,6 +8,8 @@ import type {
   ProjectFilter,
   ProjectStatus,
 } from "@local-latex-editor/shared-types";
+
+import { api } from "./api";
 
 export const projectApi = {
   async listProjects(filter?: ProjectFilter): Promise<ListProjectsResponse> {
@@ -128,7 +129,9 @@ export const projectApi = {
       try {
         const error = await response.json();
         if (error.error?.message) errorMsg = error.error.message;
-      } catch (e) {}
+      } catch {
+        /* response was not JSON */
+      }
       throw new Error(errorMsg);
     }
 

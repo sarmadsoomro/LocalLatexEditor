@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useProjectStore } from '../stores/projectStore';
+
 import { projectApi } from '../services/projectApi';
+import { useProjectStore } from '../stores/projectStore';
 
 export function useProjects() {
   const { projects, setProjects, isLoading, setLoading, error, setError } = useProjectStore();

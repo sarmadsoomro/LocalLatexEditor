@@ -185,6 +185,8 @@ export const PDFPreview = memo(function PDFPreview({
       container.addEventListener("keydown", handleKeyDown);
       return () => container.removeEventListener("keydown", handleKeyDown);
     }
+    // page helpers are stable enough; rebinding would reset the listener
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numPages]);
 
   // Ctrl/Cmd + scroll wheel for zoom
@@ -328,7 +330,7 @@ export const PDFPreview = memo(function PDFPreview({
   }, []);
 
   const onPageLoadSuccess = useCallback(
-    (page: any) => {
+    (page: { width: number; height: number }) => {
       setPageWidth(page.width);
       setPageHeight(page.height);
 

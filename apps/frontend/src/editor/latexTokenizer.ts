@@ -67,7 +67,7 @@ export const latexTokenizer: monaco.languages.IMonarchLanguage = {
       { regex: /#/, action: { token: 'operator' } },
       { regex: /\^/, action: { token: 'operator' } },
       { regex: /_/, action: { token: 'operator' } },
-      { regex: /\~/, action: { token: 'operator' } },
+      { regex: /~/, action: { token: 'operator' } },
       
       // Brackets
       { regex: /\{/, action: { token: 'delimiter.bracket' } },

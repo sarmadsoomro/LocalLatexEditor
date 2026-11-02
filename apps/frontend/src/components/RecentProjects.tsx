@@ -1,8 +1,10 @@
-import React from 'react';
-import { Clock, FolderOpen, ChevronRight } from 'lucide-react';
 import type { ProjectWithMetadata } from '@local-latex-editor/shared-types';
-import { formatTimeAgo, formatFullDate } from '../utils/date';
 import { isToday, isYesterday, isThisWeek } from 'date-fns';
+import { Clock, FolderOpen, ChevronRight } from 'lucide-react';
+import React from 'react';
+
+import { formatTimeAgo, formatFullDate } from '../utils/date';
+
 
 interface RecentProjectsProps {
   projects: ProjectWithMetadata[];
