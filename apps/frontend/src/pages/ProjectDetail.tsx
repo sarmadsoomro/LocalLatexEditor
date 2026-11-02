@@ -27,7 +27,7 @@ import { syncApi } from "../services/syncApi";
 import { useEditorStore } from "../stores/editorStore";
 import { useProjectStore } from "../stores/projectStore";
 import { useSettingsStore } from "../stores/settingsStore";
-import { useSyncStore } from "../stores/syncStore";
+import { samePath, useSyncStore } from "../stores/syncStore";
 import type { CompilerSettings } from "../types/settings";
 
 type CompilerEngine = CompilerSettings["defaultEngine"];
@@ -119,7 +119,9 @@ export function ProjectDetail() {
     async (page: number, x: number, y: number) => {
       if (!projectId) return;
       try {
-        const { file, line } = await syncApi.inverse(projectId, page, x, y);
+        const { file: syncFile, line } = await syncApi.inverse(projectId, page, x, y);
+        // reuse the open tab's spelling of the path (Windows uses "\\")
+        const file = useEditorStore.getState().openFiles.find((f) => samePath(f.path, syncFile))?.path ?? syncFile;
         await openFile(projectId, file);
         useSyncStore.getState().requestReveal(file, line);
       } catch (err) {

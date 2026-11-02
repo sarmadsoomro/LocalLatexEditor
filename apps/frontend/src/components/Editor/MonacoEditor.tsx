@@ -8,7 +8,7 @@ import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokeni
 import { registerThemes } from "../../editor/latexThemes";
 import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
 import { useSettingsStore } from "../../stores/settingsStore";
-import { useSyncStore } from "../../stores/syncStore";
+import { samePath, useSyncStore } from "../../stores/syncStore";
 
 export interface MonacoEditorProps {
   content: string;
@@ -143,7 +143,7 @@ export function MonacoEditor({
   useEffect(() => {
     const ed = editorRef.current;
     if (!ed || !reveal || reveal.nonce === handledRevealRef.current) return;
-    if (reveal.path !== path || ed.getValue() !== content) return;
+    if (!path || !samePath(reveal.path, path) || ed.getValue() !== content) return;
     handledRevealRef.current = reveal.nonce;
     const line = Math.min(Math.max(reveal.line, 1), ed.getModel()?.getLineCount() ?? 1);
     ed.setPosition({ lineNumber: line, column: 1 });

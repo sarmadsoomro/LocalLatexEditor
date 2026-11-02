@@ -27,6 +27,11 @@ interface SyncState {
 
 let nonce = 0;
 
+/** Project-relative paths may use "\\" (Windows file tree) or "/" (SyncTeX). */
+export function samePath(a: string, b: string): boolean {
+  return a.replace(/\\/g, '/') === b.replace(/\\/g, '/');
+}
+
 export const useSyncStore = create<SyncState>((set) => ({
   cursor: null,
   reveal: null,
