@@ -352,3 +352,23 @@ button:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* SyncTeX: location shown in the PDF, and the line revealed in the editor */
+.synctex-pdf-highlight {
+  background: color-mix(in srgb, var(--color-warning) 28%, transparent);
+  outline: 2px solid var(--color-warning);
+  animation: synctex-fade 2.5s ease-out forwards;
+}
+
+.monaco-editor .synctex-line-flash {
+  background: color-mix(in srgb, var(--color-warning) 30%, transparent);
+}
+
+@keyframes synctex-fade {
+  0%, 60% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synctex-pdf-highlight { animation: none; }
+}

@@ -2,6 +2,7 @@ import { memo, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 import { apiAuthHeaders, notifySessionExpired } from "../services/api";
+import { useSyncStore } from "../stores/syncStore";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
@@ -32,6 +33,8 @@ interface PDFPreviewProps {
   pdfUrl: string;
   refreshKey?: number;
   projectId?: string;
+  /** Double-click or Ctrl/Cmd+click: page and point in PDF points (top-left origin). */
+  onSyncClick?: (page: number, x: number, y: number) => void;
 }
 
 function useDebouncedCallback<T extends (...args: never[]) => void>(
@@ -67,6 +70,7 @@ export const PDFPreview = memo(function PDFPreview({
   pdfUrl,
   refreshKey,
   projectId,
+  onSyncClick,
 }: PDFPreviewProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -123,6 +127,12 @@ export const PDFPreview = memo(function PDFPreview({
   const [pageHeight, setPageHeight] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // SyncTeX: page size in PDF points, the page element, and the highlight to draw
+  const pageSizePtRef = useRef<{ width: number; height: number } | null>(null);
+  const pageWrapperRef = useRef<HTMLDivElement>(null);
+  const highlight = useSyncStore((state) => state.highlight);
+  const [visibleHighlight, setVisibleHighlight] = useState<typeof highlight>(null);
   const pageInputRef = useRef<HTMLInputElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -364,7 +374,8 @@ export const PDFPreview = memo(function PDFPreview({
   }, []);
 
   const onPageLoadSuccess = useCallback(
-    (page: { width: number; height: number }) => {
+    (page: { width: number; height: number; originalWidth: number; originalHeight: number }) => {
+      pageSizePtRef.current = { width: page.originalWidth, height: page.originalHeight };
       setPageWidth(page.width);
       setPageHeight(page.height);
 
@@ -382,6 +393,47 @@ export const PDFPreview = memo(function PDFPreview({
   const onPageRenderSuccess = useCallback(() => {
     // Page rendered successfully
   }, []);
+
+  // SyncTeX: show a location requested from the editor
+  useEffect(() => {
+    if (!highlight) return;
+    setPageNumber(highlight.page);
+    setPageInputValue(highlight.page.toString());
+    setVisibleHighlight(highlight);
+    const timer = setTimeout(() => setVisibleHighlight(null), 2500);
+    return () => clearTimeout(timer);
+  }, [highlight]);
+
+  // Scroll the first highlighted box into view once the page has rendered
+  useEffect(() => {
+    if (!visibleHighlight || visibleHighlight.page !== pageNumber) return;
+    const frame = requestAnimationFrame(() => {
+      pageWrapperRef.current
+        ?.querySelector<HTMLElement>("[data-synctex-highlight]")
+        ?.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [visibleHighlight, pageNumber, scale]);
+
+  // SyncTeX: double-click or Ctrl/Cmd+click on the page -> source
+  const handlePageClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!onSyncClick) return;
+      if (e.type === "click" && !(e.ctrlKey || e.metaKey)) return;
+      const pageEl = pageWrapperRef.current?.querySelector<HTMLElement>(".react-pdf__Page");
+      const size = pageSizePtRef.current;
+      if (!pageEl || !size) return;
+      const rect = pageEl.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const x = ((e.clientX - rect.left) / rect.width) * size.width;
+      const y = ((e.clientY - rect.top) / rect.height) * size.height;
+      if (x < 0 || y < 0 || x > size.width || y > size.height) return;
+      e.preventDefault();
+      window.getSelection()?.removeAllRanges();
+      onSyncClick(pageNumber, x, y);
+    },
+    [onSyncClick, pageNumber],
+  );
 
   // Navigation functions
   const goToFirstPage = useCallback(() => {
@@ -998,15 +1050,38 @@ export const PDFPreview = memo(function PDFPreview({
             </div>
           }
         >
-          <Page
-            pageNumber={pageNumber}
-            scale={scale}
-            renderTextLayer={true}
-            renderAnnotationLayer={true}
-            className="shadow-xl"
-            onLoadSuccess={onPageLoadSuccess}
-            onRenderSuccess={onPageRenderSuccess}
-          />
+          <div
+            ref={pageWrapperRef}
+            className="relative"
+            onDoubleClick={handlePageClick}
+            onClick={handlePageClick}
+            title={onSyncClick ? "Double-click (or Ctrl/Cmd+click) to jump to the source" : undefined}
+          >
+            <Page
+              pageNumber={pageNumber}
+              scale={scale}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              className="shadow-xl"
+              onLoadSuccess={onPageLoadSuccess}
+              onRenderSuccess={onPageRenderSuccess}
+            />
+            {visibleHighlight?.page === pageNumber &&
+              visibleHighlight.rects.map((r, i) => (
+                <div
+                  key={`${visibleHighlight.nonce}-${i}`}
+                  data-synctex-highlight
+                  aria-hidden="true"
+                  className="synctex-pdf-highlight pointer-events-none absolute z-10 rounded-sm"
+                  style={{
+                    left: r.x * scale - 2,
+                    top: r.y * scale - 2,
+                    width: r.width * scale + 4,
+                    height: Math.max(r.height * scale, 8) + 4,
+                  }}
+                />
+              ))}
+          </div>
         </Document>
       </div>
     </div>

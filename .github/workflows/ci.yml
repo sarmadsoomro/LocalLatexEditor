@@ -55,4 +55,4 @@ jobs:
         working-directory: apps/backend
         env:
           TEXCRAFT_REQUIRE_TEX: "1"
-        run: pnpm exec vitest run src/__tests__/compile.test.ts
+        run: pnpm exec vitest run src/__tests__/compile.test.ts src/__tests__/synctexRoutes.test.ts

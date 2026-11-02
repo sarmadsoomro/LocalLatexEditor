@@ -8,6 +8,7 @@ import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokeni
 import { registerThemes } from "../../editor/latexThemes";
 import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
 import { useSettingsStore } from "../../stores/settingsStore";
+import { samePath, useSyncStore } from "../../stores/syncStore";
 
 export interface MonacoEditorProps {
   content: string;
@@ -16,6 +17,10 @@ export interface MonacoEditorProps {
   onSave?: () => void;
   readOnly?: boolean;
   className?: string;
+  /** Project-relative path of the file being edited (for PDF sync). */
+  path?: string;
+  /** Jump to this line's location in the PDF (SyncTeX). */
+  onGoToPdf?: () => void;
 }
 
 export function MonacoEditor({
@@ -25,9 +30,21 @@ export function MonacoEditor({
   onSave,
   readOnly = false,
   className = "",
+  path,
+  onGoToPdf,
 }: MonacoEditorProps) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
+
+  // refs so editor callbacks registered once at mount see current values
+  const pathRef = useRef(path);
+  pathRef.current = path;
+  const onGoToPdfRef = useRef(onGoToPdf);
+  onGoToPdfRef.current = onGoToPdf;
+  const setCursor = useSyncStore((state) => state.setCursor);
+  const reveal = useSyncStore((state) => state.reveal);
+  const handledRevealRef = useRef(0);
+  const flashRef = useRef<editor.IEditorDecorationsCollection | null>(null);
 
   const getMonacoOptions = useSettingsStore((state) => state.getMonacoOptions);
   const settingsOptions = useSettingsStore((state) => state.getMonacoOptions());
@@ -76,10 +93,25 @@ export function MonacoEditor({
         onSave?.();
       });
 
+      // PDF sync: publish the cursor line, and "Show in PDF" (Alt+J, right-click menu)
+      editor.onDidChangeCursorPosition((e) => {
+        if (pathRef.current) setCursor(pathRef.current, e.position.lineNumber);
+      });
+      const position = editor.getPosition();
+      if (pathRef.current && position) setCursor(pathRef.current, position.lineNumber);
+      editor.addAction({
+        id: "texcraft.showInPdf",
+        label: "Show in PDF",
+        keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KeyJ],
+        contextMenuGroupId: "navigation",
+        contextMenuOrder: 0,
+        run: () => onGoToPdfRef.current?.(),
+      });
+
       // Focus the editor
       editor.focus();
     },
-    [onSave, getMonacoOptions, syntaxTheme],
+    [onSave, getMonacoOptions, syntaxTheme, setCursor],
   );
 
   useEffect(() => {
@@ -106,6 +138,30 @@ export function MonacoEditor({
       }
     }
   }, [content]);
+
+  // PDF sync: reveal a line requested from the PDF once this file's content is loaded
+  useEffect(() => {
+    const ed = editorRef.current;
+    if (!ed || !reveal || reveal.nonce === handledRevealRef.current) return;
+    if (!path || !samePath(reveal.path, path) || ed.getValue() !== content) return;
+    handledRevealRef.current = reveal.nonce;
+    const line = Math.min(Math.max(reveal.line, 1), ed.getModel()?.getLineCount() ?? 1);
+    ed.setPosition({ lineNumber: line, column: 1 });
+    ed.revealLineInCenter(line);
+    ed.focus();
+    flashRef.current?.clear();
+    flashRef.current = ed.createDecorationsCollection([
+      { range: { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: 1 }, options: { isWholeLine: true, className: "synctex-line-flash" } },
+    ]);
+    const timer = setTimeout(() => flashRef.current?.clear(), 1800);
+    return () => clearTimeout(timer);
+  }, [reveal, path, content]);
+
+  // Keep the published cursor's file in sync when switching tabs
+  useEffect(() => {
+    const pos = editorRef.current?.getPosition();
+    if (path && pos) setCursor(path, pos.lineNumber);
+  }, [path, content, setCursor]);
 
   // Listen for syntax theme changes
   useEffect(() => {

@@ -70,6 +70,15 @@ Mounted at `/api/projects/:id/files`. Paths are relative to the project director
 
 `spawn` is called with `shell: false`. With `latexmk` on PATH the command is `latexmk -pdf|-xelatex|-lualatex -interaction=nonstopmode -synctex=1 -outdir=<project>/output [-shell-escape] <main>`, and auxiliary files are kept between compiles. Without it, the engine runs with `-interaction=nonstopmode -synctex=1 -output-directory=...`, then `biber` or `bibtex` if the main file uses a bibliography, then the engine twice more (once if there is no bibliography). `TEXCRAFT_DISABLE_LATEXMK=1` forces the fallback. Errors are parsed from `output/<main>.log`; each error has the file TeX was reading and the line number. On timeout the whole process tree is killed.
 
+## SyncTeX
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| GET | `/api/projects/:id/synctex/forward?file=&line=` | `file` is project-relative. Returns `{ page, rects: [{ x, y, width, height }] }` in PDF points from the page's top-left. 400 if `file` leaves the project, 404 if there is no SyncTeX data yet or the line produced no output |
+| GET | `/api/projects/:id/synctex/inverse?page=&x=&y=` | Point in PDF points (top-left origin). Returns `{ file, line }`, project-relative. Only files inside the project are returned, never package files |
+
+Both read `output/<main>.synctex.gz` directly (`apps/backend/src/services/synctexService.ts`); the `synctex` CLI is not needed. Results are checked against the CLI in `src/__tests__/synctexRoutes.test.ts`.
+
 `GET /api/system/latex-check` returns `engines` (pdflatex, xelatex, lualatex), `tools` (latexmk, biber, bibtex, synctex) and `incrementalBuilds` (true when latexmk is used).
 
 Rate limits: 1000 requests per 15 minutes on `/api`, and 10 compile requests per minute on `/api/projects/:id/compile`.

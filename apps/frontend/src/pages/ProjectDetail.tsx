@@ -1,4 +1,5 @@
 import type { FileNode } from "@local-latex-editor/shared-types";
+import { FileSearch } from "lucide-react";
 import { useEffect, useState, useCallback, useRef, lazy, Suspense, startTransition } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { shallow } from "zustand/shallow";
@@ -22,9 +23,11 @@ import { useFileOperations } from "../hooks/useFileOperations";
 import { useEditorShortcuts } from "../hooks/useKeyboardShortcuts";
 import { compilationApi } from "../services/compilationApi";
 import { projectApi } from "../services/projectApi";
+import { syncApi } from "../services/syncApi";
 import { useEditorStore } from "../stores/editorStore";
 import { useProjectStore } from "../stores/projectStore";
 import { useSettingsStore } from "../stores/settingsStore";
+import { samePath, useSyncStore } from "../stores/syncStore";
 import type { CompilerSettings } from "../types/settings";
 
 type CompilerEngine = CompilerSettings["defaultEngine"];
@@ -98,6 +101,35 @@ export function ProjectDetail() {
   } = useFileOperations();
 
   const { isCompiling, status, result, compile } = useCompilation();
+
+  // SyncTeX: editor cursor -> PDF location
+  const handleGoToPdf = useCallback(async () => {
+    const cursor = useSyncStore.getState().cursor;
+    if (!projectId || !cursor) return;
+    try {
+      const { page, rects } = await syncApi.forward(projectId, cursor.path, cursor.line);
+      useSyncStore.getState().showInPdf(page, rects);
+    } catch (err) {
+      addToast(err instanceof Error ? err.message : "Could not find this line in the PDF", "info");
+    }
+  }, [projectId, addToast]);
+
+  // SyncTeX: point in the PDF -> source file and line
+  const handlePdfSyncClick = useCallback(
+    async (page: number, x: number, y: number) => {
+      if (!projectId) return;
+      try {
+        const { file: syncFile, line } = await syncApi.inverse(projectId, page, x, y);
+        // reuse the open tab's spelling of the path (Windows uses "\\")
+        const file = useEditorStore.getState().openFiles.find((f) => samePath(f.path, syncFile))?.path ?? syncFile;
+        await openFile(projectId, file);
+        useSyncStore.getState().requestReveal(file, line);
+      } catch (err) {
+        addToast(err instanceof Error ? err.message : "Could not find the source for that point", "info");
+      }
+    },
+    [projectId, openFile, addToast],
+  );
   const { triggerAutoCompile } = useAutoCompile();
   const compiler = useSettingsStore((state) => state.compiler.defaultEngine);
   const updateCompilerSettings = useSettingsStore((state) => state.updateCompilerSettings);
@@ -134,6 +166,7 @@ export function ProjectDetail() {
     }
     return () => {
       closeAllFiles();
+      useSyncStore.getState().reset();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when the project id changes
   }, [projectId]);
@@ -379,6 +412,7 @@ export function ProjectDetail() {
   const tabs = openFiles.map((file) => ({
     id: file.id,
     name: file.name,
+    path: file.path,
     isDirty: file.isDirty,
     isActive: file.id === activeFileId,
   }));
@@ -517,6 +551,16 @@ export function ProjectDetail() {
               onCleanBuild={handleCleanBuild}
             />
 
+            <button
+              onClick={handleGoToPdf}
+              disabled={!activeFileId}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold text-secondary hover:text-cta hover:bg-cta/5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Show the cursor's line in the PDF (Alt+J). Double-click the PDF to jump back."
+            >
+              <FileSearch className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden xl:inline">Show in PDF</span>
+            </button>
+
             <div className="w-px h-4 bg-border mx-1" />
 
             <AutoCompileToggle
@@ -613,6 +657,7 @@ export function ProjectDetail() {
                   onTabClose={handleTabCloseRequest}
                   onContentChange={handleEditorChange}
                   onSave={handleSave}
+                  onGoToPdf={handleGoToPdf}
                 />
               }
               rightPane={
@@ -621,6 +666,7 @@ export function ProjectDetail() {
                     pdfUrl={compilationApi.getPdfUrl(projectId, pdfRefreshKey)}
                     refreshKey={pdfRefreshKey}
                     projectId={projectId}
+                    onSyncClick={handlePdfSyncClick}
                   />
                 </Suspense>
               }
@@ -642,6 +688,7 @@ export function ProjectDetail() {
                   onTabClose={handleTabCloseRequest}
                   onContentChange={handleEditorChange}
                   onSave={handleSave}
+                  onGoToPdf={handleGoToPdf}
                   showHint={!showPreviewPane}
                 />
               }
