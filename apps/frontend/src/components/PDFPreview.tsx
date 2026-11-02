@@ -3,6 +3,8 @@ import { Document, Page, pdfjs } from "react-pdf";
 
 import { apiAuthHeaders, notifySessionExpired } from "../services/api";
 import { useSyncStore } from "../stores/syncStore";
+
+import { useToast } from "./Toast";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
@@ -35,7 +37,10 @@ interface PDFPreviewProps {
   projectId?: string;
   /** Double-click or Ctrl/Cmd+click: page and point in PDF points (top-left origin). */
   onSyncClick?: (page: number, x: number, y: number) => void;
+  /** file name for Save PDF, e.g. "main.pdf" */
+  downloadName?: string;
 }
+
 
 function useDebouncedCallback<T extends (...args: never[]) => void>(
   callback: T,
@@ -68,6 +73,7 @@ function useDebouncedCallback<T extends (...args: never[]) => void>(
 
 export const PDFPreview = memo(function PDFPreview({
   pdfUrl,
+  downloadName,
   refreshKey,
   projectId,
   onSyncClick,
@@ -121,6 +127,32 @@ export const PDFPreview = memo(function PDFPreview({
       })
       .catch(() => w?.close());
   }, [pdfUrl]);
+  // Save PDF: fetch a fresh copy (the viewer may own pdfData's buffer) and
+  // hand it to the browser's download, which asks where to save
+  const { addToast } = useToast();
+  const [saving, setSaving] = useState(false);
+  const savePdf = useCallback(() => {
+    setSaving(true);
+    void fetch(pdfUrl, { headers: apiAuthHeaders() })
+      .then((response) => {
+        if (response.status === 401) notifySessionExpired();
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.blob();
+      })
+      .then((blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = downloadName || "document.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      })
+      .catch(() => addToast("Could not save the PDF. Compile again, then retry.", "error"))
+      .finally(() => setSaving(false));
+  }, [pdfUrl, downloadName, addToast]);
+
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const [pageWidth, setPageWidth] = useState<number>(0);
@@ -692,7 +724,7 @@ export const PDFPreview = memo(function PDFPreview({
 
       {/* Toolbar */}
       <div
-        className="flex items-center justify-between px-3 py-1.5 bg-surface border-b border-border gap-4"
+        className="flex flex-wrap items-center justify-between px-3 py-1.5 bg-surface border-b border-border gap-x-4 gap-y-1.5"
         role="toolbar"
         aria-label="PDF controls"
       >
@@ -1010,12 +1042,19 @@ export const PDFPreview = memo(function PDFPreview({
           </div>
         </div>
 
-        {/* Keyboard Shortcuts Hint */}
-        <div
-          className="text-[10px] uppercase tracking-wider font-semibold text-muted hidden lg:block"
-          aria-hidden="true"
-        >
-          Ctrl+Scroll to zoom • PgUp/PgDn to navigate
+        <div className="flex items-center shrink-0 ml-auto">
+          <button
+            onClick={savePdf}
+            disabled={!pdfData || saving}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 text-secondary border border-border hover:bg-surface-hover hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            aria-label="Save PDF"
+            title={`Save PDF${downloadName ? ` (${downloadName})` : ""}`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Save PDF
+          </button>
         </div>
       </div>
 

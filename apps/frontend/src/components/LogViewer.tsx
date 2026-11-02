@@ -44,9 +44,18 @@ export default function LogViewer({
             {errors.map((error, idx) => (
               <div
                 key={idx}
+                role="button"
+                tabIndex={0}
+                title={onErrorClick && error.line > 0 ? `Go to ${error.file ? `${error.file}, ` : ''}line ${error.line}` : undefined}
                 onClick={() => handleErrorClick(error)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleErrorClick(error);
+                  }
+                }}
                 className={`
-                  px-4 py-4 cursor-pointer transition-all duration-fast
+                  px-4 py-4 cursor-pointer transition-all duration-fast focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-error/50
                   ${selectedError === error ? 'bg-error/10' : 'hover:bg-error/5'}
                 `}
               >
