@@ -27,6 +27,8 @@ interface EditorAreaProps {
   onContentChange: (value: string) => void;
   onSave: () => void;
   showHint?: boolean;
+  /** Jump from the cursor to the PDF (SyncTeX). */
+  onGoToPdf?: () => void;
 }
 
 export function EditorArea({
@@ -39,6 +41,7 @@ export function EditorArea({
   onContentChange,
   onSave,
   showHint = false,
+  onGoToPdf,
 }: EditorAreaProps) {
   const activeTab = tabs.find((t) => t.id === activeFileId);
 
@@ -62,6 +65,8 @@ export function EditorArea({
                 language={language}
                 onChange={onContentChange}
                 onSave={onSave}
+                path={activeTab.path}
+                onGoToPdf={onGoToPdf}
               />
             </Suspense>
           ) : (
