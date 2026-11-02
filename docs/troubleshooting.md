@@ -42,14 +42,16 @@ xattr -dr com.apple.quarantine /Applications/TexCraft.app
 
 Click an error in the log to jump to its line. The [user guide](user-guide.md#fixing-errors) lists the common LaTeX errors. Problems that come from the setup rather than your document:
 
-**``LaTeX Error: File `something.sty' not found``.** A package the document uses is not installed.
+**``LaTeX Error: File `something.sty' not found``.** A package the document uses is not installed. The log shows a notice with an **Install** button or a command to run ([user guide](user-guide.md#missing-packages)). If the install fails, or you prefer to do it yourself:
 
 | Distribution | Fix |
 | --- | --- |
 | MiKTeX | Allow on-the-fly installs (MiKTeX Console → Settings → "Always install missing packages"), then compile again. Or install the package in MiKTeX Console → Packages |
 | MacTeX | MacTeX includes almost everything. Update it: `sudo tlmgr update --self --all` |
-| BasicTeX, TinyTeX | `sudo tlmgr install <package>` (TinyTeX: no `sudo`). The package name is usually the file name without `.sty`; `tlmgr search --global --file something.sty` finds it otherwise |
+| BasicTeX, TinyTeX | `sudo tlmgr install <package>` (TinyTeX: no `sudo`). The package name is usually the file name without `.sty`; `tlmgr search --global --file something.sty` finds it otherwise. Journal templates need many packages: `sudo tlmgr install collection-latexextra collection-fontsrecommended` adds most of them |
 | TeX Live on Linux | Install the collection that holds it, for example `sudo apt install texlive-science` for `algorithmic.sty`, or `texlive-full` for everything |
+
+**Install fails with "your TeX Live is older than the online package server".** `tlmgr` only installs packages for the current TeX Live year. Install the current MacTeX or TeX Live, then try again.
 
 **The compile fails on the template's sample before you changed anything.** Usually the same missing-package problem. Journal templates (IEEE, Elsevier, Springer) need a fairly complete install. Check the first error in the log.
 
@@ -67,7 +69,9 @@ Click an error in the log to jump to its line. The [user guide](user-guide.md#fi
 
 **The fonts differ from the journal's sample PDF.** Some classes quietly fall back to the default font when the font they want is not installed. Elsevier's `cas-dc` class, for example, uses STIX and switches to Computer Modern without an error if STIX is missing. Search the log for "not available" or "font", then install the font package (on Linux, `texlive-fonts-extra`; on MiKTeX it installs on the fly; MacTeX has it).
 
-**The PDF does not update.** Look at the log for an error: after a failed compile the preview can still show the last good PDF. Then try Clean build.
+**The PDF does not update.** Open the **Log** tab and look for an error. After a failed compile the **PDF** tab still shows the last good PDF, marked "Last compile failed". Then try Clean build.
+
+**Compile shows the log instead of the PDF.** The compile failed: the **Log** tab has a red error count. If the count is orange, there are only warnings; click **PDF** to see the document.
 
 **Double-click on the PDF jumps to the wrong line, or does nothing.** Compile again. The jump uses data from the last successful compile, so it drifts after big edits.
 

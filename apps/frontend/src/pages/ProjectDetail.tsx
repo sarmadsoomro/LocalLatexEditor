@@ -102,6 +102,9 @@ export function ProjectDetail() {
   } = useFileOperations();
 
   const { isCompiling, status, result, compile } = useCompilation();
+  // Right pane: the PDF or the compile log. A PDF stays visible after a compile
+  // with warnings, and after a failed compile until the user looks at the log.
+  const [rightView, setRightView] = useState<"pdf" | "log">("pdf");
 
   // SyncTeX: editor cursor -> PDF location
   const handleGoToPdf = useCallback(async () => {
@@ -109,6 +112,7 @@ export function ProjectDetail() {
     if (!projectId || !cursor) return;
     try {
       const { page, rects } = await syncApi.forward(projectId, cursor.path, cursor.line);
+      setRightView("pdf");
       useSyncStore.getState().showInPdf(page, rects);
     } catch (err) {
       addToast(err instanceof Error ? err.message : "Could not find this line in the PDF", "info");
@@ -223,6 +227,11 @@ export function ProjectDetail() {
       setPdfRefreshKey((prev) => prev + 1);
     }
   }, [status, result]);
+
+  // After each compile: show the new PDF, or the log when the compile failed.
+  useEffect(() => {
+    if (result) setRightView(result.success ? "pdf" : "log");
+  }, [result]);
 
   useEffect(() => {
     // Update last opened when project is opened
@@ -449,7 +458,11 @@ export function ProjectDetail() {
     isActive: file.id === activeFileId,
   }));
 
-  const showPreviewPane = Boolean(result?.success);
+  // A PDF exists once a compile in this session has succeeded.
+  const hasPdf = pdfRefreshKey > 0;
+  const showPdf = hasPdf && rightView === "pdf";
+  const errorCount = result?.errors?.length ?? 0;
+  const warningCount = result?.warnings?.length ?? 0;
   const currentContent = activeFile?.content || "";
   const currentLanguage = activeFileId ? getLanguage(activeFileId) : "latex";
 
@@ -679,7 +692,6 @@ export function ProjectDetail() {
           </aside>
 
           <main id="main-content" className="flex-1 min-w-0 flex overflow-hidden outline-none" tabIndex={-1}>
-            {showPreviewPane && !(result?.errors?.length || result?.warnings?.length) ? (
             <ResizableSplitPane
               leftPane={
                 <EditorArea
@@ -692,18 +704,81 @@ export function ProjectDetail() {
                   onContentChange={handleEditorChange}
                   onSave={handleSave}
                   onGoToPdf={handleGoToPdf}
+                  showHint={!hasPdf}
                 />
               }
               rightPane={
-                <Suspense fallback={<ComponentLoader />}>
-                  <PDFPreview
-                    pdfUrl={compilationApi.getPdfUrl(projectId, pdfRefreshKey)}
-                    refreshKey={pdfRefreshKey}
-                    projectId={projectId}
-                    onSyncClick={handlePdfSyncClick}
-                    downloadName={pdfNameFor(currentProject?.metadata?.mainFile)}
-                  />
-                </Suspense>
+                <div className="flex flex-col h-full min-h-0">
+                  {hasPdf && (
+                    <div
+                      role="tablist"
+                      aria-label="Output"
+                      className="flex items-center gap-1 pl-11 pr-2 py-1 border-b border-border bg-surface shrink-0"
+                    >
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={rightView === "pdf"}
+                        onClick={() => setRightView("pdf")}
+                        className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
+                          rightView === "pdf" ? "bg-cta/10 text-cta" : "text-muted hover:text-heading"
+                        }`}
+                      >
+                        PDF
+                      </button>
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={rightView === "log"}
+                        onClick={() => setRightView("log")}
+                        className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-md transition-colors ${
+                          rightView === "log" ? "bg-cta/10 text-cta" : "text-muted hover:text-heading"
+                        }`}
+                      >
+                        Log
+                        {errorCount > 0 && (
+                          <span className="px-1.5 rounded-full bg-error text-white" title={`${errorCount} error${errorCount === 1 ? "" : "s"}`}>
+                            {errorCount}
+                          </span>
+                        )}
+                        {warningCount > 0 && (
+                          <span className="px-1.5 rounded-full bg-warning/20 text-warning" title={`${warningCount} warning${warningCount === 1 ? "" : "s"}`}>
+                            {warningCount}
+                          </span>
+                        )}
+                      </button>
+                      {rightView === "pdf" && result && !result.success && (
+                        <span className="ml-2 text-xs text-error truncate">Last compile failed. Showing the previous PDF.</span>
+                      )}
+                    </div>
+                  )}
+                  {/* Keep the PDF mounted while the log is shown, so switching back is instant. */}
+                  {hasPdf && (
+                    <div className={showPdf ? "flex-1 min-h-0" : "hidden"}>
+                      <Suspense fallback={<ComponentLoader />}>
+                        <PDFPreview
+                          pdfUrl={compilationApi.getPdfUrl(projectId, pdfRefreshKey)}
+                          refreshKey={pdfRefreshKey}
+                          projectId={projectId}
+                          onSyncClick={handlePdfSyncClick}
+                          downloadName={pdfNameFor(currentProject?.metadata?.mainFile)}
+                        />
+                      </Suspense>
+                    </div>
+                  )}
+                  {!showPdf && (
+                    <div className="flex-1 min-h-0">
+                      <LogViewer
+                        logs={result?.logOutput?.split("\n") || []}
+                        errors={result?.errors || []}
+                        warnings={result?.warnings || []}
+                        onErrorClick={handleErrorClick}
+                        // latexmk does not notice a newly installed package, so rebuild from scratch
+                        onPackageInstalled={() => void handleCleanBuild()}
+                      />
+                    </div>
+                  )}
+                </div>
               }
               defaultSplit={50}
               minLeftWidth={150}
@@ -711,38 +786,7 @@ export function ProjectDetail() {
               storageKey={`latex-editor-split-${projectId}`}
               className="flex-1"
             />
-          ) : (
-            <ResizableSplitPane
-              leftPane={
-                <EditorArea
-                  tabs={tabs}
-                  activeFileId={activeFileId}
-                  content={currentContent}
-                  language={currentLanguage}
-                  onTabClick={handleTabClick}
-                  onTabClose={handleTabCloseRequest}
-                  onContentChange={handleEditorChange}
-                  onSave={handleSave}
-                  onGoToPdf={handleGoToPdf}
-                  showHint={!showPreviewPane}
-                />
-              }
-              rightPane={
-                <LogViewer
-                  logs={result?.logOutput?.split('\n') || []}
-                  errors={result?.errors || []}
-                  warnings={result?.warnings || []}
-                  onErrorClick={handleErrorClick}
-                />
-              }
-              defaultSplit={60}
-              minLeftWidth={150}
-              minRightWidth={150}
-              storageKey={`latex-editor-error-split-${projectId}`}
-              className="flex-1"
-              />
-              )}
-              </main>
+          </main>
               </div>
         <UnsavedChangesDialog
           isOpen={unsavedDialogOpen}

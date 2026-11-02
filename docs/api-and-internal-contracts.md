@@ -22,6 +22,8 @@ Project files live in `~/.latex-editor/projects/<id>`, or `LATEX_EDITOR_PROJECTS
 | --- | --- | --- |
 | GET | `/health` | `{ status, timestamp }` |
 | GET | `/api/system/latex-check` | Whether a LaTeX engine is on `PATH` |
+| POST | `/api/system/packages/lookup` | Body `{ file }`, a package file such as `lipsum.sty` (`.sty .cls .bst .def .clo .fd .cfg .ldf .cbx .bbx .lbx`). Returns `{ lookup: { file, package, manager, method, command, note? } }` |
+| POST | `/api/system/packages/install` | Body `{ file, package }`. Installs with `tlmgr` or MiKTeX. 409 when the method is `manual` or another install is running, 400 `INSTALL_CANCELLED` when the macOS password prompt was cancelled, 502 `INSTALL_FAILED` with `details.output` |
 
 ## Projects
 
@@ -83,6 +85,8 @@ Mounted at `/api/projects/:id/files`. Paths are relative to the project director
 Both read `output/<main>.synctex.gz` directly (`apps/backend/src/services/synctexService.ts`); the `synctex` CLI is not needed. Results are checked against the CLI in `src/__tests__/synctexRoutes.test.ts`.
 
 `GET /api/system/latex-check` returns `engines` (pdflatex, xelatex, lualatex), `tools` (latexmk, biber, bibtex, synctex) and `incrementalBuilds` (true when latexmk is used).
+
+Package installs (`apps/backend/src/services/texPackageService.ts`): `manager` is `tlmgr`, `miktex` or `none`. `method` is `install` (TexCraft runs `tlmgr install` or `miktex packages install`: the TeX Live folder is writable, or MiKTeX), `admin` (macOS system TeX Live: `tlmgr` runs through `osascript … with administrator privileges`, which shows the macOS password prompt) or `manual` (Debian/Ubuntu TeX Live in `/usr/share/texlive`, or any other read-only install: show `command`). The install route works the method out again on the server and never takes it from the request. File and package names are checked against strict patterns before anything runs; only the macOS admin path uses a shell, with a validated absolute `tlmgr` path.
 
 Rate limits: 1000 requests per 15 minutes on `/api`, and 10 compile requests per minute on `/api/projects/:id/compile`.
 

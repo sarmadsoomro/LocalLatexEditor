@@ -20,6 +20,7 @@ import compilationRoutes, {
 import importRoutes from "./routes/import.js";
 import projectRoutes from "./routes/projects.js";
 import synctexRoutes from "./routes/synctex.js";
+import texPackageRoutes from "./routes/texPackages.js";
 import { jobStore } from "./services/jobStore.js";
 
 // pino-pretty runs in a worker thread loaded by name, which a bundled build
@@ -80,6 +81,7 @@ export function createApp(token: string, port: number = PORT): Express {
   app.use("/api/projects/:id", synctexRoutes);
   app.use("/api/compile", compilationJobRouter);
   app.use("/api", systemCheckRouter);
+  app.use("/api/system/packages", texPackageRoutes);
   app.use("/api", importRoutes);
 
   // TEXCRAFT_FRONTEND_DIST: where the desktop app ships the built frontend

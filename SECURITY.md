@@ -31,6 +31,7 @@ TexCraft is a single-user app. Its backend runs on your computer and should be r
 
 - LaTeX is started with `spawn` and `shell: false`. Arguments are never passed through a shell.
 - `-shell-escape` is off. It is only passed when you turn on Settings → Compiler → Shell escape, which lets a document run programs. Only enable it for documents you trust.
+- **Package installs.** When a compile reports a missing package, TexCraft can install it, but only after you click **Install**. The file and package names from the log are checked against strict patterns (letters, digits, `.`, `_`, `+`, `-`) before anything runs. `tlmgr` and MiKTeX run without a shell. On macOS with a system TeX Live, the install runs through the standard macOS administrator prompt (`osascript … with administrator privileges`); TexCraft never sees your password, and the command contains only the validated package name and the absolute path of `tlmgr`.
 - This is not a sandbox. LaTeX runs as your user and can read any file you can read, for example through `\input{/path/to/file}`. Treat documents from others like any other file you open.
 
 ### Desktop app
