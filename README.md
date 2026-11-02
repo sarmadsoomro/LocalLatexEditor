@@ -1,6 +1,6 @@
 # TexCraft
 
-A local LaTeX editor. The UI runs in the browser. Compilation uses the LaTeX install on your machine. Documents are copied into app storage under `~/.latex-editor/projects` (override with `LATEX_EDITOR_PROJECTS_DIR`). Nothing in the app uploads them.
+A local LaTeX editor. Use it as a desktop app (macOS, Windows, Linux) or run it from source and open it in your browser. Compilation uses the LaTeX install on your machine. Documents are copied into app storage under `~/.latex-editor/projects` (override with `LATEX_EDITOR_PROJECTS_DIR`). Nothing in the app uploads them.
 
 It works without internet. The editor (Monaco) and the fonts are bundled with the app, so the page makes no requests to other sites. Your LaTeX distribution may still download missing packages on its own if you configured it to (MiKTeX does by default).
 
@@ -30,9 +30,15 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - Shell escape is off by default. Settings → Compiler → Shell escape passes `-shell-escape` (needed by `minted`); only enable it for documents you trust
 - No accounts or multi-user access. The API trusts one per-launch token, and only the page the server hands to your browser has it
 
-## Requirements
+## Desktop app
 
-- Node.js 18+
+Download the installer for your system from the [Releases page](https://github.com/sarmadsoomro/LocalLatexEditor/releases): `.dmg` for macOS (Apple silicon `arm64` or Intel `x64`), `.exe` for Windows, `.AppImage` for Linux. No Node.js, pnpm or Git needed. You still need a LaTeX distribution (MacTeX, MiKTeX or TeX Live); the app tells you which one to install if it finds none.
+
+The app is not code-signed yet, so the first launch needs one extra click. See [docs/desktop-app.md](docs/desktop-app.md#first-launch) for macOS, Windows and Linux.
+
+## Requirements (running from source)
+
+- Node.js 20.19+ (or 22.12+)
 - pnpm 8+ (`npm install -g pnpm`)
 - Git
 - A LaTeX install that provides `pdflatex`, `xelatex`, or `lualatex` (`pdflatex --version` should work)
@@ -65,12 +71,15 @@ pnpm test          # Vitest, where a package defines tests
 pnpm test:unit
 ```
 
+Desktop app from source: `pnpm desktop` (downloads Electron the first time). Installers: `pnpm build && pnpm --filter texcraft-desktop dist`, output in `apps/desktop/release/`. Details: [docs/desktop-app.md](docs/desktop-app.md).
+
 `pnpm test:e2e` is wired to Playwright in the frontend package. There are no Playwright specs in the repo.
 
 ```
 LatexEditor/
 ├── apps/frontend/          # React + Vite, port 3000
 ├── apps/backend/           # Express, port 3001
+├── apps/desktop/           # Electron shell + installers
 ├── packages/shared-types/
 ├── tooling/
 ├── scripts/
@@ -87,10 +96,12 @@ The backend listens on `127.0.0.1` only, so other machines on the same Wi-Fi can
 - **`HOST` override.** Setting `HOST` (for example `HOST=0.0.0.0`) makes the backend listen on that address instead of `127.0.0.1`. It logs a loud warning. The token and Host check still apply, so other machines get `401`/`403`, but the port is then open to the network and you lose the network-level protection. Do not set it on shared Wi-Fi.
 - **Windows.** The token file is created with mode `0600`, which Windows does not enforce. The file is in your user profile folder, which by default only your user can read.
 
+- **Desktop app.** Same backend, token and Host check, on `127.0.0.1:41731` (or the next free port). The window cannot navigate away from the app; links to other sites open in your normal browser. The page has no Node.js access, and permission requests (camera, microphone, location, notifications) are denied.
+
 Compilation uses `spawn` with `shell: false` and does not pass `-shell-escape` unless you turn on the Shell escape setting. That is not a sandbox. LaTeX still runs as your user and can read files you can read.
 
 ## Docs
 
-Current behavior: this file, and [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md).
+Current behavior: this file, [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md), and [docs/desktop-app.md](docs/desktop-app.md).
 
 April 2026 plans and the requirements draft are not a description of this build. See [docs/README.md](docs/README.md).

@@ -6,7 +6,7 @@ import type {
 
 import { api } from "./api";
 
-interface LatexCheckResponse {
+export interface LatexCheckResponse {
   latexInstalled: boolean;
   engines: Array<{ engine: string; installed: boolean; version?: string }>;
   tools: Array<{ engine: string; installed: boolean; version?: string }>;

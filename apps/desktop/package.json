@@ -1,0 +1,39 @@
+{
+  "name": "texcraft-desktop",
+  "productName": "TexCraft",
+  "version": "0.3.0",
+  "private": true,
+  "license": "MIT",
+  "description": "TexCraft desktop app: the local LaTeX editor in its own window",
+  "author": "Sarmad Soomro",
+  "homepage": "https://github.com/sarmadsoomro/LocalLatexEditor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sarmadsoomro/LocalLatexEditor.git"
+  },
+  "desktopName": "texcraft.desktop",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/ensure-electron.mjs && pnpm run build && electron .",
+    "dist": "pnpm run build && electron-builder --publish never",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
+    "test": "vitest run",
+    "test:unit": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist release"
+  },
+  "devDependencies": {
+    "@local-latex-editor/eslint-config": "workspace:*",
+    "@local-latex-editor/typescript-config": "workspace:*",
+    "@types/node": "^20.11.0",
+    "electron": "44.9.0",
+    "electron-builder": "26.17.0",
+    "esbuild": "0.28.2",
+    "eslint": "^8.57.0",
+    "texcraft-backend": "workspace:*",
+    "texcraft-frontend": "workspace:*",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

@@ -44,4 +44,4 @@ export interface ErrorResponse {
   };
 }
 
-import type { ProjectFile, CompilationResult } from './index';
+import type { ProjectFile, CompilationResult } from './index.js';
