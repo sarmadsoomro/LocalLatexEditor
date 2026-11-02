@@ -1,3 +1,5 @@
+import { Heart } from 'lucide-react';
+
 const REPO_URL = 'https://github.com/sarmadsoomro/TexCraft';
 
 export function AboutSection() {
@@ -70,6 +72,16 @@ export function AboutSection() {
           className="text-primary hover:text-primary-dark text-sm transition-colors"
         >
           Documentation
+        </a>
+        <span className="text-border">|</span>
+        <a
+          href="https://github.com/sponsors/sarmadsoomro"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-primary hover:text-primary-dark text-sm transition-colors"
+        >
+          <Heart className="w-4 h-4" aria-hidden="true" />
+          Sponsor
         </a>
       </div>
     </div>

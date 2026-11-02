@@ -67,6 +67,12 @@ Everything in `docs/`: [docs/README.md](docs/README.md).
 
 TexCraft listens only on `127.0.0.1`, so other computers cannot reach it, and every API request needs a token created at launch. Imported zips are checked before extraction. LaTeX runs as your user with shell escape off unless you turn it on. Details in [SECURITY.md](SECURITY.md).
 
+## Support TexCraft
+
+TexCraft is free and open source, built in spare time. The installers are not code-signed yet, which is why macOS, Windows and Chrome warn when you download them. Signing costs money every year: USD 99 for an Apple Developer ID, and more for Windows.
+
+If TexCraft helps you, [sponsor it on GitHub](https://github.com/sponsors/sarmadsoomro). The first goal is the Apple Developer ID, which removes the macOS security warning for every student. Starring the repository and telling classmates also helps.
+
 ## License
 
 [MIT](LICENSE). The repository is [sarmadsoomro/TexCraft](https://github.com/sarmadsoomro/TexCraft); the npm workspace name is `local-latex-editor`.

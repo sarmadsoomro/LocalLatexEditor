@@ -4,7 +4,9 @@ Notable changes to TexCraft. The format follows [Keep a Changelog](https://keepa
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing.
 
 ## 0.3.0 (2026-11-02)
 
