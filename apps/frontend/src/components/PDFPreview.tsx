@@ -1,5 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+
+import { apiAuthHeaders, notifySessionExpired } from "../services/api";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
@@ -231,7 +233,8 @@ export const PDFPreview = memo(function PDFPreview({
       }, 30000); // 30 second timeout
 
       try {
-        const response = await fetch(pdfUrl);
+        const response = await fetch(pdfUrl, { headers: apiAuthHeaders() });
+        if (response.status === 401) notifySessionExpired();
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -557,7 +560,11 @@ export const PDFPreview = memo(function PDFPreview({
           <p className="font-semibold text-heading">Failed to load PDF</p>
           <p className="text-sm text-error/70 mt-1 max-w-xs mx-auto">{error}</p>
           <button
-            onClick={() => window.open(pdfUrl, "_blank")}
+            onClick={() => {
+              void fetch(pdfUrl, { headers: apiAuthHeaders() })
+                .then((response) => response.blob())
+                .then((blob) => window.open(URL.createObjectURL(blob), "_blank"));
+            }}
             className="mt-4 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark transition-all active:scale-[0.98] cursor-pointer"
           >
             Open in New Tab

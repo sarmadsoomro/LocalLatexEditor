@@ -6,7 +6,9 @@ The frontend dev server is on port 3000 and proxies `/api` to port 3001.
 
 Success responses use `{ success: true, data }`, except `PUT /api/projects/:id/files/:path`, which returns 204 with an empty body. Errors go through the shared error handler.
 
-There is no authentication. `app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` is logged as an error. `localhost` may resolve to IPv6 and miss the IPv4 socket; use `127.0.0.1`.
+`app.listen` binds to `127.0.0.1` unless `HOST` is set. A non-loopback `HOST` is logged as an error. `localhost` may resolve to IPv6 and miss the IPv4 socket; use `127.0.0.1`.
+
+Every `/api` route requires `X-TexCraft-Token`. The token is 32 random bytes, hex, generated at process start and written to `~/.latex-editor/.session-token` (mode `0600`). It is not logged. A missing or wrong token is `401` with code `UNAUTHORIZED`. `GET /health` does not require it. CORS still allows only `http://localhost:3000`, and allows the `X-TexCraft-Token` header.
 
 Project ids look like `proj_` plus letters, digits, `_`, or `-`.
 

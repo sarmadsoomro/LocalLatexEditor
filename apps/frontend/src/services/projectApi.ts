@@ -9,7 +9,7 @@ import type {
   ProjectStatus,
 } from "@local-latex-editor/shared-types";
 
-import { api } from "./api";
+import { api, apiAuthHeaders, notifySessionExpired } from "./api";
 
 export const projectApi = {
   async listProjects(filter?: ProjectFilter): Promise<ListProjectsResponse> {
@@ -76,8 +76,10 @@ export const projectApi = {
 
     const response = await fetch("/api/import-zip", {
       method: "POST",
+      headers: apiAuthHeaders(),
       body: formData,
     });
+    if (response.status === 401) notifySessionExpired();
 
     const contentType = response.headers.get("content-type");
     if (contentType?.includes("application/json")) {
@@ -121,8 +123,10 @@ export const projectApi = {
 
     const response = await fetch(`/api/projects/${id}/files/upload`, {
       method: "POST",
+      headers: apiAuthHeaders(),
       body: formData,
     });
+    if (response.status === 401) notifySessionExpired();
 
     if (!response.ok) {
       let errorMsg = "Failed to upload file";
@@ -171,7 +175,10 @@ export const projectApi = {
   },
 
   async exportProject(projectId: string, projectName: string): Promise<void> {
-    const response = await fetch(`/api/projects/${projectId}/export`);
+    const response = await fetch(`/api/projects/${projectId}/export`, {
+      headers: apiAuthHeaders(),
+    });
+    if (response.status === 401) notifySessionExpired();
 
     if (!response.ok) {
       let errorMsg = "Failed to export project";
