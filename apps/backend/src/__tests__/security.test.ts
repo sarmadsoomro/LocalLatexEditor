@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
+import archiver from 'archiver';
 import type { Express } from 'express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -67,11 +68,31 @@ function zipStored(entries: Array<{ name: string; data: Buffer }>): Buffer {
   return Buffer.concat([...locals, centralDir, end]);
 }
 
+function zipWithSymlink(): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const archive = archiver('zip');
+    const chunks: Buffer[] = [];
+    archive.on('data', (c: Buffer) => chunks.push(c));
+    archive.on('end', () => resolve(Buffer.concat(chunks)));
+    archive.on('error', reject);
+    archive.append('\\documentclass{article}', { name: 'main.tex' });
+    archive.symlink('link.tex', '/etc/passwd');
+    void archive.finalize();
+  });
+}
+
+function expectTempClean(): void {
+  for (const sub of ['uploads', 'extracted']) {
+    const dir = path.join(root, 'temp', sub);
+    expect(fs.existsSync(dir) ? fs.readdirSync(dir) : []).toEqual([]);
+  }
+}
+
 describe('API security', () => {
   let app: Express;
 
   beforeAll(async () => {
-    const mod = await import('../index.ts');
+    const mod = await import('../index.js');
     app = mod.createApp(token, 3001);
   });
 
@@ -123,6 +144,7 @@ describe('API security', () => {
       .field('name', 'Slip')
       .attach('file', zipStored([{ name: '../evil.txt', data: Buffer.from('nope') }]), 'slip.zip');
     expect(res.status).toBe(400);
+    expectTempClean();
     expect(fs.existsSync(path.join(root, 'evil.txt'))).toBe(false);
     expect(fs.existsSync(path.join(root, 'temp', 'evil.txt'))).toBe(false);
   });
@@ -132,7 +154,26 @@ describe('API security', () => {
       .field('name', 'Absolute')
       .attach('file', zipStored([{ name: '/tmp/evil.txt', data: Buffer.from('nope') }]), 'abs.zip');
     expect(res.status).toBe(400);
+    expectTempClean();
     expect(fs.existsSync('/tmp/evil.txt')).toBe(false);
+  });
+
+  it('rejects a zip containing a symlink entry', async () => {
+    const res = await call('post', '/api/import-zip')
+      .field('name', 'Symlink')
+      .attach('file', await zipWithSymlink(), 'link.zip');
+    expect(res.status).toBe(400);
+    expectTempClean();
+  });
+
+  it('deletes the upload when the project name is missing', async () => {
+    const res = await call('post', '/api/import-zip').attach(
+      'file',
+      zipStored([{ name: 'main.tex', data: Buffer.from('x') }]),
+      'noname.zip',
+    );
+    expect(res.status).toBe(400);
+    expectTempClean();
   });
 
   it('rejects a zip with too many entries', async () => {
@@ -144,6 +185,7 @@ describe('API security', () => {
       .field('name', 'Too Many')
       .attach('file', zipStored(entries), 'many.zip');
     expect(res.status).toBe(400);
+    expectTempClean();
   });
 
   it('rejects a zip over the uncompressed size limit', async () => {
@@ -153,6 +195,7 @@ describe('API security', () => {
         .field('name', 'Too Big')
         .attach('file', zipStored([{ name: 'main.tex', data: Buffer.from('0123456789abcdef') }]), 'big.zip');
       expect(res.status).toBe(400);
+    expectTempClean();
     } finally {
       delete process.env.LATEX_EDITOR_ZIP_MAX_BYTES;
     }
@@ -163,6 +206,7 @@ describe('API security', () => {
       .field('name', 'Normal Zip')
       .attach('file', zipStored([{ name: 'main.tex', data: Buffer.from('\\documentclass{article}') }]), 'ok.zip');
     expect(res.status).toBe(201);
+    expectTempClean();
     expect(res.body.success).toBe(true);
     expect(res.body.data.project.name).toBe('Normal Zip');
   });
