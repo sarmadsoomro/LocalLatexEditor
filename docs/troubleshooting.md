@@ -12,6 +12,8 @@ Find the symptom, try the fix. If nothing here helps, [report a problem](#report
 
 ## Installing and opening the app
 
+**Chrome: "This file is dangerous" or "isn't commonly downloaded".** Chrome flags new, unsigned installers. If the file came from the TexCraft Releases page, open `chrome://downloads` and choose **Keep**. Details in the [installation guide](installation.md#2-install-the-desktop-app).
+
 **macOS: "Apple could not verify TexCraft is free of malware".** The app is not signed yet. Click **Done**, then System Settings → Privacy & Security → **Open Anyway**. Details in the [installation guide](installation.md#macos).
 
 **macOS: "TexCraft is damaged and can't be opened".** The download was quarantined. Run once in Terminal:

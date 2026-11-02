@@ -51,6 +51,12 @@ Not sure which Mac you have? Apple menu â†’ **About This Mac**. "Chip: Apple Mâ€
 
 The installers are not code-signed yet, so the operating system warns you the first time. The steps below get past that once.
 
+**Chrome says the file is dangerous or "not commonly downloaded".** Chrome warns about any installer that few people have downloaded yet and that is not signed. If you got the file from the Releases page above, it is safe to keep: click the warning in the download bar (or open `chrome://downloads`), then **Keep** or **Download dangerous file**. Safari and Firefox do not show this warning. You can also download in Terminal, which skips the browser and the macOS quarantine:
+
+```bash
+curl -LO https://github.com/sarmadsoomro/TexCraft/releases/download/v<version>/TexCraft-<version>-mac-arm64.dmg
+```
+
 ### macOS
 
 1. Open the `.dmg` and drag **TexCraft** onto **Applications**.
