@@ -10,7 +10,6 @@ import unzipper from 'unzipper';
 import { z } from 'zod';
 
 import { storageConfig } from '../config/storage.js';
-import { validateBody } from '../middleware/validate.js';
 import { importProject } from '../services/projectService.js';
 import { ValidationError } from '../types/error.js';
 import { createSuccessResponse } from '../types/response.js';
@@ -154,7 +153,6 @@ function findExtractedRoot(extractDir: string): string {
 router.post(
   '/import-zip',
   upload.single('file'),
-  validateBody<ImportZipBody>(importZipBodySchema),
   async (req, res, next) => {
     const zipFilePath = req.file?.path;
     
@@ -163,7 +161,14 @@ router.post(
     }
 
     try {
-      const { name } = req.body;
+      // validated here, not as middleware, so the catch below always deletes the upload
+      const parsed = importZipBodySchema.safeParse(req.body);
+      if (!parsed.success) {
+        throw new ValidationError('Validation failed', {
+          errors: parsed.error.errors.map((e) => ({ path: e.path.join('.'), message: e.message })),
+        });
+      }
+      const { name } = parsed.data;
       
       const extractDir = path.join(storageConfig.tempDir, 'extracted', nanoid(12));
       fs.mkdirSync(extractDir, { recursive: true });
