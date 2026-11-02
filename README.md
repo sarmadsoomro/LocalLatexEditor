@@ -17,7 +17,7 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - **Compile ▾ → Clean build** deletes the auxiliary files and rebuilds from scratch. A compile that fails inside a stale `.aux` file is rebuilt from scratch automatically, once
 - Compile timeout is a setting (default 300 s, up to 30 min) and covers the whole compile. On timeout, LaTeX and everything it started are stopped
 - One compile per project at a time; changes made during a compile trigger one follow-up compile
-- SyncTeX data (`output/<main>.synctex.gz`) is generated on every compile
+- **Jump between source and PDF (SyncTeX).** Double-click the PDF (or Ctrl/Cmd+click) to open the file and line that produced it. **Show in PDF** in the toolbar, **Alt+J**, or right-click → Show in PDF in the editor jumps the other way and highlights the spot. Works across `\input`/`\include` files and pages, with every engine, without the `synctex` command-line tool
 - Project status is `draft`, `in_progress`, or `published`. Trash, restore, and permanent delete
 - Zip export of a project
 
@@ -27,7 +27,6 @@ Repository: [sarmadsoomro/LocalLatexEditor](https://github.com/sarmadsoomro/Loca
 - No WebSocket. Compile status is ordinary HTTP polling
 - Import does not edit the original folder. It copies
 - No outline view
-- No click-to-jump between PDF and source yet (the SyncTeX data is generated, the UI does not use it)
 - Shell escape is off by default. Settings → Compiler → Shell escape passes `-shell-escape` (needed by `minted`); only enable it for documents you trust
 - No accounts or multi-user access. The API trusts one per-launch token, and only the page the server hands to your browser has it
 
