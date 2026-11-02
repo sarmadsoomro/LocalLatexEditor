@@ -150,6 +150,19 @@ function findExtractedRoot(extractDir: string): string {
   return extractDir;
 }
 
+// retries because on Windows a just-aborted write stream can still hold its file handle
+async function removeTemp(...targets: Array<string | undefined>): Promise<void> {
+  await Promise.all(
+    targets.map((target) =>
+      target
+        ? fs.promises
+            .rm(target, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+            .catch(() => undefined)
+        : undefined,
+    ),
+  );
+}
+
 router.post(
   '/import-zip',
   upload.single('file'),
@@ -160,6 +173,7 @@ router.post(
       return next(new ValidationError('No ZIP file provided'));
     }
 
+    let extractDir: string | undefined;
     try {
       // validated here, not as middleware, so the catch below always deletes the upload
       const parsed = importZipBodySchema.safeParse(req.body);
@@ -169,32 +183,18 @@ router.post(
         });
       }
       const { name } = parsed.data;
-      
-      const extractDir = path.join(storageConfig.tempDir, 'extracted', nanoid(12));
+
+      extractDir = path.join(storageConfig.tempDir, 'extracted', nanoid(12));
       fs.mkdirSync(extractDir, { recursive: true });
 
-      try {
-        await extractZip(zipFilePath, extractDir);
-        
-        const projectRoot = findExtractedRoot(extractDir);
-        
-        const project = await importProject(projectRoot, name);
-        
-        res.status(201).json(createSuccessResponse({ project }));
-      } finally {
-        try {
-          fs.rmSync(zipFilePath, { force: true });
-          fs.rmSync(extractDir, { recursive: true, force: true });
-        } catch {
-          /* cleanup is best-effort */
-        }
-      }
+      await extractZip(zipFilePath, extractDir);
+      const project = await importProject(findExtractedRoot(extractDir), name);
+
+      // clean up before answering so nothing is left behind once the client has a response
+      await removeTemp(zipFilePath, extractDir);
+      res.status(201).json(createSuccessResponse({ project }));
     } catch (error) {
-      try {
-        fs.rmSync(zipFilePath, { force: true });
-      } catch {
-        /* cleanup is best-effort */
-      }
+      await removeTemp(zipFilePath, extractDir);
       next(error);
     }
   }
