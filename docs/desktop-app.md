@@ -37,23 +37,7 @@ Only one copy of the app runs at a time. Opening it again focuses the existing w
 
 ## First launch
 
-The installers are not code-signed yet, so each OS asks once.
-
-**macOS.** Open the `.dmg` and drag TexCraft to Applications. Pick `arm64` for Apple silicon (M1 and later) or `x64` for Intel. On first open, macOS says it cannot verify the app. Click **Done**, then open **System Settings → Privacy & Security**, scroll to "TexCraft was blocked", click **Open Anyway** and confirm. If macOS instead says the app "is damaged", run this once in Terminal:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/TexCraft.app
-```
-
-**Windows.** Run the `.exe`. If SmartScreen shows "Windows protected your PC", click **More info → Run anyway**. The installer installs for your user only and lets you pick the folder.
-
-**Linux.** Make the AppImage executable, then run it:
-
-```bash
-chmod +x TexCraft-*-linux-x86_64.AppImage
-```
-
-Some distributions need `libfuse2` for AppImages (`sudo apt install libfuse2` on Ubuntu 22.04 and later).
+The installers are not code-signed yet, so macOS, Windows and Linux each ask once. Steps for each OS are in the [installation guide](installation.md#2-install-the-desktop-app); fixes for launch errors are in [troubleshooting](troubleshooting.md#installing-and-opening-the-app).
 
 ## Building
 

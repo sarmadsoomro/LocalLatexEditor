@@ -1,6 +1,6 @@
 # System Architecture
 
-> April 2026 design draft. Not a description of the running app. WebSocket, alternative stacks, and `-shell-escape` examples below are not implemented. Current shape: [../README.md](../README.md) and [api-and-internal-contracts.md](api-and-internal-contracts.md).
+> April 2026 design draft. Not a description of the running app. WebSocket, alternative stacks, and `-shell-escape` examples below are not implemented. Current shape: [../README.md](../../README.md) and [api-and-internal-contracts.md](../api-and-internal-contracts.md).
 
 ## Overview
 

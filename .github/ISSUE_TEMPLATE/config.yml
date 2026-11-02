@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Troubleshooting guide
+    url: https://github.com/sarmadsoomro/LocalLatexEditor/blob/main/docs/troubleshooting.md
+    about: Fixes for LaTeX not found, missing packages, first launch warnings and more.
+  - name: Report a security vulnerability
+    url: https://github.com/sarmadsoomro/LocalLatexEditor/security/advisories/new
+    about: Please report security problems privately.

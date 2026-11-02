@@ -1,27 +1,28 @@
 # Docs
 
-TexCraft is the product name. The repo is LocalLatexEditor. The npm package is `local-latex-editor`.
+TexCraft is the product name. The repository is LocalLatexEditor; the npm workspace is `local-latex-editor`.
 
-## Current
+## For students and users
 
-| File | What it is |
+| Read | For |
 | --- | --- |
-| [../README.md](../README.md) | How to run it, and what it does |
-| [api-and-internal-contracts.md](api-and-internal-contracts.md) | Routes that exist |
-| [../AGENTS.md](../AGENTS.md) | Where to change code |
-| [../CONTRIBUTING.md](../CONTRIBUTING.md) | How to send a change |
+| [installation.md](installation.md) | Installing LaTeX and TexCraft on macOS, Windows and Linux; first launch; updating and uninstalling |
+| [user-guide.md](user-guide.md) | Projects, editing, compiling, the main file, PDF preview, SyncTeX, errors, settings, shortcuts, where files are |
+| [troubleshooting.md](troubleshooting.md) | LaTeX not found, missing packages, wrong fonts, projects that will not open, reporting a problem |
 
-## Not a description of this build
+## For contributors
 
-Written in March and April 2026 as plans or drafts. The app has moved past them. Do not treat a "shall" or a comparison table in these files as current behavior.
+| Read | For |
+| --- | --- |
+| [../CONTRIBUTING.md](../CONTRIBUTING.md) | Setup, code layout, conventions, tests, pull requests |
+| [api-and-internal-contracts.md](api-and-internal-contracts.md) | Every HTTP route, environment variables, storage layout |
+| [desktop-app.md](desktop-app.md) | How the Electron app is built, packaged, smoke-tested, signed and released |
+| [../SECURITY.md](../SECURITY.md) | Security model and how to report a vulnerability |
+| [../CHANGELOG.md](../CHANGELOG.md) | What changed in each release |
+| [../AGENTS.md](../AGENTS.md) | Short orientation for coding agents |
 
-- `software-requirements-specification.md`
-- `system-architecture.md`
-- `tools-and-technology.md`
-- `product-overview.md` (vision is still the intent; the use cases below the banner are corrected where they were false)
-- `phase-1-foundation-and-setup.md` through `phase-7-post-mvp-enhancements.md`
-- `feature-plans/`
-- `superpowers/`
-- `risks-and-assumptions.md`
+## Archive
 
-`design-system/latexeditor/` is the navy and blue notes the UI tokens follow. The app does not import it.
+[archive/](archive/) holds the March and April 2026 plans: the requirements specification, system architecture, technology survey, phase plans, feature plans and design specs. They were written before the code and the app has moved past them. Some features they describe were never built (WebSockets, write-back import), others work differently. Read them for history, not as a description of this build.
+
+`../design-system/latexeditor/` holds the navy and blue design notes the UI colors follow. The app does not import it.

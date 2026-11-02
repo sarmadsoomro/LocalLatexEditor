@@ -17,23 +17,18 @@ React 18 SPA with Monaco Editor for LaTeX editing, Zustand for state management,
 ```
 apps/frontend/
 ├── src/
-│   ├── components/          # React components
-│   │   ├── Editor/         # Monaco editor wrapper
-│   │   ├── FileTree.tsx    # Project file browser
-│   │   ├── PDFPreview.tsx  # PDF viewer
-│   │   └── ...
-│   ├── pages/              # Route-level components
-│   │   ├── ProjectList.tsx
-│   │   └── ProjectDetail.tsx
-│   ├── stores/             # Zustand state stores
-│   │   ├── projectStore.ts
-│   │   ├── editorStore.ts
-│   │   └── compilationStore.ts
-│   ├── hooks/              # Custom React hooks
-│   ├── services/           # API service layer
-│   ├── utils/              # Utility functions
-│   └── main.tsx           # App entry point
-├── vite.config.ts         # Vite config with proxy
+│   ├── pages/              # ProjectList.tsx, ProjectDetail.tsx
+│   ├── components/         # FileTree, PDFPreview, LogViewer, CompileButton, Editor/,
+│   │                       # Settings/, dialogs, LatexMissingBanner, Toast, ...
+│   ├── editor/             # Monaco setup, LaTeX and BibTeX tokenizers, themes
+│   ├── stores/             # projectStore, editorStore, compilationStore,
+│   │                       # settingsStore, syncStore (Zustand)
+│   ├── hooks/              # useCompilation, useAutoCompile, useFileOperations, ...
+│   ├── services/           # api.ts (adds the session token), projectApi, fileApi,
+│   │                       # compilationApi, syncApi
+│   ├── utils/
+│   └── main.tsx
+├── vite.config.ts          # dev proxy for /api and /health, Monaco chunk
 └── package.json
 ```
 

@@ -1,12 +1,14 @@
 # TexCraft
 
-**Updated:** 20 October 2026
+**Updated:** 2 November 2026
 **Repo:** LocalLatexEditor
 **Package:** `local-latex-editor`
 
-Browser UI for local LaTeX editing. React + Vite on port 3000, Express on port 3001, Monaco, PDF.js, Zustand, Turborepo, pnpm.
+Local LaTeX editor: a browser UI (React + Vite on port 3000, Express on port 3001) and an Electron desktop app around the same backend. Monaco, PDF.js, Zustand, Turborepo, pnpm.
 
-Current behavior is the code, [README.md](README.md), and [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md). Phase docs, the SRS, and `docs/system-architecture.md` are April 2026 plans. Do not implement from them without checking the code.
+Current behavior is the code, [README.md](README.md), [docs/api-and-internal-contracts.md](docs/api-and-internal-contracts.md) and the user docs in `docs/` ([index](docs/README.md)). `docs/archive/` holds the April 2026 plans, SRS and architecture draft. Do not implement from them without checking the code.
+
+When behavior changes, update [docs/user-guide.md](docs/user-guide.md), the API contracts, and `CHANGELOG.md` (Unreleased) in the same change. Contributor workflow: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Where to look
 

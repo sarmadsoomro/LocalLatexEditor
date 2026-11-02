@@ -1,0 +1,57 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Check [troubleshooting](https://github.com/sarmadsoomro/LocalLatexEditor/blob/main/docs/troubleshooting.md) first; many compile problems are a missing LaTeX package.
+        Security problems: please report them privately, see [SECURITY.md](https://github.com/sarmadsoomro/LocalLatexEditor/blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Import the zip ...
+        2. Click Compile
+        3. ...
+  - type: dropdown
+    id: how
+    attributes:
+      label: How do you run TexCraft?
+      options:
+        - Desktop app
+        - From source (pnpm dev)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TexCraft version
+      description: From the installer file name (for example TexCraft-0.3.0-mac-arm64.dmg) or the commit if from source.
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15 (Apple silicon), Windows 11, Ubuntu 24.04 ...
+    validations:
+      required: true
+  - type: input
+    id: tex
+    attributes:
+      label: LaTeX distribution
+      description: First line of `pdflatex --version`.
+      placeholder: pdfTeX 3.141592653-2.6-1.40.26 (TeX Live 2024)
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Desktop app - Help → Show Log File. For compile problems, the relevant part of the compile log. Remove anything private.
+      render: text

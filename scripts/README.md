@@ -1,6 +1,8 @@
 # TexCraft Setup Scripts
 
-This folder contains automated setup scripts to make installing and running **TexCraft** easy!
+Scripts for running **TexCraft from source**.
+
+> Most people do not need these. The [desktop app](../docs/installation.md#2-install-the-desktop-app) needs no Node.js, pnpm or Git. Use these scripts if you want to change TexCraft or run unreleased code.
 
 ## Available Scripts
 
@@ -58,7 +60,7 @@ start.bat
 The setup scripts will verify you have:
 
 1. ✅ **Git** - For downloading TexCraft
-2. ✅ **Node.js 18+** - The runtime for the application
+2. ✅ **Node.js 20.19+** - The runtime for the application
 3. ✅ **pnpm** - Package manager for dependencies
 4. ✅ **LaTeX** - For compiling documents to PDF
 
@@ -95,4 +97,8 @@ No problem! The scripts are designed to be run multiple times. Fix the issue and
 
 ## Need More Help?
 
-See the main [README.md](../README.md) for detailed troubleshooting steps, manual installation instructions, and information about the latest [TexCraft releases](https://github.com/sarmadsoomro/LocalLatexEditor/releases).
+- [Installation guide](../docs/installation.md#3-or-run-from-source): the manual steps these scripts automate
+- [Troubleshooting](../docs/troubleshooting.md)
+- [Contributing](../CONTRIBUTING.md): development commands
+
+Read a script before running it, especially one downloaded on its own. They install software (Homebrew, apt and NodeSource on macOS/Linux) and may ask for your password.

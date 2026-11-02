@@ -17,24 +17,21 @@ Express + TypeScript API handling project management, file operations, and LaTeX
 ```
 apps/backend/
 ├── src/
-│   ├── routes/             # Express route handlers
-│   │   ├── projects.ts    # /api/projects/*
-│   │   ├── files.ts       # /api/projects/:id/files/*
-│   │   ├── compilation.ts # /api/projects/:id/compile
-│   │   └── import.ts      # /api/import/*
-│   ├── services/          # Business logic
-│   │   ├── projectService.ts
-│   │   ├── compilationService.ts
-│   │   └── fileSystemService.ts
-│   ├── middleware/        # Express middleware
-│   │   ├── errorHandler.ts
-│   │   └── validate.ts
-│   ├── validators/        # Zod schemas
-│   ├── types/            # TypeScript types
-│   ├── config/           # Configuration
-│   └── index.ts          # Server entry
-├── package.json
-└── tsconfig.json
+│   ├── routes/
+│   │   ├── projects.ts     # /api/projects, trash, status, rename, main-file, export
+│   │   ├── files.ts        # /api/projects/:id/files/* (read, write, create, upload, rename, move, delete)
+│   │   ├── compilation.ts  # compile, job status, PDF, LaTeX check
+│   │   ├── synctex.ts      # /api/projects/:id/synctex/{forward,inverse}
+│   │   └── import.ts       # /api/import-zip
+│   ├── services/           # compilationService, compileQueue, jobStore, logParser,
+│   │                       # projectService, fileSystemService, synctexService,
+│   │                       # exportService, trashService, cleanupService, templates
+│   ├── middleware/         # requireApiToken, requireLoopbackHost, validate, errorHandler
+│   ├── validators/         # Zod schemas
+│   ├── config/             # storage paths, session token
+│   ├── types/              # AppError and friends, response helpers
+│   └── index.ts            # createApp(token, port), startServer()
+└── package.json
 ```
 
 ---
