@@ -135,13 +135,22 @@ Compile once before using it. If it jumps to the wrong place after big edits, co
 
 When a compile fails, TexCraft opens the **Log** tab. It lists the errors first, each with its file and line number when LaTeX reports one, then the full LaTeX log. **Click an error** (or select it and press Enter) to open its file with the cursor on that line. An error inside a file that is not part of your project, such as a package from your LaTeX installation, cannot be opened; look at the line in your own file that uses that package instead.
 
+### Missing packages
+
+If the document uses a package your LaTeX does not have (``LaTeX Error: File `lipsum.sty' not found``), the log shows a notice above the errors naming the package, for example "The LaTeX package **lipsum** is not installed".
+
+- **Install** button: click it and TexCraft installs the package, then rebuilds the document. On a Mac with MacTeX or BasicTeX, macOS first asks for your password, because LaTeX is installed for all users; TexCraft never sees the password. With TinyTeX, or a TeX Live in your own folders, no password is needed. Installing needs an internet connection and can take a minute.
+- **A command to copy** instead of the button: shown when TexCraft cannot install it for you, for example with Ubuntu's or Debian's TeX Live (`sudo apt install texlive-latex-extra`). Run it in a terminal, then compile again.
+
+TexCraft looks up which package holds the file, since the names differ sometimes (`algorithmic.sty` is in `algorithms`). Nothing is installed until you click **Install**.
+
 Common errors:
 
 | Message | Usual cause |
 | --- | --- |
 | `Undefined control sequence` | A typo in a command, or a missing `\usepackage` |
 | `Missing $ inserted` | Math (`^`, `_`, `\alpha`) outside `$...$`, or an unescaped `_` or `&` in text |
-| `File 'xyz.sty' not found` | The package is not installed. MiKTeX installs it on the fly; on TeX Live run `tlmgr install xyz` (or install `texlive-full`) |
+| `File 'xyz.sty' not found` | The package is not installed: use the notice above the errors ([Missing packages](#missing-packages)) |
 | `Missing \begin{document}` | Text or a stray character before `\begin{document}`, or the wrong file is the main file |
 | `Citation ... undefined` (warning) | The key is not in your `.bib`, or the bibliography has not run yet: compile again |
 | `??` in the PDF | References not resolved yet: compile again. If they stay, Clean build |
@@ -204,6 +213,6 @@ Each project is a folder named `proj_` and 12 letters and digits. The project ca
 
 TexCraft runs entirely on your computer. It has no account and sends your documents nowhere. The editor, fonts and PDF viewer are part of the app, so it works offline.
 
-Two things can still use the internet: MiKTeX (or `tlmgr`) downloading a missing LaTeX package, and links you click, which open in your browser.
+Two things can still use the internet: installing a missing LaTeX package (MiKTeX on its own, or TexCraft's **Install** button through `tlmgr`), and links you click, which open in your browser.
 
 Something not working? See [troubleshooting](troubleshooting.md).

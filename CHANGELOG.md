@@ -15,6 +15,7 @@ The first release with desktop installers. The package version is `0.3.0`, but n
 - **Set as main file** from the file tree, with a MAIN badge, so templates with several documents can compile any of them. ([#10](https://github.com/sarmadsoomro/LocalLatexEditor/pull/10))
 - **Save PDF** button in the PDF toolbar. ([#10](https://github.com/sarmadsoomro/LocalLatexEditor/pull/10))
 - Click an error in the log to open its file at that line. ([#10](https://github.com/sarmadsoomro/LocalLatexEditor/pull/10))
+- **Install missing LaTeX packages** from the log. When a compile reports ``File `x.sty' not found``, the log names the package and offers **Install** (TeX Live via `tlmgr`, with the macOS password prompt for MacTeX and BasicTeX; MiKTeX), or the command to run on Debian and Ubuntu. After an install the document is rebuilt.
 - Installation guide, user guide, troubleshooting guide, security policy and this changelog.
 
 ### Changed

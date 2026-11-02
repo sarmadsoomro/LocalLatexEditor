@@ -773,6 +773,8 @@ export function ProjectDetail() {
                         errors={result?.errors || []}
                         warnings={result?.warnings || []}
                         onErrorClick={handleErrorClick}
+                        // latexmk does not notice a newly installed package, so rebuild from scratch
+                        onPackageInstalled={() => void handleCleanBuild()}
                       />
                     </div>
                   )}

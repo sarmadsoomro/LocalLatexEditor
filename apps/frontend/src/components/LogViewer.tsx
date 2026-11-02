@@ -1,11 +1,17 @@
 import type { CompilationError, CompilationWarning } from '@local-latex-editor/shared-types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { missingPackageFiles } from '../utils/missingPackages';
+
+import { MissingPackageNotice } from './MissingPackageNotice';
 
 interface LogViewerProps {
   logs: string[];
   errors: CompilationError[];
   warnings: CompilationWarning[];
   onErrorClick?: (error: CompilationError) => void;
+  /** Called after a missing package was installed from the log, to compile again. */
+  onPackageInstalled?: () => void;
 }
 
 export default function LogViewer({
@@ -13,6 +19,7 @@ export default function LogViewer({
   errors,
   warnings,
   onErrorClick,
+  onPackageInstalled,
 }: LogViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedError, setSelectedError] = useState<CompilationError | null>(null);
@@ -28,11 +35,15 @@ export default function LogViewer({
     onErrorClick?.(error);
   };
 
+  const missingFiles = useMemo(() => missingPackageFiles(errors), [errors]);
   const hasErrors = errors.length > 0;
   const hasWarnings = warnings.length > 0;
 
   return (
     <div className="flex flex-col h-full bg-background">
+      {missingFiles.length > 0 && (
+        <MissingPackageNotice files={missingFiles} onInstalled={onPackageInstalled} />
+      )}
       {errors.length > 0 && (
         <div className="border-b border-border bg-error/5 max-h-48 overflow-auto">
           <div className="px-4 py-2 border-b border-error/10 bg-error/5 sticky top-0 flex items-center justify-between backdrop-blur-sm">

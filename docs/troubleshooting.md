@@ -42,14 +42,16 @@ xattr -dr com.apple.quarantine /Applications/TexCraft.app
 
 Click an error in the log to jump to its line. The [user guide](user-guide.md#fixing-errors) lists the common LaTeX errors. Problems that come from the setup rather than your document:
 
-**``LaTeX Error: File `something.sty' not found``.** A package the document uses is not installed.
+**``LaTeX Error: File `something.sty' not found``.** A package the document uses is not installed. The log shows a notice with an **Install** button or a command to run ([user guide](user-guide.md#missing-packages)). If the install fails, or you prefer to do it yourself:
 
 | Distribution | Fix |
 | --- | --- |
 | MiKTeX | Allow on-the-fly installs (MiKTeX Console → Settings → "Always install missing packages"), then compile again. Or install the package in MiKTeX Console → Packages |
 | MacTeX | MacTeX includes almost everything. Update it: `sudo tlmgr update --self --all` |
-| BasicTeX, TinyTeX | `sudo tlmgr install <package>` (TinyTeX: no `sudo`). The package name is usually the file name without `.sty`; `tlmgr search --global --file something.sty` finds it otherwise |
+| BasicTeX, TinyTeX | `sudo tlmgr install <package>` (TinyTeX: no `sudo`). The package name is usually the file name without `.sty`; `tlmgr search --global --file something.sty` finds it otherwise. Journal templates need many packages: `sudo tlmgr install collection-latexextra collection-fontsrecommended` adds most of them |
 | TeX Live on Linux | Install the collection that holds it, for example `sudo apt install texlive-science` for `algorithmic.sty`, or `texlive-full` for everything |
+
+**Install fails with "your TeX Live is older than the online package server".** `tlmgr` only installs packages for the current TeX Live year. Install the current MacTeX or TeX Live, then try again.
 
 **The compile fails on the template's sample before you changed anything.** Usually the same missing-package problem. Journal templates (IEEE, Elsevier, Springer) need a fairly complete install. Check the first error in the log.
 
