@@ -43,6 +43,11 @@ export const updateStatusSchema = z.object({
   status: z.enum(['draft', 'in_progress', 'published']),
 });
 
+export const setMainFileSchema = z.object({
+  mainFile: z.string().min(1, 'Main file is required').max(1024),
+});
+
+export type SetMainFileInput = z.infer<typeof setMainFileSchema>;
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type ProjectIdInput = z.infer<typeof projectIdSchema>;
 export type ImportProjectInput = z.infer<typeof importProjectSchema>;

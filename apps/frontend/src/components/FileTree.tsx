@@ -4,6 +4,7 @@ import { memo, useState, useRef, useEffect, useCallback, useMemo } from "react";
 
 import { projectApi } from "../services/projectApi";
 import { useSettingsStore } from "../stores/settingsStore";
+import { samePath } from "../stores/syncStore";
 
 import { FileIcon, FolderIcon } from "./icons/FileIcon";
 import { useToast } from "./Toast";
@@ -15,6 +16,13 @@ interface FileTreeProps {
   onFileSelect?: (file: FileNode) => void;
   onFileOpen?: (file: FileNode) => void;
   selectedFileId?: string | null;
+  /** project-relative path of the file that compiles */
+  mainFile?: string;
+  onSetMainFile?: (file: FileNode) => void;
+}
+
+export function isTexFile(node: FileNode): boolean {
+  return node.type === "file" && node.name.toLowerCase().endsWith(".tex");
 }
 
 interface FileTreeItemProps {
@@ -28,6 +36,7 @@ interface FileTreeItemProps {
   focusedId: string | null;
   onFocus: (id: string) => void;
   onContextMenu?: (e: React.MouseEvent, node: FileNode) => void;
+  isMain?: boolean;
 }
 
 // Flatten only visible tree items for keyboard navigation.
@@ -74,6 +83,7 @@ const FileTreeItem = memo(function FileTreeItem({
   focusedId,
   onFocus,
   onContextMenu,
+  isMain = false,
 }: FileTreeItemProps) {
   const isSelected = node.id === selectedFileId;
   const isFocused = node.id === focusedId;
@@ -112,7 +122,7 @@ const FileTreeItem = memo(function FileTreeItem({
   };
 
   const label = isEditable
-    ? `${node.name}, editable file`
+    ? `${node.name}, ${isMain ? "main file" : "editable file"}`
     : node.type === "directory"
       ? `${node.name}, folder, ${isExpanded ? "expanded" : "collapsed"}`
       : node.name;
@@ -178,7 +188,16 @@ const FileTreeItem = memo(function FileTreeItem({
       >
         {node.name}
       </span>
-      {isEditable && !isSelected && (
+      {isMain && (
+        <span
+          className="ml-2 shrink-0 rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider bg-primary-50 text-primary dark:bg-primary-900/30 dark:text-primary-light"
+          title="Main file: this is the file that compiles"
+          aria-hidden="true"
+        >
+          main
+        </span>
+      )}
+      {isEditable && !isSelected && !isMain && (
         <span
           className="ml-auto text-[10px] font-medium uppercase tracking-wider text-primary-light opacity-0 group-hover:opacity-100 transition-opacity duration-fast"
           aria-hidden="true"
@@ -197,6 +216,8 @@ export const FileTree = memo(function FileTree({
   onFileSelect,
   onFileOpen,
   selectedFileId,
+  mainFile,
+  onSetMainFile,
 }: FileTreeProps) {
   const { addToast } = useToast();
   const showHiddenFiles = useSettingsStore((state) => state.ui.showHiddenFiles);
@@ -484,6 +505,7 @@ export const FileTree = memo(function FileTree({
             focusedId={focusedId}
             onFocus={handleFocus}
             onContextMenu={handleContextMenu}
+            isMain={node.type === "file" && !!mainFile && samePath(node.path, mainFile)}
           />
           {node.type === "directory" && isExpanded && node.children && (
             <div role="group">{renderItems(node.children, depth + 1)}</div>
@@ -651,6 +673,21 @@ export const FileTree = memo(function FileTree({
           style={{ left: contextMenu.x, top: contextMenu.y }}
           onClick={(e) => e.stopPropagation()}
         >
+          {onSetMainFile && isTexFile(contextMenu.node) && !(mainFile && samePath(contextMenu.node.path, mainFile)) && (
+            <button
+              onClick={() => {
+                const node = contextMenu.node;
+                closeContextMenu();
+                onSetMainFile(node);
+              }}
+              className="w-full px-4 py-2 text-sm text-left text-secondary hover:bg-surface-hover cursor-pointer flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Set as main file
+            </button>
+          )}
           <button
             onClick={() => handleRenameStart(contextMenu.node)}
             className="w-full px-4 py-2 text-sm text-left text-secondary hover:bg-surface-hover cursor-pointer flex items-center gap-2"

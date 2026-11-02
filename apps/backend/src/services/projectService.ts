@@ -228,6 +228,44 @@ export async function updateProjectStatus(
   return updatedProject;
 }
 
+/**
+ * Make `mainFile` (a path relative to the project) the file that compiles.
+ * It must be an existing .tex file inside the project folder.
+ */
+export async function setMainFile(id: string, mainFile: string): Promise<ProjectWithMetadata> {
+  const projects = await loadProjectsMetadata();
+  const projectIndex = projects.findIndex((p) => p.id === id);
+  if (projectIndex === -1) {
+    throw new NotFoundError('Project', id);
+  }
+  const project = projects[projectIndex];
+
+  const relative = path.normalize(mainFile).replace(/\\/g, '/').replace(/^\.\//, '');
+  const absolute = path.resolve(project.path, relative);
+  const inside = path.relative(project.path, absolute);
+  if (inside === '' || inside.startsWith('..') || path.isAbsolute(inside)) {
+    throw new ValidationError('The main file must be inside the project');
+  }
+  if (path.extname(relative).toLowerCase() !== '.tex') {
+    throw new ValidationError('The main file must be a .tex file');
+  }
+  try {
+    const stats = await fs.stat(absolute);
+    if (!stats.isFile()) throw new Error('not a file');
+  } catch {
+    throw new NotFoundError('File', relative);
+  }
+
+  const updatedProject = {
+    ...project,
+    metadata: { ...project.metadata, mainFile: relative },
+    updatedAt: new Date().toISOString(),
+  };
+  projects[projectIndex] = updatedProject;
+  await saveProjectsMetadata(projects);
+  return updatedProject;
+}
+
 export async function importProject(sourcePath: string, name: string): Promise<ProjectWithMetadata> {
   if (!name || name.trim().length === 0) {
     throw new ValidationError('Project name is required');

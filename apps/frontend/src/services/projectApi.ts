@@ -31,6 +31,11 @@ export const projectApi = {
     return api.delete<{ success: boolean }>(`/api/projects/${id}/permanent`);
   },
 
+  /** Choose which .tex file compiles (path relative to the project). */
+  async setMainFile(id: string, mainFile: string): Promise<GetProjectResponse> {
+    return api.put<GetProjectResponse>(`/api/projects/${id}/main-file`, { mainFile });
+  },
+
   async updateStatus(id: string, status: ProjectStatus): Promise<GetProjectResponse> {
     return api.put<GetProjectResponse>(`/api/projects/${id}/status`, { status });
   },
