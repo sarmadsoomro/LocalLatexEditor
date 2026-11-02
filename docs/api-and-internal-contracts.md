@@ -57,7 +57,7 @@ Mounted at `/api/projects/:id/files`. Paths are relative to the project director
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| POST | `/api/import-zip` | Multipart field `file` (`.zip`, `.tex`, `.bib`, `.cls`, `.sty`), body field `name`. 100 MB limit |
+| POST | `/api/import-zip` | Multipart field `file` (`.zip`, `.tex`, `.bib`, `.cls`, `.sty`), body field `name`. 100 MB upload limit. Extraction rejects absolute paths, `..` escapes, and symlinks. At most 5,000 entries and 500 MB uncompressed, counted from bytes written. Temp files live under the app storage dir and are deleted on success and failure |
 
 ## Compile
 
