@@ -126,6 +126,35 @@ function generateAutoFixes(
   return fixes.length > 0 ? fixes : undefined;
 }
 
+/**
+ * TeX writes "(./chapters/one.tex" when it opens a file and ")" when it closes
+ * it. Replaying those parentheses up to an error tells us which file was being
+ * read when the error happened. Log lines are wrapped at 79 characters, so a
+ * long path can be split; this is a best-effort guess, like every TeX log parser.
+ */
+export function currentFileAt(lines: string[], endLine: number): string | null {
+  const stack: Array<string | null> = [];
+  const fileStart = /^\(((?:[A-Za-z]:)?[^\s()]*\.[A-Za-z0-9]{1,8})/;
+  for (let i = 0; i < endLine && i < lines.length; i++) {
+    const text = lines[i];
+    for (let j = 0; j < text.length; j++) {
+      const ch = text[j];
+      if (ch === "(") {
+        const m = text.slice(j).match(fileStart);
+        stack.push(m ? m[1] : null);
+        if (m) j += m[0].length - 1;
+      } else if (ch === ")") {
+        stack.pop();
+      }
+    }
+  }
+  for (let k = stack.length - 1; k >= 0; k--) {
+    const file = stack[k];
+    if (file) return file.replace(/^\.\//, "");
+  }
+  return null;
+}
+
 function parseErrorBlock(
   lines: string[],
   startIndex: number,
@@ -146,8 +175,8 @@ function parseErrorBlock(
   while (currentIndex < lines.length) {
     const currentLine = lines[currentIndex];
 
-    // Match standalone line number patterns like "l.58" or "l.58 8"
-    const lineMatch = currentLine.match(/^l\.(\d+)(?:\s+(\d+))?$/);
+    // TeX prints "l.58 <the source text up to the error>"; the text is optional
+    const lineMatch = currentLine.match(/^l\.(\d+)(?:\s|$)/);
     if (lineMatch) {
       line = parseInt(lineMatch[1], 10);
       currentIndex++;
@@ -265,6 +294,9 @@ export function parseLaTeXLog(logOutput: string): ParsedLogResult {
     const latexErrorMatch = trimmedLine.match(/^!\s+(.+?)$/);
     if (latexErrorMatch) {
       const blockResult = parseErrorBlock(lines, i);
+      if (!blockResult.error.file) {
+        blockResult.error.file = currentFileAt(lines, i);
+      }
       processedRanges.push({ start: i, end: blockResult.endIndex });
 
       const compilationError = toCompilationError(blockResult.error);
