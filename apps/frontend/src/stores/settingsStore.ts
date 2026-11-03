@@ -102,9 +102,15 @@ export const useSettingsStore = create<SettingsState>()(
       // defaults instead of being undefined for people with saved settings.
       merge: (persisted, current) => {
         const saved = (persisted ?? {}) as Partial<Settings>;
+        const editor = { ...current.editor, ...saved.editor };
+        // Version 1 had no 'auto' theme and defaulted to LaTeX Light, which left a
+        // white editor in dark mode. Move people still on that default to 'auto'.
+        if ((saved.version ?? 1) < 2 && editor.syntaxTheme === 'latex-light') {
+          editor.syntaxTheme = 'auto';
+        }
         return {
           ...current,
-          editor: { ...current.editor, ...saved.editor },
+          editor,
           compiler: pickKnown(current.compiler, saved.compiler),
           ui: { ...current.ui, ...saved.ui },
         };

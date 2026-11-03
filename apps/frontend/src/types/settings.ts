@@ -1,4 +1,6 @@
+/** 'auto' follows the app: LaTeX Light in light mode, LaTeX Dark in dark mode. */
 export type SyntaxThemeId = 
+  | 'auto'
   | 'latex-light' 
   | 'latex-dark' 
   | 'dracula' 
@@ -63,7 +65,7 @@ export const DEFAULT_SETTINGS: Settings = {
     autoSaveDelay: 1000,
     autoCompile: true,
     autoCompileDelay: 2000,
-    syntaxTheme: 'latex-light',
+    syntaxTheme: 'auto',
   },
   compiler: {
     defaultEngine: 'pdflatex',
@@ -81,5 +83,5 @@ export const DEFAULT_SETTINGS: Settings = {
     confirmDelete: true,
     confirmCloseUnsaved: true,
   },
-  version: 1,
+  version: 2,
 };

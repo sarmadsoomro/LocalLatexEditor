@@ -167,7 +167,7 @@ The gear icon in the editor toolbar has the light/dark theme switch and **Editor
 
 | Tab | What you can set |
 | --- | --- |
-| Editor | Font and size, tab size, word wrap, line numbers, minimap, current-line highlight, bracket colours, syntax theme, auto-save, auto-compile and their delays |
+| Editor | Font and size, tab size, word wrap, line numbers, minimap, current-line highlight, bracket colours, syntax theme (by default it follows the app's light or dark mode), auto-save, auto-compile and their delays |
 | Compiler | Default engine, compile timeout, shell escape |
 | Appearance | Theme (light, dark or follow the system), show hidden files, show compiled files (`.aux`, `.log`, …) in the file tree, delete and close confirmations |
 | About | Version (include it in bug reports), links to the documentation, the source code and GitHub Sponsors |

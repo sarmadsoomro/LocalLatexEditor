@@ -202,3 +202,9 @@ export function registerThemes(monaco: typeof import('monaco-editor')): void {
     });
   });
 }
+
+/** The Monaco theme to use: 'auto' becomes LaTeX Dark or LaTeX Light to match the app. */
+export function resolveSyntaxTheme(id: string, appIsDark: boolean): string {
+  if (id === 'auto') return appIsDark ? 'latex-dark' : 'latex-light';
+  return SYNTAX_THEMES.some((theme) => theme.id === id) ? id : 'latex-light';
+}

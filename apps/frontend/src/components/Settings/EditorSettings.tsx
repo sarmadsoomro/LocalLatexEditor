@@ -84,10 +84,13 @@ export function EditorSettings() {
           <SelectSetting
             label="Theme"
             value={editor.syntaxTheme}
-            options={SYNTAX_THEMES.map(theme => ({
-              value: theme.id,
-              label: theme.name,
-            }))}
+            options={[
+              { value: 'auto', label: 'Match app (LaTeX Light / Dark)' },
+              ...SYNTAX_THEMES.map(theme => ({
+                value: theme.id,
+                label: theme.name,
+              })),
+            ]}
             onChange={(theme) =>
               updateEditorSettings({ syntaxTheme: theme as SyntaxThemeId })
             }
