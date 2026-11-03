@@ -65,6 +65,10 @@ Click an error in the log to jump to its line. The [user guide](user-guide.md#fi
 
 **`minted` or `\write18` errors.** These packages run outside programs and need Settings → Compiler → **Shell escape**. Only turn it on for documents you trust.
 
+**`Not reading from ... (openin_any = p)` or `Not writing to ...`.** The document asks for a file outside its project, for example `\input{../shared/macros}` or an absolute path. TexCraft blocks this so a document cannot copy your private files into its PDF. Copy the file into the project, or turn on **Shell escape** if you trust the document.
+
+**My `~/.latexmkrc` is ignored.** latexmk runs with `-norc` so that a `latexmkrc` inside a downloaded project cannot run code. Your own rc file is skipped too. Turn on **Shell escape** to use rc files.
+
 **The wrong document compiles.** TexCraft compiles the **main file**, not the file you have open. Right-click the right `.tex` file → **Set as main file**.
 
 ## The PDF looks wrong

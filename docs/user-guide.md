@@ -112,7 +112,7 @@ The choice is remembered (Settings → Compiler → Default engine).
 
 **Timeout.** A compile that runs longer than the timeout (default 5 minutes; Settings → Compiler) is stopped.
 
-**Shell escape** is off. Packages such as `minted` need it: Settings → Compiler → Shell escape. Only turn it on for documents you trust, because it lets the document run programs on your computer.
+**Shell escape** is off. Packages such as `minted` need it: Settings → Compiler → Shell escape. Only turn it on for documents you trust, because it lets the document run programs on your computer. It also lets the document read files outside its project and lets latexmk use a `latexmkrc` that came with the project; both are blocked while it is off.
 
 ## The PDF preview
 
