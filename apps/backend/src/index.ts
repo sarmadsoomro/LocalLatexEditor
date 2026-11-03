@@ -7,7 +7,7 @@ import express, { type Express } from "express";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
 
-import { createSessionToken, injectSessionToken } from "./config/sessionToken.js";
+import { createSessionToken, injectSessionToken, shellSessionToken } from "./config/sessionToken.js";
 import { ensureStorageDirectories } from "./config/storage.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requireApiToken } from "./middleware/requireApiToken.js";
@@ -40,7 +40,17 @@ const logger =
 const PORT = Number(process.env.PORT) || 3001;
 const HOST = process.env.HOST || "127.0.0.1";
 
-export function createApp(token: string, port: number = PORT): Express {
+export interface AppOptions {
+  /**
+   * Put the token in the served page (window.__TEXCRAFT_TOKEN__). Needed when the
+   * app runs in a normal browser. The desktop app turns it off and adds the token
+   * to each request in the main process instead.
+   */
+  tokenInPage?: boolean;
+}
+
+export function createApp(token: string, port: number = PORT, options: AppOptions = {}): Express {
+  const tokenInPage = options.tokenInPage ?? true;
   const app = express();
 
   const apiLimiter = rateLimit({
@@ -94,7 +104,7 @@ export function createApp(token: string, port: number = PORT): Express {
         next();
         return;
       }
-      res.type("html").send(injectSessionToken(fs.readFileSync(indexPath, "utf8"), token));
+      res.type("html").send(injectSessionToken(fs.readFileSync(indexPath, "utf8"), tokenInPage ? token : ""));
     });
   }
 
@@ -119,7 +129,7 @@ export async function startServer(port: number = PORT, host: string = HOST): Pro
     );
   }
 
-  const app = createApp(token, port);
+  const app = createApp(token, port, { tokenInPage: shellSessionToken() === null });
   return new Promise((resolve, reject) => {
     const server = app.listen(port, host);
     server.once("error", reject);

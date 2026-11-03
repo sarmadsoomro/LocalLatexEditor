@@ -4,6 +4,10 @@ Notable changes to TexCraft. The format follows [Keep a Changelog](https://keepa
 
 ## Unreleased
 
+### Security
+
+- **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX.
+
 ### Added
 
 - A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing.
