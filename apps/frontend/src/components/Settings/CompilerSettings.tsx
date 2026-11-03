@@ -57,7 +57,7 @@ export function CompilerSettings() {
         <SettingItem>
           <ToggleSetting
             label="Shell escape"
-            description="Lets the document run programs on your computer. Needed for minted and some SVG/gnuplot packages. Only enable it for documents you trust."
+            description="Trusts the document: it can run programs, read files outside the project, and use a latexmkrc that came with it. Needed for minted and some SVG/gnuplot packages. Only enable it for documents you trust."
             checked={compiler.shellEscape}
             onChange={(shellEscape) => updateCompilerSettings({ shellEscape })}
           />

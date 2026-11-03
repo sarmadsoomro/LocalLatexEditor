@@ -8,11 +8,14 @@ Nothing yet.
 
 ## 0.3.1 (2026-11-03)
 
-A security fix for the desktop app. Everyone on 0.3.0 should update.
+Security fixes. Everyone on 0.3.0 should update.
 
 ### Security
 
 - **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX. ([#19](https://github.com/sarmadsoomro/TexCraft/pull/19))
+- **A downloaded project could run code when you pressed Compile.** latexmk runs any `latexmkrc` or `.latexmkrc` in the project folder, and that file is Perl. latexmk now runs with `-norc` unless Shell escape is on. This also skips your own `~/.latexmkrc` in that case. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
+- **A document could copy private files into its PDF.** `\input{/home/you/.ssh/id_rsa}` worked. With TeX Live, TeX now reads and writes only inside the project unless Shell escape is on. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
+- The compile's main file must be a `.tex` file inside the project and may not start with `-`, so it cannot be passed to latexmk as an option. File uploads are capped at 100 MB. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
 
 ### Added
 
