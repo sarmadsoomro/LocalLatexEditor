@@ -4,18 +4,24 @@ Notable changes to TexCraft. The format follows [Keep a Changelog](https://keepa
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.3.1 (2026-11-03)
+
+A security fix for the desktop app. Everyone on 0.3.0 should update.
+
 ### Security
 
-- **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX.
+- **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX. ([#19](https://github.com/sarmadsoomro/TexCraft/pull/19))
 
 ### Added
 
-- A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing.
-- Screenshots in the README.
+- A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing. ([#17](https://github.com/sarmadsoomro/TexCraft/pull/17))
+- Screenshots in the README. ([#18](https://github.com/sarmadsoomro/TexCraft/pull/18))
 
 ### Fixed
 
-- In dark mode the editor stayed white. The syntax theme now has a **Match app** option, the new default, which uses LaTeX Light or LaTeX Dark to match the app. Anyone still on the old default is moved to it; a theme you picked yourself is kept.
+- In dark mode the editor stayed white. The syntax theme now has a **Match app** option, the new default, which uses LaTeX Light or LaTeX Dark to match the app. Anyone still on the old default is moved to it; a theme you picked yourself is kept. ([#18](https://github.com/sarmadsoomro/TexCraft/pull/18))
 
 ## 0.3.0 (2026-11-02)
 
