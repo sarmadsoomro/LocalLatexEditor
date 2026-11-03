@@ -6,6 +6,8 @@ Made for students writing assignments, papers and theses, including journal temp
 
 **[Download](https://github.com/sarmadsoomro/TexCraft/releases)** · [Installation](docs/installation.md) · [User guide](docs/user-guide.md) · [Troubleshooting](docs/troubleshooting.md) · [Contributing](CONTRIBUTING.md)
 
+![TexCraft: LaTeX source on the left, the compiled PDF on the right](docs/images/editor-light.png)
+
 ## Features
 
 - **Editor**: Monaco (the editor in VS Code) with LaTeX and BibTeX highlighting, tabs, find and replace, light and dark themes.
@@ -18,6 +20,12 @@ Made for students writing assignments, papers and theses, including journal temp
 - **Organise**: search, status (draft, in progress, published), recently opened, trash with restore.
 - **Export** a project as a `.zip`.
 - **Private**: documents stay on your computer. The app makes no requests to other sites.
+
+## Screenshots
+
+| Dark mode | Your projects |
+| --- | --- |
+| ![The editor and PDF preview in dark mode, showing a graph on page 2](docs/images/editor-dark.png) | ![The project list with recent papers and a project library](docs/images/projects-light.png) |
 
 ## Get started
 

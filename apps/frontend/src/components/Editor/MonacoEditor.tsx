@@ -5,8 +5,9 @@ import { useRef, useCallback, useEffect } from "react";
 // side effect: point @monaco-editor/react at the bundled Monaco (no CDN, works offline)
 import "../../editor/monacoSetup";
 import { bibtexLanguageConfig, bibtexTokenizer } from "../../editor/bibtexTokenizer";
-import { registerThemes } from "../../editor/latexThemes";
+import { registerThemes, resolveSyntaxTheme } from "../../editor/latexThemes";
 import { latexLanguageConfig, latexTokenizer } from "../../editor/latexTokenizer";
+import { useDarkMode } from "../../hooks/useDarkMode";
 import { useSettingsStore } from "../../stores/settingsStore";
 import { samePath, useSyncStore } from "../../stores/syncStore";
 
@@ -48,7 +49,11 @@ export function MonacoEditor({
 
   const getMonacoOptions = useSettingsStore((state) => state.getMonacoOptions);
   const settingsOptions = useSettingsStore((state) => state.getMonacoOptions());
-  const syntaxTheme = useSettingsStore((state) => state.editor.syntaxTheme);
+  const appIsDark = useDarkMode();
+  const syntaxTheme = resolveSyntaxTheme(
+    useSettingsStore((state) => state.editor.syntaxTheme),
+    appIsDark,
+  );
 
   const handleEditorDidMount: OnMount = useCallback(
     (editor, monaco) => {

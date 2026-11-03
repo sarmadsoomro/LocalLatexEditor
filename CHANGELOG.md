@@ -7,6 +7,11 @@ Notable changes to TexCraft. The format follows [Keep a Changelog](https://keepa
 ### Added
 
 - A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing.
+- Screenshots in the README.
+
+### Fixed
+
+- In dark mode the editor stayed white. The syntax theme now has a **Match app** option, the new default, which uses LaTeX Light or LaTeX Dark to match the app. Anyone still on the old default is moved to it; a theme you picked yourself is kept.
 
 ## 0.3.0 (2026-11-02)
 
