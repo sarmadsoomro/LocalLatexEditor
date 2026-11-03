@@ -15,7 +15,7 @@ TexCraft is a single-user app. Its backend runs on your computer and should be r
 ### Network
 
 - The backend listens on `127.0.0.1` only (`3001` from source, `41731` or the next free port in the desktop app), so other machines on the same network cannot connect.
-- **Per-launch token.** On every start the backend creates a random token. Every `/api` request needs it in the `X-TexCraft-Token` header, otherwise the answer is `401`. `/health` is open. When the backend serves the app it writes the token into `index.html`. With `pnpm dev`, the backend writes it to `~/.latex-editor/.session-token` (mode `0600`) and the Vite dev server puts it into the page. The token is not logged, not put in URLs, and not stored in browser storage. If the backend restarts, the token changes and the page shows "Server restarted - reload the page".
+- **Per-launch token.** On every start the backend creates a random token. Every `/api` request needs it in the `X-TexCraft-Token` header, otherwise the answer is `401`. `/health` is open. In the desktop app the token never reaches the page: the app's main process creates it, hands it to the backend, and adds the header to the window's own requests. The page served on `127.0.0.1` has no token, so another program or another user account on the same computer that connects to the port cannot call the API. When you run from source and open the app in a normal browser, the backend has to write the token into `index.html`, so any local program that can load that page can read it; use the desktop app on shared computers. With `pnpm dev`, the backend writes it to `~/.latex-editor/.session-token` (mode `0600`) and the Vite dev server puts it into the page. The token is not logged, not put in URLs, and not stored in browser storage. If the backend restarts, the token changes and the page shows "Server restarted - reload the page".
 - **Host check.** Requests whose `Host` header is not `localhost:<port>` or `127.0.0.1:<port>` get `403`. This blocks DNS-rebinding attacks from web pages.
 - **CORS** allows only `http://localhost:3000` (the dev server).
 - **`HOST` override.** Setting `HOST` (for example `HOST=0.0.0.0`) makes the backend listen on that address and logs a warning. The token and Host check still apply, so other machines get `401` or `403`, but the port is open to the network. Do not set it on shared networks.
@@ -36,7 +36,7 @@ TexCraft is a single-user app. Its backend runs on your computer and should be r
 
 ### Desktop app
 
-- Same backend, token and Host check.
+- Same backend and Host check. The token stays in the main process and the backend; it is never in the page, in a file, or in a URL. A request from outside the app gets `401`. CI checks all three on every packaged build.
 - The window cannot navigate away from the app. Links to other sites open in your normal browser (`http`, `https` and `mailto` only).
 - The page has no Node.js access (`contextIsolation`, `sandbox`, no `nodeIntegration`).
 - Permission requests (camera, microphone, location, notifications) are denied.

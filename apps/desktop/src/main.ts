@@ -2,6 +2,7 @@
  * TexCraft desktop: starts the bundled backend in a utility process on
  * 127.0.0.1 and shows the app in a window. No browser, Node or pnpm needed.
  */
+import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -10,6 +11,7 @@ import {
   BrowserWindow,
   dialog,
   Menu,
+  session,
   shell,
   utilityProcess,
   type MenuItemConstructorOptions,
@@ -27,6 +29,13 @@ let backend: UtilityProcess | null = null;
 let mainWindow: BrowserWindow | null = null;
 let origin = "";
 let quitting = false;
+/**
+ * Per-launch API token. It stays in this process and the backend: the page never
+ * sees it. Electron adds it to the app's own requests (see addTokenToRequests),
+ * so another program or user on this computer that connects to the port gets a
+ * page without the token and every API call fails with 401.
+ */
+const sessionToken = randomBytes(32).toString("hex");
 
 function frontendDist(): string {
   return app.isPackaged
@@ -70,6 +79,7 @@ function backendEnv(port: number): Record<string, string> {
     NODE_ENV: "production",
     TEXCRAFT_PLAIN_LOGS: "1",
     TEXCRAFT_FRONTEND_DIST: frontendDist(),
+    TEXCRAFT_SESSION_TOKEN: sessionToken,
   };
 }
 
@@ -154,6 +164,13 @@ function lockDown(contents: WebContents, allowBlob: boolean): void {
   });
 }
 
+/** Add the token to every request the app's windows make to its own backend. */
+function addTokenToRequests(): void {
+  session.defaultSession.webRequest.onBeforeSendHeaders({ urls: [`${origin}/*`] }, (details, callback) => {
+    callback({ requestHeaders: { ...details.requestHeaders, "X-TexCraft-Token": sessionToken } });
+  });
+}
+
 function createWindow(): void {
   const win = new BrowserWindow({
     width: 1440,
@@ -182,8 +199,9 @@ function createWindow(): void {
 }
 
 /**
- * CI check of a packaged build: the page loads and its API calls reach the
- * backend with the injected token. Exits 0 on success, 1 otherwise.
+ * CI check of a packaged build: the page loads, the token is not in it, its API
+ * calls reach the backend (Electron adds the token), and a request from outside
+ * the app is refused. Exits 0 on success, 1 otherwise.
  */
 function smokeTest(win: BrowserWindow): void {
   const fail = (why: string): void => {
@@ -193,17 +211,22 @@ function smokeTest(win: BrowserWindow): void {
   setTimeout(() => fail("timed out after 60 s"), 60_000).unref();
   win.webContents.once("did-fail-load", (_e, code, description) => fail(`page load failed: ${code} ${description}`));
   win.webContents.once("did-finish-load", () => {
-    win.webContents
-      .executeJavaScript(
-        `fetch("/api/system/latex-check", { headers: { "X-TexCraft-Token": window.__TEXCRAFT_TOKEN__ } })
-           .then(async (r) => ({ status: r.status, body: await r.json() }))`,
-      )
-      .then((res: { status: number; body: { data?: { latexInstalled?: boolean } } }) => {
-        if (res.status !== 200) return fail(`latex-check returned ${res.status}`);
-        console.log(`SMOKE TEST OK: ${origin}, LaTeX installed: ${res.body.data?.latexInstalled}`);
-        app.exit(0);
-      })
-      .catch((error: unknown) => fail(String(error)));
+    void (async (): Promise<void> => {
+      // Inside the app: no token in the page, yet API calls succeed.
+      const res = (await win.webContents.executeJavaScript(
+        `fetch("/api/system/latex-check")
+           .then(async (r) => ({ status: r.status, inPage: window.__TEXCRAFT_TOKEN__ || "", body: await r.json() }))`,
+      )) as { status: number; inPage: string; body: { data?: { latexInstalled?: boolean } } };
+      if (res.inPage) return fail("the token is in the page");
+      if (res.status !== 200) return fail(`latex-check from the app returned ${res.status}`);
+      // Outside the app (plain Node fetch, no Electron session): no token anywhere.
+      const page = await (await fetch(`${origin}/`)).text();
+      if (page.includes(sessionToken)) return fail("the served page contains the token");
+      const outside = await fetch(`${origin}/api/system/latex-check`);
+      if (outside.status !== 401) return fail(`a request from outside the app returned ${outside.status}, not 401`);
+      console.log(`SMOKE TEST OK: ${origin}, LaTeX installed: ${res.body.data?.latexInstalled}`);
+      app.exit(0);
+    })().catch((error: unknown) => fail(String(error)));
   });
 }
 
@@ -233,6 +256,7 @@ async function boot(): Promise<void> {
   buildMenu();
   const port = await findFreePort();
   origin = `http://${HOST}:${port}`;
+  addTokenToRequests();
   await startBackend(port);
   createWindow();
 }
