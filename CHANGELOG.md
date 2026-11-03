@@ -4,21 +4,27 @@ Notable changes to TexCraft. The format follows [Keep a Changelog](https://keepa
 
 ## Unreleased
 
+Nothing yet.
+
+## 0.3.1 (2026-11-03)
+
+Security fixes. Everyone on 0.3.0 should update.
+
 ### Security
 
-- **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX.
-- **A downloaded project could run code when you pressed Compile.** latexmk runs any `latexmkrc` or `.latexmkrc` in the project folder, and that file is Perl. latexmk now runs with `-norc` unless Shell escape is on. This also skips your own `~/.latexmkrc` in that case.
-- **A document could copy private files into its PDF.** `\input{/home/you/.ssh/id_rsa}` worked. With TeX Live, TeX now reads and writes only inside the project unless Shell escape is on.
-- The compile's main file must be a `.tex` file inside the project and may not start with `-`, so it cannot be passed to latexmk as an option. File uploads are capped at 100 MB.
+- **Desktop app: the API token is no longer in the page.** Before, anything that could connect to `127.0.0.1` (another program, or another user account on a shared computer) could load the page, read the token, and use the API, including compiling with shell escape, which runs programs. Now the token stays in the app's main process and the backend, and Electron adds it to the app's own requests. A request from outside the app gets `401`. Reported on r/LaTeX. ([#19](https://github.com/sarmadsoomro/TexCraft/pull/19))
+- **A downloaded project could run code when you pressed Compile.** latexmk runs any `latexmkrc` or `.latexmkrc` in the project folder, and that file is Perl. latexmk now runs with `-norc` unless Shell escape is on. This also skips your own `~/.latexmkrc` in that case. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
+- **A document could copy private files into its PDF.** `\input{/home/you/.ssh/id_rsa}` worked. With TeX Live, TeX now reads and writes only inside the project unless Shell escape is on. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
+- The compile's main file must be a `.tex` file inside the project and may not start with `-`, so it cannot be passed to latexmk as an option. File uploads are capped at 100 MB. ([#21](https://github.com/sarmadsoomro/TexCraft/pull/21))
 
 ### Added
 
-- A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing.
-- Screenshots in the README.
+- A **Sponsor** link in Settings → About and on the repository page, for anyone who wants to help pay for code signing. ([#17](https://github.com/sarmadsoomro/TexCraft/pull/17))
+- Screenshots in the README. ([#18](https://github.com/sarmadsoomro/TexCraft/pull/18))
 
 ### Fixed
 
-- In dark mode the editor stayed white. The syntax theme now has a **Match app** option, the new default, which uses LaTeX Light or LaTeX Dark to match the app. Anyone still on the old default is moved to it; a theme you picked yourself is kept.
+- In dark mode the editor stayed white. The syntax theme now has a **Match app** option, the new default, which uses LaTeX Light or LaTeX Dark to match the app. Anyone still on the old default is moved to it; a theme you picked yourself is kept. ([#18](https://github.com/sarmadsoomro/TexCraft/pull/18))
 
 ## 0.3.0 (2026-11-02)
 
