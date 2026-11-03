@@ -31,8 +31,11 @@ TexCraft is a single-user app. Its backend runs on your computer and should be r
 
 - LaTeX is started with `spawn` and `shell: false`. Arguments are never passed through a shell.
 - `-shell-escape` is off. It is only passed when you turn on Settings → Compiler → Shell escape, which lets a document run programs. Only enable it for documents you trust.
+- **Project `latexmkrc` files are ignored.** A `latexmkrc` or `.latexmkrc` is Perl code that latexmk runs, so a project you downloaded could otherwise run programs as soon as you press Compile. latexmk runs with `-norc`, which also skips your own `~/.latexmkrc`. With Shell escape on, rc files are read as usual.
+- **The main file** sent with a compile must be a `.tex` file inside the project and must not start with `-`, so it cannot be read as a latexmk or engine option.
 - **Package installs.** When a compile reports a missing package, TexCraft can install it, but only after you click **Install**. The file and package names from the log are checked against strict patterns (letters, digits, `.`, `_`, `+`, `-`) before anything runs. `tlmgr` and MiKTeX run without a shell. On macOS with a system TeX Live, the install runs through the standard macOS administrator prompt (`osascript … with administrator privileges`); TexCraft never sees your password, and the command contains only the validated package name and the absolute path of `tlmgr`.
-- This is not a sandbox. LaTeX runs as your user and can read any file you can read, for example through `\input{/path/to/file}`. Treat documents from others like any other file you open.
+- **TeX can only read and write files inside the project.** With TeX Live, TexCraft sets `openin_any=p` and `openout_any=p`, so `\input{/home/you/.ssh/id_rsa}` or `\input{../../secret}` fails instead of copying the file into the PDF. Files TeX Live itself installs still load normally. With Shell escape on this is lifted. MiKTeX ignores these settings.
+- This is not a sandbox. LaTeX runs as your user. Treat documents from others like any other file you open.
 
 ### Desktop app
 

@@ -13,7 +13,8 @@ import { createSuccessResponse } from "../types/response.js";
 import { projectIdSchema } from "../validators/project.js";
 
 const router: RouterType = Router({ mergeParams: true });
-const upload = multer({ storage: multer.memoryStorage() });
+// Same cap as project import: a single file larger than this is not a LaTeX source or figure.
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 100 * 1024 * 1024, files: 1 } });
 
 export const filePathParamsSchema = z.object({
   id: z.string().regex(/^proj_[a-zA-Z0-9_-]+$/, "Invalid project ID format"),

@@ -83,6 +83,39 @@ class Deadline {
   }
 }
 
+/**
+ * Environment for TeX and its tools. Unless the user trusts the document
+ * (shell-escape on), TeX Live may only read and write files inside the
+ * project: openin_any=p stops \input{/home/me/.ssh/id_rsa} from copying a
+ * private file into the PDF. MiKTeX ignores these variables.
+ */
+export function texEnv(trusted: boolean, base: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+  if (trusted) return base;
+  return { ...base, openin_any: "p", openout_any: "p" };
+}
+
+/**
+ * The main file as a path relative to the project. It must be a .tex file
+ * inside the project, and must not start with "-", which latexmk and the
+ * engines would read as an option.
+ */
+export function safeMainFile(projectPath: string, mainFile: string): string {
+  const relative = path.normalize(mainFile).replace(/\\/g, "/").replace(/^\.\//, "");
+  const inside = path.relative(projectPath, path.resolve(projectPath, relative));
+  if (
+    inside === "" ||
+    inside.startsWith("..") ||
+    path.isAbsolute(inside) ||
+    path.isAbsolute(relative) ||
+    relative.startsWith("-") ||
+    relative.includes("\0") ||
+    path.extname(relative).toLowerCase() !== ".tex"
+  ) {
+    throw new ValidationError(`Main file "${mainFile}" must be a .tex file inside the project`);
+  }
+  return relative;
+}
+
 /** Kill a process and everything it started (latexmk spawns pdflatex, biber, ...). */
 function killTree(pid: number | undefined): void {
   if (!pid) return;
@@ -219,7 +252,7 @@ export async function compileProject(
   const project = await getProject(projectId);
   const projectPath = project.path;
 
-  const mainFile = options.mainFile || project.metadata?.mainFile || "main.tex";
+  const mainFile = safeMainFile(projectPath, options.mainFile || project.metadata?.mainFile || "main.tex");
   const mainFilePath = path.join(projectPath, mainFile);
   if (!(await exists(mainFilePath))) {
     throw new ValidationError(`Main file "${mainFile}" not found in project`);
@@ -338,6 +371,10 @@ async function runLatexmk(
   deadline: Deadline,
 ): Promise<{ logOutput: string; exitCode: number }> {
   const args = [
+    // A latexmkrc in the project is Perl that latexmk runs. A downloaded
+    // project must not run code on Compile, so ignore every rc file unless
+    // the user trusts the document.
+    ...(shellEscape ? [] : ["-norc"]),
     LATEXMK_ENGINE_FLAG[engine],
     "-interaction=nonstopmode",
     "-synctex=1",
@@ -346,7 +383,7 @@ async function runLatexmk(
   if (shellEscape) args.push("-shell-escape");
   args.push(mainFile);
 
-  const result = await runProcess("latexmk", args, projectPath, deadline);
+  const result = await runProcess("latexmk", args, projectPath, deadline, texEnv(shellEscape));
   return { logOutput: result.output, exitCode: result.exitCode };
 }
 
@@ -368,7 +405,7 @@ async function runManualPasses(
   if (shellEscape) engineArgs.push("-shell-escape");
   engineArgs.push(mainFile);
 
-  const pass = (): Promise<ProcessResult> => runProcess(engine, engineArgs, projectPath, deadline);
+  const pass = (): Promise<ProcessResult> => runProcess(engine, engineArgs, projectPath, deadline, texEnv(shellEscape));
 
   let logOutput = "";
   const first = await pass();
@@ -379,7 +416,7 @@ async function runManualPasses(
 
   const bib = await detectBibliography(projectPath, mainFile);
   if (bib) {
-    const bibResult = await runBibliography(bib, projectPath, outputDir, mainBase, deadline);
+    const bibResult = await runBibliography(bib, projectPath, outputDir, mainBase, shellEscape, deadline);
     logOutput += `\n=== ${bib.toUpperCase()} ===\n` + bibResult.output;
   }
 
@@ -417,6 +454,7 @@ async function runBibliography(
   projectPath: string,
   outputDir: string,
   mainBase: string,
+  trusted: boolean,
   deadline: Deadline,
 ): Promise<ProcessResult> {
   // Both tools run inside output/ (where the .aux/.bcf live) and find .bib
@@ -424,7 +462,7 @@ async function runBibliography(
   // some Biber builds ignore BIBINPUTS for relative \addbibresource paths.
   await copyBibFiles(projectPath, outputDir);
   const env = {
-    ...process.env,
+    ...texEnv(trusted),
     BIBINPUTS: [projectPath, outputDir, process.env.BIBINPUTS ?? ""].join(path.delimiter),
   };
   try {

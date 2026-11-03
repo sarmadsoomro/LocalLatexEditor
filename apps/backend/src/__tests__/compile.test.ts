@@ -33,6 +33,8 @@ type ProjectsModule = typeof import('../services/projectService.js');
 const svc = {} as {
   compileProject: ServiceModule['compileProject'];
   resetLatexmkCheck: ServiceModule['resetLatexmkCheck'];
+  safeMainFile: ServiceModule['safeMainFile'];
+  texEnv: ServiceModule['texEnv'];
   detectBibliography: ServiceModule['detectBibliography'];
 };
 const projects = {} as { createProject: ProjectsModule['createProject'] };
@@ -109,6 +111,8 @@ beforeAll(async () => {
   svc.compileProject = service.compileProject;
   svc.resetLatexmkCheck = service.resetLatexmkCheck;
   svc.detectBibliography = service.detectBibliography;
+  svc.safeMainFile = service.safeMainFile;
+  svc.texEnv = service.texEnv;
   projects.createProject = (await import('../services/projectService.js')).createProject;
 });
 
@@ -211,6 +215,45 @@ describe.skipIf(!hasTex || !hasLatexmkBin)('compileProject with latexmk', () => 
     await svc.compileProject(on.id, { shellEscape: true });
     expect(fs.existsSync(path.join(on.dir, 'escaped-marker'))).toBe(true);
   }, 120_000);
+});
+
+describe.skipIf(!hasTex || !hasLatexmkBin)('untrusted projects', () => {
+  const secret = path.join(root, 'secret.txt');
+  beforeAll(() => fs.writeFileSync(secret, 'TOPSECRETVALUE\n'));
+
+  it.skipIf(!isPosix)('does not run a latexmkrc that came with the project', async () => {
+    const marker = path.join(root, 'rc-ran');
+    const rc = `system("touch ${marker}");\n`;
+    const { id } = await makeProject({ 'main.tex': ARTICLE, '.latexmkrc': rc, latexmkrc: rc });
+    const result = await svc.compileProject(id);
+    expect(result.success).toBe(true);
+    expect(fs.existsSync(marker)).toBe(false);
+  }, 120_000);
+
+  it('cannot read a file outside the project into the PDF', async () => {
+    const doc = `\\documentclass{article}\n\\begin{document}\n\\input{${secret.replace(/\\/g, '/')}}\n\\end{document}\n`;
+    const { id, dir } = await makeProject({ 'main.tex': doc });
+    const result = await svc.compileProject(id);
+    expect(result.success).toBe(false);
+    const pdf = path.join(dir, 'output', 'main.pdf');
+    expect(fs.existsSync(pdf) && fs.readFileSync(pdf).includes('TOPSECRETVALUE')).toBe(false);
+  }, 120_000);
+});
+
+describe('safeMainFile', () => {
+  it('accepts .tex files inside the project and rejects the rest', () => {
+    const dir = path.join(root, 'p');
+    expect(svc.safeMainFile(dir, 'main.tex')).toBe('main.tex');
+    expect(svc.safeMainFile(dir, './chapters/thesis.tex')).toBe('chapters/thesis.tex');
+    for (const bad of ['../x.tex', '/etc/x.tex', '-e=system(1).tex', '-norc', 'notes.txt', 'a/../../x.tex']) {
+      expect(() => svc.safeMainFile(dir, bad), bad).toThrow(/must be a .tex file inside the project/);
+    }
+  });
+
+  it('keeps the environment as it is for trusted documents only', () => {
+    expect(svc.texEnv(true, { A: '1' })).toEqual({ A: '1' });
+    expect(svc.texEnv(false, { A: '1' })).toEqual({ A: '1', openin_any: 'p', openout_any: 'p' });
+  });
 });
 
 describe.skipIf(!hasTex || !hasBiber)('compileProject without latexmk (fallback)', () => {
